@@ -1,32 +1,30 @@
-const Attendance = require("../models/Attendance");
-const Session = require("../models/Session");
+import Attendance from "../Model/Attendance.js"
+import Session from "../Model/Session.js";
+import Politician from "../Model/Politician.js";
 
-// 🔹 Get attendance by politician ID
-exports.getAttendanceByPolitician = async (req, res) => {
+
+// GET /api/attendance/:politicianId
+export const getAttendanceByPolitician = async (req, res) => {
   try {
     const { politicianId } = req.params;
 
-    // Total sessions
-    const totalSessions = await Session.countDocuments();
-
-    // Present count
-    const presentCount = await Attendance.countDocuments({
-      politicianId,
-      status: "Present"
-    });
-
-    const percentage = totalSessions === 0
-      ? 0
-      : ((presentCount / totalSessions) * 100).toFixed(2);
-
-    // Full records with session details
     const records = await Attendance.find({ politicianId })
-      .populate("sessionId");
+      .populate("sessionId", "date topic");
 
-    res.status(200).json({
+    if (!records.length) {
+      return res.status(404).json({ message: "No attendance records found" });
+    }
+
+    const total = records.length;
+    const present = records.filter(r => r.status === "Present").length;
+
+    const percentage = ((present / total) * 100).toFixed(2);
+
+    res.json({
+      politicianId,
       attendancePercentage: percentage,
-      totalSessions,
-      presentCount,
+      totalSessions: total,
+      presentSessions: present,
       records
     });
 
@@ -35,25 +33,88 @@ exports.getAttendanceByPolitician = async (req, res) => {
   }
 };
 
-// 🔹 Record attendance (Admin only)
-exports.recordAttendance = async (req, res) => {
+
+// GET /api/parliament/sessions
+export const getAllSessions = async (req, res) => {
+  try {
+    const sessions = await Session.find().sort({ date: -1 });
+    res.json(sessions);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+
+// POST /api/attendance/record
+export const recordAttendance = async (req, res) => {
   try {
     const { politicianId, sessionId, status } = req.body;
 
-    const newRecord = new Attendance({
+    const attendance = await Attendance.create({
       politicianId,
       sessionId,
       status
     });
 
-    await newRecord.save();
+    res.status(201).json(attendance);
 
-    res.status(201).json({
-      message: "Attendance recorded successfully",
-      newRecord
-    });
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
+
+
+// GET /api/attendance/stats/compare?ids=id1,id2,id3
+export const compareAttendance = async (req, res) => {
+  try {
+    const ids = req.query.ids.split(",");
+
+    const results = [];
+
+    for (let id of ids) {
+      const records = await Attendance.find({ politicianId: id });
+
+      const total = records.length;
+      const present = records.filter(r => r.status === "Present").length;
+      const percentage = total ? ((present / total) * 100).toFixed(2) : 0;
+
+      const politician = await Politician.findById(id);
+
+      results.push({
+        politician: politician?.name,
+        totalSessions: total,
+        presentSessions: present,
+        attendancePercentage: percentage
+      });
+    }
+
+    res.json(results);
 
   } catch (error) {
     res.status(500).json({ message: error.message });
+  }
+};
+
+
+// PUT /api/attendance/:recordId
+export const updateAttendance = async (req, res) => {
+  try {
+    const { recordId } = req.params;
+    const { status } = req.body;
+
+    const updated = await Attendance.findByIdAndUpdate(
+      recordId,
+      { status },
+      { new: true }
+    );
+
+    if (!updated) {
+      return res.status(404).json({ message: "Record not found" });
+    }
+
+    res.json(updated);
+
+  } catch (error) {
+    res.status(400).json({ message: error.message });
   }
 };

@@ -1,0 +1,29 @@
+{
+  "attendance": [
+    {
+      "politicianId": "65a4c8f2e3b5f9e0d1c2a3b4",
+      "sessionId": "65a4c8f2e3b5f9e0d1c2a3b5",
+      "status": "Present"
+    },
+    {
+      "politicianId": "65a4c8f2e3b5f9e0d1c2a3b6",
+      "sessionId": "65a4c8f2e3b5f9e0d1c2a3b5",
+      "status": "Absent"
+    },
+    {
+      "politicianId": "65a4c8f2e3b5f9e0d1c2a3b7",
+      "sessionId": "65a4c8f2e3b5f9e0d1c2a3b5",
+      "status": "Excused"
+    },
+    {
+      "politicianId": "65a4c8f2e3b5f9e0d1c2a3b4",
+      "sessionId": "65a4c8f2e3b5f9e0d1c2a3b6",
+      "status": "Present"
+    },
+    {
+      "politicianId": "65a4c8f2e3b5f9e0d1c2a3b6",
+      "sessionId": "65a4c8f2e3b5f9e0d1c2a3b6",
+      "status": "Present"
+    }
+  ]
+}

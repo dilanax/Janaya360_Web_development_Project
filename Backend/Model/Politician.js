@@ -1,4 +1,4 @@
-const mongoose = require("mongoose");
+import mongoose from "mongoose";
 
 const politicianSchema = new mongoose.Schema({
   name: String,
@@ -6,4 +6,4 @@ const politicianSchema = new mongoose.Schema({
   district: String
 });
 
-module.exports = mongoose.model("Politician", politicianSchema);
+export default mongoose.model("Politician", politicianSchema);
