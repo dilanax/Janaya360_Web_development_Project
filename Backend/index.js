@@ -2,6 +2,7 @@ import express from "express";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
 import userRoutes from "./Routes/userRoutes.js";
+import notificationRoutes from "./Routes/notificationRoutes.js";
 
 dotenv.config();
 
@@ -14,6 +15,7 @@ mongoose
   .catch((err) => console.log(err));
 
 app.use("/api/users", userRoutes);
+app.use("/api/notifications", notificationRoutes);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
