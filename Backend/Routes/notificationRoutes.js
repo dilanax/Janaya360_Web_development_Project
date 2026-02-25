@@ -52,5 +52,4 @@ router.get("/logs/otp/:email", protect, authorizeRoles("admin"), getOTPLogsForEm
 router.get("/logs/email/:email", protect, authorizeRoles("admin"), getEmailLogsForAddress);
 router.get("/logs/email/stats/summary", protect, authorizeRoles("admin"), getEmailStats);
 
-
 export default router;

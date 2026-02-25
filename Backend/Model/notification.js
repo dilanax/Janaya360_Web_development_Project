@@ -51,7 +51,6 @@ const notificationSchema = new mongoose.Schema(
                 default: Date.now
             }
     }
-    
 );
 
 const Notification = mongoose.model('Notification', notificationSchema);
