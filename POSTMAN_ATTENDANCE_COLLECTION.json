@@ -1,0 +1,59 @@
+{
+  "info": {
+    "name": "Attendance API",
+    "description": "Collection for testing Attendance endpoints",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Record Attendance (POST)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer YOUR_JWT_TOKEN_HERE"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"politicianId\": \"65a4c8f2e3b5f9e0d1c2a3b4\",\n  \"sessionId\": \"65a4c8f2e3b5f9e0d1c2a3b5\",\n  \"status\": \"Present\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:5000/api/attendance/record",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "5000",
+          "path": ["api", "attendance", "record"]
+        },
+        "description": "Record attendance for a politician in a session"
+      },
+      "response": []
+    },
+    {
+      "name": "Get Attendance by Politician (GET)",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer YOUR_JWT_TOKEN_HERE"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:5000/api/attendance/65a4c8f2e3b5f9e0d1c2a3b4",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "5000",
+          "path": ["api", "attendance", "65a4c8f2e3b5f9e0d1c2a3b4"]
+        },
+        "description": "Get attendance records for a specific politician"
+      },
+      "response": []
+    }
+  ]
+}
