@@ -21,6 +21,7 @@ router.post("/verify-otp", verifyOTP);
 
 router.get("/", protect, authorizeRoles("admin"), getUsers);
 router.get("/search/email", protect, authorizeRoles("admin"), searchUserByEmail);
+
 router.delete("/:id", protect, authorizeRoles("admin"), deleteUser);
 
 export default router;
