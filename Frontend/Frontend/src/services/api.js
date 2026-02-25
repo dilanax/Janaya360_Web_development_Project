@@ -6,10 +6,27 @@ const API = axios.create({
 
 // Attach token automatically
 API.interceptors.request.use((req) => {
-  const user = JSON.parse(localStorage.getItem("user"));
-  if (user?.token) {
-    req.headers.Authorization = `Bearer ${user.token}`;
+  // Try to get token from multiple sources
+  let token = localStorage.getItem("token");
+  
+  // If not found, try from user object
+  if (!token) {
+    const user = localStorage.getItem("user");
+    if (user) {
+      try {
+        const userData = JSON.parse(user);
+        token = userData.token;
+      } catch (e) {
+        console.error("Failed to parse user from localStorage:", e);
+      }
+    }
   }
+
+  // If token found, add it to headers
+  if (token) {
+    req.headers.Authorization = `Bearer ${token}`;
+  }
+
   return req;
 });
 

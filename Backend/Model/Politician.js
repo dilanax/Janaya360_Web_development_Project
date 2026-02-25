@@ -26,4 +26,4 @@ const politicianSchema = new mongoose.Schema({
   }
 }, { timestamps: true });
 
-export default mongoose.model('Politician', politicianSchema);
+export default mongoose.model("Politician", politicianSchema);
