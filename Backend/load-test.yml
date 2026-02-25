@@ -1,0 +1,12 @@
+config:
+  target: "http://localhost:5000" # Your local server URL
+  phases:
+    - duration: 30 # Run the test for 30 seconds
+      arrivalRate: 10 # Simulate 10 new users connecting every second
+      name: "Sustained peak load"
+
+scenarios:
+  - name: "Citizens checking promises"
+    flow:
+      - get:
+          url: "/api/promises" # Testing your specific Read endpoint
