@@ -8,6 +8,8 @@ import Dashboard from "./pages/Dashboard";
 import Navbar from "./components/Navbar";
 import { useContext } from "react";
 import { AuthContext } from "./context/AuthContext";
+import Home from "./pages/Home";
+import News from "./pages/News";
 
 function AppContent() {
   const { user } = useContext(AuthContext);
@@ -18,7 +20,10 @@ function AppContent() {
       {user && <Navbar />}
       
       <Routes>
-        <Route path="/" element={<Register />} />
+        <Route path="/" element={<Home />} />
+        <Route path="/news" element={<News />} />
+
+        <Route path="/register" element={<Register />} />
         <Route path="/login" element={<Login />} />
         <Route path="/otp-request" element={<OTPRequest />} />
         <Route path="/verify-otp" element={<OTPVerify />} />
