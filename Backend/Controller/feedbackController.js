@@ -1,8 +1,9 @@
 import Feedback from "../Model/Feedback.js";
 import axios from "axios";
+import mongoose from "mongoose";
 
 /**
- * Sentiment analysis using external API (text-processing)
+ * Sentiment analysis using external API
  */
 const analyzeSentiment = async (text) => {
   try {
@@ -29,12 +30,11 @@ export const createFeedback = async (req, res) => {
   try {
     const { comment, evidenceUrl } = req.body;
 
-    // ⭐ analyze sentiment from comment
     const sentimentData = await analyzeSentiment(comment);
 
     const feedback = await Feedback.create({
-      promiseId: req.params.promiseId,
-      userId: req.user.id,
+      promiseId: req.params.promiseId,  // promiseId from URL
+      userId: req.user.id,              // logged-in user
       comment,
       evidenceUrl,
       sentiment: sentimentData.type,
@@ -69,9 +69,9 @@ export const voteFeedback = async (req, res) => {
   try {
     const { type } = req.body; // up or down
 
-    const feedback = await Feedback.findById(req.params.promiseId);
+    const feedback = await Feedback.findById(req.params.feedbackId);
 
-    if (!feedback) return res.status(404).json({ message: "Not found" });
+    if (!feedback) return res.status(404).json({ message: "Feedback not found" });
 
     if (type === "up") feedback.upvotes++;
     if (type === "down") feedback.downvotes++;
