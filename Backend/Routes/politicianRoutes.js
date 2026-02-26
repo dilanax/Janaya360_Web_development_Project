@@ -74,7 +74,7 @@
 import express from "express";
 import {
   createPolitician,
-  getAllPoliticians,
+  getPoliticians,
   getPoliticianById,
   updatePolitician,
   deletePolitician
@@ -83,7 +83,7 @@ import {
 const router = express.Router();
 
 router.post("/", createPolitician);
-router.get("/", getAllPoliticians);
+router.get("/", getPoliticians);
 router.get("/:id", getPoliticianById);
 router.put("/:id", updatePolitician);
 router.delete("/:id", deletePolitician);
