@@ -18,17 +18,20 @@ import swaggerJsdoc from "swagger-jsdoc";
 dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT || 5000;
 
-// CORS
+// CORS Configuration
 app.use(cors({
   origin: "http://localhost:5173",
-  credentials: true
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  allowedHeaders: ["Content-Type", "Authorization"]
 }));
 
 app.use(express.json());
 
-// Swagger
+const PORT = process.env.PORT || 5000;
+
+// Swagger setup
 const swaggerDefinition = {
   openapi: "3.0.0",
   info: {
@@ -57,7 +60,7 @@ const options = {
 
 const swaggerSpec = swaggerJsdoc(options);
 
-// Routes
+// Register routes
 app.use("/api/users", userRoutes);
 app.use("/api/news", newsRoutes);
 app.use("/api/feedback", feedbackRoutes);
@@ -67,9 +70,10 @@ app.use("/api/attendance", attendanceRoutes);
 app.use("/api/sessions", sessionRoutes);
 app.use("/api/notifications", notificationRoutes);
 
+// Swagger UI
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
-// DB connect + server start
+// Connect to MongoDB then start server
 mongoose
   .connect(process.env.MONGO_URI, { serverSelectionTimeoutMS: 5000, family: 4 })
   .then(() => {
