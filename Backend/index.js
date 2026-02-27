@@ -10,6 +10,7 @@ import politicianRoutes from "./Routes/politicianRoutes.js";
 import attendanceRoutes from "./Routes/attendanceRoutes.js";
 import sessionRoutes from "./Routes/sessionRoutes.js";
 import notificationRoutes from "./Routes/notificationRoutes.js";
+import promiseRoutes from "./Routes/promiseRoutes.js";
 
 dotenv.config();
 
@@ -33,7 +34,7 @@ app.use("/api/politicians", politicianRoutes);
 app.use("/api/attendance", attendanceRoutes);
 app.use("/api/sessions", sessionRoutes);
 app.use("/api/notifications", notificationRoutes);
-
+app.use("/api/promises", promiseRoutes);
 // Connect to MongoDB then start server
 mongoose
   .connect(process.env.MONGO_URI, { serverSelectionTimeoutMS: 5000, family: 4 })

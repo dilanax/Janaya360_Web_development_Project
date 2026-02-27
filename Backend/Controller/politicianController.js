@@ -7,7 +7,6 @@ export const getPoliticians = async (req, res) => {
   try {
     const { name, party, district } = req.query;
     let query = {};
-
     if (name) query.name = { $regex: name, $options: 'i' }; // Case-insensitive search
     if (party) query.party = party;
     if (district) query.district = district;
@@ -37,6 +36,12 @@ export const getPoliticianById = async (req, res) => {
 // @access  Private/Admin
 export const createPolitician = async (req, res) => {
   try {
+    if (req.role !== "admin") {
+      return res.status(403).json({ message: "Access denied" });
+    }
+    else if (!req.body.name || !req.body.party || !req.body.district) {
+      return res.status(400).json({ message: "Name, party, and district are required" });
+    }
     const { name, party, district } = req.body;
     const newPolitician = await Politician.create({ name, party, district });
     res.status(201).json(newPolitician);
@@ -50,6 +55,9 @@ export const createPolitician = async (req, res) => {
 // @access  Private/Admin
 export const updatePolitician = async (req, res) => {
   try {
+    if (req.role !== "admin") {
+      return res.status(403).json({ message: "Access denied" });
+    }
     const updatedPolitician = await Politician.findByIdAndUpdate(
       req.params.id,
       req.body,
@@ -67,6 +75,9 @@ export const updatePolitician = async (req, res) => {
 // @access  Private/Admin
 export const deletePolitician = async (req, res) => {
   try {
+    if (req.role !== "admin") {
+      return res.status(403).json({ message: "Access denied" });
+    }
     const politician = await Politician.findByIdAndDelete(req.params.id);
     if (!politician) return res.status(404).json({ message: "Politician not found" });
     res.status(200).json({ message: "Politician successfully removed" });
