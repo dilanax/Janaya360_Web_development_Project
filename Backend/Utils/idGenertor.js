@@ -8,5 +8,4 @@ export default function generateID() {
             const seconds = now.getSeconds().toString().padStart(2, '0')
 
             return year + month + day + hours + minutes + seconds;
-
         }

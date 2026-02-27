@@ -58,6 +58,7 @@ export async function createNotification(req, res) {
 }
 
 
+
 export async function sendNotification(req, res) {
   try {
     const { notificationId, recipientUserIds, sendToRole } = req.body;
