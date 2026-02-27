@@ -129,3 +129,31 @@ export const removeLinkedNews = async (req, res) => {
     });
   }
 };
+// =============================
+// UPDATE LINKED NEWS (Admin Only)
+// =============================
+export const updateLinkedNews = async (req, res) => {
+  try {
+    const news = await News.findById(req.params.id);
+
+    if (!news) {
+      return res.status(404).json({ message: "News not found" });
+    }
+
+    // Update allowed fields
+    news.title = req.body.title || news.title;
+    news.description = req.body.description || news.description;
+    news.url = req.body.url || news.url;
+    news.politician = req.body.politician || news.politician;
+
+    const updatedNews = await news.save();
+
+    res.json({
+      message: "News updated successfully",
+      news: updatedNews
+    });
+
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
