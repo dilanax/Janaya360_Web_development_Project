@@ -16,7 +16,7 @@ const router = express.Router();
 router.get("/", getAllPoliticians);
 router.get("/:id", getPoliticianById);
 
-/* ADMIN ONLY */
+/* ADMIN ONLY ..*/
 router.post("/", protect, authorizeRoles("admin"), createPolitician);
 router.put("/:id", protect, authorizeRoles("admin"), updatePolitician);
 router.delete("/:id", protect, authorizeRoles("admin"), deletePolitician);
