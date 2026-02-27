@@ -324,3 +324,40 @@ export const deleteUser = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+// =============================
+// UPDATE USER (Admin or Self)
+// =============================
+export const updateUser = async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id).select("+password");
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Update allowed fields only
+    user.name = req.body.name || user.name;
+    user.phone = req.body.phone || user.phone;
+    user.district = req.body.district || user.district;
+
+    // Optional: Allow role change only by admin
+    if (req.user.role === "admin" && req.body.role) {
+      user.role = req.body.role;
+    }
+
+    // If password is changing
+    if (req.body.password) {
+      user.password = req.body.password;
+    }
+
+    const updatedUser = await user.save();
+
+    res.json({
+      message: "User updated successfully",
+      user: updatedUser
+    });
+
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};

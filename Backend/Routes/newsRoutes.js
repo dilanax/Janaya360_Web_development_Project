@@ -3,7 +3,8 @@ import {
   getPoliticalTrends,
   getArchivedNews,
   verifyNewsForPromise,
-  removeLinkedNews
+  removeLinkedNews,
+  updateLinkedNews
 } from "../Controller/newsController.js";
 
 import { protect } from "../Middleware/authMiddleware.js";
@@ -18,5 +19,6 @@ router.get("/social/trends", getPoliticalTrends);
 router.get("/archive/:id", protect, authorizeRoles("admin"), getArchivedNews);
 router.post("/verify/:id", protect, authorizeRoles("admin"), verifyNewsForPromise);
 router.delete("/link/:id", protect, authorizeRoles("admin"), removeLinkedNews);
+router.put("/update/:id", protect, authorizeRoles("admin"), updateLinkedNews);
 
 export default router;
