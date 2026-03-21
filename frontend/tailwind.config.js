@@ -3,7 +3,12 @@ module.exports = {
     "./src/**/*.{js,jsx,ts,tsx}",
   ],
   theme: {
-    extend: {},
+    extend: {
+      colors: {
+        'sriLanka-orange': '#FF6B35',
+        'sriLanka-maroon': '#800000',
+      },
+    },
   },
   plugins: [],
 }
