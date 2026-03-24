@@ -17,14 +17,12 @@
     "react-hot-toast": "^2.6.0",
     "react-intersection-observer": "^10.0.3",
     "react-router-dom": "^7.13.1",
-    "react-scripts": "5.0.1",
     "web-vitals": "^2.1.4"
   },
-  "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject"
+"scripts": {
+  "dev":     "vite",
+  "build":   "vite build",
+  "preview": "vite preview"
   },
   "eslintConfig": {
     "extends": [
@@ -45,8 +43,10 @@
     ]
   },
   "devDependencies": {
+    "@vitejs/plugin-react": "^4.7.0",
     "autoprefixer": "^10.4.27",
     "postcss": "^8.5.8",
-    "tailwindcss": "^3.4.19"
+    "tailwindcss": "^3.4.19",
+    "vite": "^6.4.1"
   }
 }

@@ -11,6 +11,8 @@ import Notifications from './components/Notifications';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import './App.css';
+import AdminDashboard from './pages/admindashboard';
+
 
 function App() {
   return (
@@ -25,6 +27,7 @@ function App() {
           <Route path="/news" element={<News />} />
           <Route path="/notifications" element={<Notifications />} />
           <Route path="/login" element={<Login />} />
+            <Route path="/admin-dashboard" element={<AdminDashboard />} />
           <Route path="/register" element={<Register />} />
         </Routes>
         <Toaster position="top-right" />

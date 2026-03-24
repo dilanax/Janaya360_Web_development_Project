@@ -4,20 +4,54 @@ import axios from 'axios';
 import toast from 'react-hot-toast';
 import { EnvelopeIcon, LockClosedIcon, EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
 
+// Janaya360 Color Tokens
+const COLORS = {
+  parliament: {
+    50:  '#FFF7ED',
+    100: '#FFEDD5',
+    200: '#FED7AA',
+    500: '#F97316',
+    600: '#EA580C',   // PRIMARY — buttons, active nav, logo
+    700: '#C2410C',   // Hover state
+    800: '#9A3412',
+  },
+  civic: {
+    50:  '#EFF6FF',
+    100: '#DBEAFE',
+    500: '#3B82F6',
+    600: '#2563EB',   // Links, info buttons, CTAs
+    700: '#1D4ED8',
+  },
+  maroon: {
+    600: '#7B0000',   // Parliament crest / NPP
+  },
+  gray: {
+    50:  '#F9FAFB',
+    100: '#F3F4F6',
+    200: '#E5E7EB',
+    300: '#D1D5DB',
+    400: '#9CA3AF',
+    500: '#6B7280',
+    700: '#374151',
+    900: '#111827',
+  },
+};
+
 const Login = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+  const [email, setEmail]               = useState('');
+  const [password, setPassword]         = useState('');
+  const [error, setError]               = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading]       = useState(false);
   const navigate = useNavigate();
-  const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+  const API_URL  = import.meta.env.VITE_API_URL;
 
   useEffect(() => {
     const savedUser = localStorage.getItem('userInfo');
-
     if (savedUser) {
-      navigate('/');
+      const user = JSON.parse(savedUser);
+      if (user?.role === 'admin') navigate('/admin-dashboard');
+      else navigate('/');
     }
   }, [navigate]);
 
@@ -25,17 +59,13 @@ const Login = () => {
     e.preventDefault();
     setIsLoading(true);
     setError('');
-
     try {
-      const { data } = await axios.post(`${apiUrl}/users/login`, {
-        email,
-        password,
-      });
-
+      const { data } = await axios.post(`${API_URL}/api/users/login`, { email, password });
       localStorage.setItem('userInfo', JSON.stringify(data));
       window.dispatchEvent(new Event('authChange'));
       toast.success('Login successful');
-      navigate('/');
+      if (data.role === 'admin') navigate('/admin-dashboard');
+      else navigate('/');
     } catch (apiError) {
       setError(apiError.response?.data?.message || 'Login failed. Please try again.');
     } finally {
@@ -44,47 +74,92 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
+    <div
+      className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8"
+      style={{ background: `linear-gradient(135deg, ${COLORS.parliament[50]} 0%, ${COLORS.gray[100]} 50%, ${COLORS.parliament[100]} 100%)` }}
+    >
+      {/* Decorative background circles */}
+      <div
+        style={{
+          position: 'fixed', top: '-80px', right: '-80px', width: '320px', height: '320px',
+          borderRadius: '50%', background: COLORS.parliament[100], opacity: 0.5, pointerEvents: 'none',
+        }}
+      />
+      <div
+        style={{
+          position: 'fixed', bottom: '-60px', left: '-60px', width: '240px', height: '240px',
+          borderRadius: '50%', background: COLORS.parliament[200], opacity: 0.35, pointerEvents: 'none',
+        }}
+      />
+
+      <div className="max-w-md w-full space-y-8 relative">
+
+        {/* ── Logo & Header ── */}
         <div className="text-center">
-          <Link to="/" className="inline-block">
-            <h1 className="text-4xl font-bold">
-              <span className="text-gray-900 dark:text-white">Janaya</span>
-              <span className="text-blue-600">360</span>
+          <Link to="/" className="inline-block group">
+            <h1 className="text-4xl font-bold tracking-tight">
+              <span style={{ color: COLORS.gray[900] }}>Janaya</span>
+              <span style={{ color: COLORS.parliament[600] }}>360</span>
             </h1>
           </Link>
-          <h2 className="mt-6 text-3xl font-extrabold text-gray-900 dark:text-white">
+
+          {/* Parliament crest accent line */}
+          <div
+            className="mx-auto mt-3 mb-6 h-0.5 w-16 rounded-full"
+            style={{ background: `linear-gradient(90deg, ${COLORS.parliament[600]}, ${COLORS.parliament[500]})` }}
+          />
+
+          <h2
+            className="text-2xl font-extrabold"
+            style={{ color: COLORS.gray[900] }}
+          >
             Welcome Back
           </h2>
-          <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
+          <p className="mt-2 text-sm" style={{ color: COLORS.gray[500] }}>
             Sign in to track political promises and stay informed
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="mt-8 space-y-6">
+        {/* ── Card ── */}
+        <div
+          className="rounded-2xl shadow-xl p-8 space-y-6"
+          style={{
+            background: '#FFFFFF',
+            border: `1px solid ${COLORS.gray[200]}`,
+            boxShadow: `0 8px 32px rgba(234, 88, 12, 0.08), 0 1px 4px rgba(0,0,0,0.06)`,
+          }}
+        >
+
+          {/* ── Error Banner ── */}
           {error && (
-            <div className="rounded-lg bg-red-50 dark:bg-red-900/20 p-4 border border-red-200 dark:border-red-800">
-              <div className="flex">
-                <div className="flex-shrink-0">
-                  <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 0016 0zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-                  </svg>
-                </div>
-                <div className="ml-3">
-                  <p className="text-sm text-red-800 dark:text-red-200">{error}</p>
-                </div>
-              </div>
+            <div
+              className="rounded-lg p-4 border flex gap-3"
+              style={{
+                background: '#FEE2E2',
+                borderColor: '#DC2626',
+              }}
+            >
+              <svg className="h-5 w-5 flex-shrink-0 mt-0.5" style={{ color: '#DC2626' }} viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 0016 0zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+              </svg>
+              <p className="text-sm" style={{ color: '#7F1D1D' }}>{error}</p>
             </div>
           )}
 
-          <div className="space-y-4">
+          <div className="space-y-5">
+
+            {/* ── Email Field ── */}
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label
+                htmlFor="email"
+                className="block text-sm font-medium mb-1.5"
+                style={{ color: COLORS.gray[700] }}
+              >
                 Email Address
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <EnvelopeIcon className="h-5 w-5 text-gray-400" />
+                  <EnvelopeIcon className="h-5 w-5" style={{ color: COLORS.gray[400] }} />
                 </div>
                 <input
                   id="email"
@@ -94,19 +169,40 @@ const Login = () => {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="appearance-none relative block w-full px-3 py-3 pl-10 border border-gray-300 dark:border-gray-600 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm bg-white dark:bg-gray-800"
                   placeholder="you@example.com"
+                  className="block w-full pl-10 pr-4 py-3 rounded-lg text-sm transition-all duration-200"
+                  style={{
+                    border: `1.5px solid ${COLORS.gray[300]}`,
+                    color: COLORS.gray[900],
+                    outline: 'none',
+                    background: COLORS.gray[50],
+                  }}
+                  onFocus={(e) => {
+                    e.target.style.borderColor = COLORS.parliament[600];
+                    e.target.style.boxShadow   = `0 0 0 3px ${COLORS.parliament[100]}`;
+                    e.target.style.background  = '#FFFFFF';
+                  }}
+                  onBlur={(e) => {
+                    e.target.style.borderColor = COLORS.gray[300];
+                    e.target.style.boxShadow   = 'none';
+                    e.target.style.background  = COLORS.gray[50];
+                  }}
                 />
               </div>
             </div>
 
+            {/* ── Password Field ── */}
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label
+                htmlFor="password"
+                className="block text-sm font-medium mb-1.5"
+                style={{ color: COLORS.gray[700] }}
+              >
                 Password
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <LockClosedIcon className="h-5 w-5 text-gray-400" />
+                  <LockClosedIcon className="h-5 w-5" style={{ color: COLORS.gray[400] }} />
                 </div>
                 <input
                   id="password"
@@ -116,79 +212,139 @@ const Login = () => {
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="appearance-none relative block w-full px-3 py-3 pl-10 pr-10 border border-gray-300 dark:border-gray-600 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm bg-white dark:bg-gray-800"
-                  placeholder="********"
+                  placeholder="••••••••"
+                  className="block w-full pl-10 pr-10 py-3 rounded-lg text-sm transition-all duration-200"
+                  style={{
+                    border: `1.5px solid ${COLORS.gray[300]}`,
+                    color: COLORS.gray[900],
+                    outline: 'none',
+                    background: COLORS.gray[50],
+                  }}
+                  onFocus={(e) => {
+                    e.target.style.borderColor = COLORS.parliament[600];
+                    e.target.style.boxShadow   = `0 0 0 3px ${COLORS.parliament[100]}`;
+                    e.target.style.background  = '#FFFFFF';
+                  }}
+                  onBlur={(e) => {
+                    e.target.style.borderColor = COLORS.gray[300];
+                    e.target.style.boxShadow   = 'none';
+                    e.target.style.background  = COLORS.gray[50];
+                  }}
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center transition-colors"
+                  style={{ color: COLORS.gray[400] }}
+                  onMouseEnter={(e) => e.currentTarget.style.color = COLORS.parliament[600]}
+                  onMouseLeave={(e) => e.currentTarget.style.color = COLORS.gray[400]}
                 >
-                  {showPassword ? (
-                    <EyeSlashIcon className="h-5 w-5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300" />
-                  ) : (
-                    <EyeIcon className="h-5 w-5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300" />
-                  )}
+                  {showPassword
+                    ? <EyeSlashIcon className="h-5 w-5" />
+                    : <EyeIcon      className="h-5 w-5" />
+                  }
                 </button>
               </div>
             </div>
           </div>
 
+          {/* ── Remember + Forgot ── */}
           <div className="flex items-center justify-between">
-            <div className="flex items-center">
+            <label className="flex items-center gap-2 cursor-pointer select-none">
               <input
                 id="remember-me"
                 name="remember-me"
                 type="checkbox"
-                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                className="h-4 w-4 rounded"
+                style={{ accentColor: COLORS.parliament[600] }}
               />
-              <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-700 dark:text-gray-300">
-                Remember me
-              </label>
-            </div>
+              <span className="text-sm" style={{ color: COLORS.gray[700] }}>Remember me</span>
+            </label>
 
-            <div className="text-sm">
-              <Link to="/forgot-password" className="font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300">
-                Forgot your password?
-              </Link>
-            </div>
-          </div>
-
-          <div>
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-semibold rounded-lg text-white bg-blue-600 hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+            <Link
+              to="/forgot-password"
+              className="text-sm font-medium transition-colors"
+              style={{ color: COLORS.civic[600] }}
+              onMouseEnter={(e) => e.target.style.color = COLORS.civic[700]}
+              onMouseLeave={(e) => e.target.style.color = COLORS.civic[600]}
             >
-              {isLoading ? (
-                <>
-                  <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
-                  Signing in...
-                </>
-              ) : (
-                'Sign In'
-              )}
-            </button>
+              Forgot password?
+            </Link>
           </div>
 
-          <div className="text-center">
-            <p className="text-sm text-gray-600 dark:text-gray-400">
-              Don't have an account?{' '}
-              <Link to="/register" className="font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300">
-                Sign up for free
-              </Link>
-            </p>
+          {/* ── Sign In Button ── */}
+          <button
+            type="button"
+            onClick={handleSubmit}
+            disabled={isLoading}
+            className="w-full flex justify-center items-center gap-2 py-3 px-4 rounded-lg text-sm font-semibold text-white transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+            style={{
+              background: `linear-gradient(135deg, ${COLORS.parliament[600]}, ${COLORS.parliament[500]})`,
+              boxShadow: `0 4px 14px rgba(234, 88, 12, 0.35)`,
+            }}
+            onMouseEnter={(e) => {
+              if (!isLoading) {
+                e.currentTarget.style.background  = `linear-gradient(135deg, ${COLORS.parliament[700]}, ${COLORS.parliament[600]})`;
+                e.currentTarget.style.boxShadow   = `0 6px 20px rgba(234, 88, 12, 0.45)`;
+                e.currentTarget.style.transform   = 'translateY(-1px)';
+              }
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background  = `linear-gradient(135deg, ${COLORS.parliament[600]}, ${COLORS.parliament[500]})`;
+              e.currentTarget.style.boxShadow   = `0 4px 14px rgba(234, 88, 12, 0.35)`;
+              e.currentTarget.style.transform   = 'translateY(0)';
+            }}
+          >
+            {isLoading ? (
+              <>
+                <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                </svg>
+                Signing in…
+              </>
+            ) : (
+              'Sign In'
+            )}
+          </button>
+
+          {/* ── Divider ── */}
+          <div className="flex items-center gap-3">
+            <div className="flex-1 h-px" style={{ background: COLORS.gray[200] }} />
+            <span className="text-xs" style={{ color: COLORS.gray[400] }}>or</span>
+            <div className="flex-1 h-px" style={{ background: COLORS.gray[200] }} />
           </div>
 
-          <div className="mt-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-100 dark:border-blue-800">
-            <p className="text-xs text-center text-gray-600 dark:text-gray-400">
-              This form now signs in with your backend account using the configured API URL.
-            </p>
-          </div>
-        </form>
+          {/* ── Sign Up Link ── */}
+          <p className="text-center text-sm" style={{ color: COLORS.gray[500] }}>
+            Don't have an account?{' '}
+            <Link
+              to="/register"
+              className="font-semibold transition-colors"
+              style={{ color: COLORS.parliament[600] }}
+              onMouseEnter={(e) => e.target.style.color = COLORS.parliament[700]}
+              onMouseLeave={(e) => e.target.style.color = COLORS.parliament[600]}
+            >
+              Sign up for free
+            </Link>
+          </p>
+        </div>
+
+        {/* ── Info Footer ── */}
+        <div
+          className="rounded-xl p-4 text-center"
+          style={{
+            background: COLORS.parliament[50],
+            border: `1px solid ${COLORS.parliament[200]}`,
+          }}
+        >
+          <p className="text-xs" style={{ color: COLORS.gray[500] }}>
+            🇱🇰 &nbsp;
+            <span style={{ color: COLORS.parliament[700], fontWeight: 600 }}>Janaya360</span>
+            {' '}— Accountability starts with transparency
+          </p>
+        </div>
+
       </div>
     </div>
   );
