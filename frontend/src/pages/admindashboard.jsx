@@ -8,7 +8,7 @@ import {
   Newspaper, Bell, Settings, LogOut, Search,
   TrendingUp, TrendingDown, ChevronRight,
   CheckCircle, MapPin, BarChart2, ThumbsUp, ThumbsDown,
-  ExternalLink, Home,
+  ExternalLink, Home, Plus, Pencil, Trash2,
 } from 'lucide-react';
 
 /* ── Janaya360 Color Tokens ───────────────────────────────────── */
@@ -115,10 +115,20 @@ const NAV = [
   { label:'Politicians',   icon:Users,           path:'/politicians',     badge:'89'  },
   { label:'Promises',      icon:FileText,        path:'/promises',        badge:'247' },
   { label:'Feedback',      icon:MessageSquare,   path:'/feedback',        badge:'12'  },
-  { label:'News',          icon:Newspaper,       path:'/admin-dashboard', hash:'#news-management', badge:null  },
+  { label:'News',          icon:Newspaper,       path:'/admin-news',      badge:null  },
   { label:'Notifications', icon:Bell,            path:'/notifications',   badge:'5'   },
   { label:'Users',         icon:Users,           path:'/users',           badge:null  },
   { label:'Settings',      icon:Settings,        path:'/settings',        badge:null  },
+];
+
+const DISTRICTS = [
+  'Colombo','Gampaha','Kalutara','Kandy','Matale',
+  'Nuwara Eliya','Galle','Matara','Hambantota',
+  'Jaffna','Kilinochchi','Mannar','Vavuniya',
+  'Mullaitivu','Batticaloa','Ampara','Trincomalee',
+  'Kurunegala','Puttalam','Anuradhapura',
+  'Polonnaruwa','Badulla','Monaragala',
+  'Ratnapura','Kegalle',
 ];
 
 /* ── DONUT CHART ──────────────────────────────────────────────── */
@@ -185,14 +195,309 @@ const AdminDashboard = () => {
   const [newsItems, setNewsItems] = useState([]);
   const [dataError, setDataError] = useState('');
   const [isDataLoading, setIsDataLoading] = useState(true);
+  const [adminUser, setAdminUser] = useState(null);
+  const [userSearchInput, setUserSearchInput] = useState('');
+  const [activeUserSearch, setActiveUserSearch] = useState('');
+  const [userForm, setUserForm] = useState({
+    name: '',
+    email: '',
+    password: '',
+    phone: '',
+    district: '',
+    role: 'citizen',
+    status: 'active',
+  });
+  const [editingUserId, setEditingUserId] = useState(null);
+  const [userActionError, setUserActionError] = useState('');
+  const [userActionSuccess, setUserActionSuccess] = useState('');
+  const [isSavingUser, setIsSavingUser] = useState(false);
+  const [deletingUserId, setDeletingUserId] = useState('');
+  const [newsForm, setNewsForm] = useState({
+    title: '',
+    description: '',
+    source: '',
+    politician: '',
+    url: '',
+    image: '',
+    publishedAt: '',
+  });
+  const [editingNewsId, setEditingNewsId] = useState(null);
+  const [newsActionError, setNewsActionError] = useState('');
+  const [newsActionSuccess, setNewsActionSuccess] = useState('');
+  const [isSavingNews, setIsSavingNews] = useState(false);
+  const [deletingNewsId, setDeletingNewsId] = useState('');
   const isUsersPage = location.pathname === '/users';
-  const renderUsersTable = () => (
+  const isNewsPage = location.pathname === '/admin-news';
+  const searchTerm = (activeUserSearch || userSearchInput).trim().toLowerCase();
+  const displayedUsers = searchTerm
+    ? users.filter((user) => (
+        [
+          user.name,
+          user.email,
+          user.phone,
+          user.district,
+          user.role,
+          user.status,
+        ]
+          .filter(Boolean)
+          .some((value) => value.toLowerCase().includes(searchTerm))
+      ))
+    : users;
+  const getAuthHeaders = () => ({
+    Authorization: `Bearer ${JSON.parse(localStorage.getItem('userInfo') || '{}').token}`,
+  });
+
+  const resetUserForm = () => {
+    setUserForm({
+      name: '',
+      email: '',
+      password: '',
+      phone: '',
+      district: '',
+      role: 'citizen',
+      status: 'active',
+    });
+    setEditingUserId(null);
+  };
+
+  const resetNewsForm = () => {
+    setNewsForm({
+      title: '',
+      description: '',
+      source: '',
+      politician: '',
+      url: '',
+      image: '',
+      publishedAt: '',
+    });
+    setEditingNewsId(null);
+  };
+
+  const fetchUsers = async (searchValue = '') => {
+    const response = await axios.get(`${API_URL}/api/users`, {
+      headers: getAuthHeaders(),
+      params: searchValue ? { q: searchValue } : {},
+    });
+    setUsers(Array.isArray(response.data) ? response.data : []);
+  };
+
+  const fetchNews = async () => {
+    const response = await axios.get(`${API_URL}/api/news`, {
+      headers: getAuthHeaders(),
+    });
+    setNewsItems(Array.isArray(response.data) ? response.data : []);
+  };
+
+  const handleUserFormChange = (field, value) => {
+    setUserForm(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handleUserSearch = async (event) => {
+    event.preventDefault();
+    setUserActionError('');
+    setUserActionSuccess('');
+    setActiveUserSearch(userSearchInput.trim());
+    setIsDataLoading(true);
+
+    try {
+      await fetchUsers(userSearchInput.trim());
+    } catch (error) {
+      setUserActionError(error.response?.data?.message || 'Failed to search users.');
+    } finally {
+      setIsDataLoading(false);
+    }
+  };
+
+  const startEditUser = (user) => {
+    setEditingUserId(user._id);
+    setUserActionError('');
+    setUserActionSuccess('');
+    setUserForm({
+      name: user.name || '',
+      email: user.email || '',
+      password: '',
+      phone: user.phone || '',
+      district: user.district || '',
+      role: user.role || 'citizen',
+      status: user.status || 'active',
+    });
+  };
+
+  const handleSaveUser = async (event) => {
+    event.preventDefault();
+    setIsSavingUser(true);
+    setUserActionError('');
+    setUserActionSuccess('');
+
+    try {
+      const normalizedEmail = userForm.email.trim().toLowerCase();
+      const normalizedPhone = userForm.phone.trim();
+      const duplicateUser = users.find((user) => (
+        user._id !== editingUserId && (
+          user.email?.trim().toLowerCase() === normalizedEmail ||
+          user.phone?.trim() === normalizedPhone
+        )
+      ));
+
+      if (duplicateUser?.email?.trim().toLowerCase() === normalizedEmail) {
+        setUserActionError('Email is already in use.');
+        setIsSavingUser(false);
+        return;
+      }
+
+      if (duplicateUser?.phone?.trim() === normalizedPhone) {
+        setUserActionError('Phone number is already in use.');
+        setIsSavingUser(false);
+        return;
+      }
+
+      const payload = {
+        name: userForm.name,
+        email: normalizedEmail,
+        phone: normalizedPhone,
+        district: userForm.district,
+        role: userForm.role,
+        status: userForm.status,
+      };
+
+      if (userForm.password) {
+        payload.password = userForm.password;
+      }
+
+      if (editingUserId) {
+        await axios.put(`${API_URL}/api/users/${editingUserId}`, payload, {
+          headers: getAuthHeaders(),
+        });
+        setUserActionSuccess('User updated successfully.');
+      } else {
+        await axios.post(`${API_URL}/api/users`, {
+          ...payload,
+          password: userForm.password,
+        }, {
+          headers: getAuthHeaders(),
+        });
+        setUserActionSuccess('New user account created successfully.');
+      }
+
+      resetUserForm();
+      await fetchUsers(activeUserSearch);
+    } catch (error) {
+      setUserActionError(error.response?.data?.message || 'Failed to save user.');
+    } finally {
+      setIsSavingUser(false);
+    }
+  };
+
+  const handleDeleteUser = async (userId) => {
+    const shouldDelete = window.confirm('Are you sure you want to delete this user account?');
+    if (!shouldDelete) {
+      return;
+    }
+
+    setDeletingUserId(userId);
+    setUserActionError('');
+    setUserActionSuccess('');
+
+    try {
+      await axios.delete(`${API_URL}/api/users/${userId}`, {
+        headers: getAuthHeaders(),
+      });
+      setUserActionSuccess('User deleted successfully.');
+      await fetchUsers(activeUserSearch);
+    } catch (error) {
+      setUserActionError(error.response?.data?.message || 'Failed to delete user.');
+    } finally {
+      setDeletingUserId('');
+    }
+  };
+
+  const handleNewsFormChange = (field, value) => {
+    setNewsForm(prev => ({ ...prev, [field]: value }));
+  };
+
+  const startEditNews = (news) => {
+    setEditingNewsId(news._id);
+    setNewsActionError('');
+    setNewsActionSuccess('');
+    setNewsForm({
+      title: news.title || '',
+      description: news.description || '',
+      source: news.source || '',
+      politician: news.politician || '',
+      url: news.url || '',
+      image: news.image || '',
+      publishedAt: news.publishedAt ? new Date(news.publishedAt).toISOString().slice(0, 10) : '',
+    });
+  };
+
+  const handleSaveNews = async (event) => {
+    event.preventDefault();
+    setIsSavingNews(true);
+    setNewsActionError('');
+    setNewsActionSuccess('');
+
+    try {
+      const payload = {
+        title: newsForm.title,
+        description: newsForm.description,
+        source: newsForm.source,
+        politician: newsForm.politician,
+        url: newsForm.url,
+        image: newsForm.image,
+        publishedAt: newsForm.publishedAt || null,
+      };
+
+      if (editingNewsId) {
+        await axios.put(`${API_URL}/api/news/update/${editingNewsId}`, payload, {
+          headers: getAuthHeaders(),
+        });
+        setNewsActionSuccess('News updated successfully.');
+      } else {
+        await axios.post(`${API_URL}/api/news`, payload, {
+          headers: getAuthHeaders(),
+        });
+        setNewsActionSuccess('News created successfully.');
+      }
+
+      resetNewsForm();
+      await fetchNews();
+    } catch (error) {
+      setNewsActionError(error.response?.data?.message || 'Failed to save news.');
+    } finally {
+      setIsSavingNews(false);
+    }
+  };
+
+  const handleDeleteNews = async (newsId) => {
+    const shouldDelete = window.confirm('Are you sure you want to delete this news item?');
+    if (!shouldDelete) {
+      return;
+    }
+
+    setDeletingNewsId(newsId);
+    setNewsActionError('');
+    setNewsActionSuccess('');
+
+    try {
+      await axios.delete(`${API_URL}/api/news/link/${newsId}`, {
+        headers: getAuthHeaders(),
+      });
+      setNewsActionSuccess('News deleted successfully.');
+      await fetchNews();
+    } catch (error) {
+      setNewsActionError(error.response?.data?.message || 'Failed to delete news.');
+    } finally {
+      setDeletingNewsId('');
+    }
+  };
+
+  const renderNewsTable = () => (
     <div style={{ background:'#fff', borderRadius:16, padding:'20px', border:`1px solid ${C.gray[200]}` }}>
       <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:16 }}>
         <div>
-          <div style={{ fontSize:14, fontWeight:700, color: C.gray[900] }}>All Users</div>
+          <div style={{ fontSize:14, fontWeight:700, color: C.gray[900] }}>All News</div>
           <div style={{ fontSize:11, color: C.gray[400], marginTop:4 }}>
-            {isDataLoading ? 'Loading users...' : `${users.length} users found in the database`}
+            {isDataLoading ? 'Loading news...' : `${newsItems.length} news items found in the database`}
           </div>
         </div>
         <Link to="/admin-dashboard" style={{ fontSize:12, color: C.parliament[600], textDecoration:'none', display:'flex', alignItems:'center', gap:2 }}>
@@ -200,7 +505,48 @@ const AdminDashboard = () => {
         </Link>
       </div>
 
-      {dataError && (
+      <form onSubmit={handleSaveNews} style={{ background:C.gray[50], border:`1px solid ${C.gray[200]}`, borderRadius:16, padding:'16px', marginBottom:20 }}>
+        <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:14 }}>
+          <div style={{ fontSize:14, fontWeight:700, color:C.gray[900] }}>
+            {editingNewsId ? 'Update News' : 'Create News'}
+          </div>
+          {editingNewsId && (
+            <button type="button" onClick={resetNewsForm} style={{ border:'none', background:'transparent', color:C.parliament[600], fontSize:12, fontWeight:700, cursor:'pointer' }}>
+              Cancel edit
+            </button>
+          )}
+        </div>
+
+        <div style={{
+          marginBottom: 14,
+          padding: '10px 12px',
+          borderRadius: 10,
+          background: C.parliament[50],
+          border: `1px solid ${C.parliament[200]}`,
+          color: C.parliament[800],
+          fontSize: 12,
+          lineHeight: 1.5,
+        }}>
+          Admin news is optional. The homepage latest-news section prefers the live third-party news feed, while news created here remains available for your managed news content and public news page.
+        </div>
+
+        <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12 }}>
+          <input value={newsForm.title} onChange={(e) => handleNewsFormChange('title', e.target.value)} placeholder="News title" style={{ padding:'11px 12px', borderRadius:10, border:`1px solid ${C.gray[300]}` }} />
+          <input value={newsForm.source} onChange={(e) => handleNewsFormChange('source', e.target.value)} placeholder="Source" style={{ padding:'11px 12px', borderRadius:10, border:`1px solid ${C.gray[300]}` }} />
+          <input value={newsForm.politician} onChange={(e) => handleNewsFormChange('politician', e.target.value)} placeholder="Politician" style={{ padding:'11px 12px', borderRadius:10, border:`1px solid ${C.gray[300]}` }} />
+          <input value={newsForm.publishedAt} onChange={(e) => handleNewsFormChange('publishedAt', e.target.value)} type="date" style={{ padding:'11px 12px', borderRadius:10, border:`1px solid ${C.gray[300]}` }} />
+          <input value={newsForm.url} onChange={(e) => handleNewsFormChange('url', e.target.value)} placeholder="Article URL" style={{ padding:'11px 12px', borderRadius:10, border:`1px solid ${C.gray[300]}` }} />
+          <input value={newsForm.image} onChange={(e) => handleNewsFormChange('image', e.target.value)} placeholder="Image URL" style={{ padding:'11px 12px', borderRadius:10, border:`1px solid ${C.gray[300]}` }} />
+          <textarea value={newsForm.description} onChange={(e) => handleNewsFormChange('description', e.target.value)} placeholder="Description" style={{ gridColumn:'1 / -1', minHeight:90, padding:'11px 12px', borderRadius:10, border:`1px solid ${C.gray[300]}`, resize:'vertical' }} />
+        </div>
+
+        <button type="submit" disabled={isSavingNews} style={{ marginTop:14, border:'none', borderRadius:10, padding:'11px 14px', background:C.parliament[600], color:'#fff', fontWeight:700, cursor:'pointer', display:'inline-flex', alignItems:'center', gap:8 }}>
+          <Plus size={16} />
+          {isSavingNews ? 'Saving...' : editingNewsId ? 'Update News' : 'Create News'}
+        </button>
+      </form>
+
+      {(dataError || newsActionError) && (
         <div style={{
           marginBottom: 16,
           background: '#FEF2F2',
@@ -211,15 +557,178 @@ const AdminDashboard = () => {
           fontSize: 14,
           fontWeight: 600,
         }}>
-          {dataError}
+          {newsActionError || dataError}
+        </div>
+      )}
+
+      {newsActionSuccess && (
+        <div style={{
+          marginBottom: 16,
+          background: C.status.keptBg,
+          border: `1px solid ${C.status.keptColor}`,
+          color: C.status.keptText,
+          borderRadius: 14,
+          padding: '14px 16px',
+          fontSize: 14,
+          fontWeight: 600,
+        }}>
+          {newsActionSuccess}
         </div>
       )}
 
       <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
-        {users.map((user) => (
+        {newsItems.map((news) => (
+          <div key={news._id} style={{
+            display:'grid',
+            gridTemplateColumns:'1.6fr 1fr 0.9fr 0.8fr',
+            gap:12,
+            alignItems:'center',
+            padding:'14px 16px',
+            borderRadius:12,
+            background:C.gray[50],
+            border:`1px solid ${C.gray[200]}`,
+          }}>
+            <div>
+              <div style={{ fontSize:13, fontWeight:700, color:C.gray[900] }}>
+                {news.title || 'Untitled news item'}
+              </div>
+              <div style={{ fontSize:11, color:C.gray[500], marginTop:4 }}>
+                {news.description || 'No description available'}
+              </div>
+            </div>
+            <div style={{ fontSize:12, color:C.gray[700] }}>
+              {news.politician || news.source || 'Unknown source'}
+            </div>
+            <div style={{ fontSize:12, color:C.gray[700] }}>
+              {news.source || 'No source'}
+            </div>
+            <div style={{ textAlign:'right', fontSize:11, color:C.gray[500] }}>
+              {formatDate(news.publishedAt || news.createdAt)}
+              <div style={{ marginTop:8, display:'flex', justifyContent:'flex-end', gap:8 }}>
+                <button type="button" onClick={() => startEditNews(news)} style={{ border:'none', background:'transparent', color:C.civic[600], cursor:'pointer' }}>
+                  <Pencil size={14} />
+                </button>
+                <button type="button" disabled={deletingNewsId === news._id} onClick={() => handleDeleteNews(news._id)} style={{ border:'none', background:'transparent', color:C.status.brokColor, cursor:'pointer' }}>
+                  <Trash2 size={14} />
+                </button>
+              </div>
+            </div>
+          </div>
+        ))}
+
+        {!isDataLoading && newsItems.length === 0 && (
+          <div style={{ fontSize:12, color:C.gray[500] }}>No news to display yet.</div>
+        )}
+      </div>
+    </div>
+  );
+
+  const renderUsersTable = () => (
+    <div style={{ background:'#fff', borderRadius:16, padding:'20px', border:`1px solid ${C.gray[200]}` }}>
+      <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:16 }}>
+        <div>
+          <div style={{ fontSize:14, fontWeight:700, color: C.gray[900] }}>All Users</div>
+          <div style={{ fontSize:11, color: C.gray[400], marginTop:4 }}>
+            {isDataLoading ? 'Loading users...' : `${displayedUsers.length} users shown from ${users.length} database users`}
+          </div>
+        </div>
+        <Link to="/admin-dashboard" style={{ fontSize:12, color: C.parliament[600], textDecoration:'none', display:'flex', alignItems:'center', gap:2 }}>
+          Back to dashboard <ChevronRight size={12}/>
+        </Link>
+      </div>
+
+      <div style={{ display:'grid', gridTemplateColumns:'1.15fr 1.85fr', gap:16, marginBottom:20 }}>
+        <form onSubmit={handleSaveUser} style={{ background:C.gray[50], border:`1px solid ${C.gray[200]}`, borderRadius:16, padding:'16px' }}>
+          <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:14 }}>
+            <div style={{ fontSize:14, fontWeight:700, color:C.gray[900] }}>
+              {editingUserId ? 'Update User Account' : 'Create User Account'}
+            </div>
+            {editingUserId && (
+              <button type="button" onClick={resetUserForm} style={{ border:'none', background:'transparent', color:C.parliament[600], fontSize:12, fontWeight:700, cursor:'pointer' }}>
+                Cancel edit
+              </button>
+            )}
+          </div>
+
+          <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12 }}>
+            <input value={userForm.name} onChange={(e) => handleUserFormChange('name', e.target.value)} placeholder="Full name" style={{ padding:'11px 12px', borderRadius:10, border:`1px solid ${C.gray[300]}` }} />
+            <input value={userForm.email} onChange={(e) => handleUserFormChange('email', e.target.value)} placeholder="Email address" style={{ padding:'11px 12px', borderRadius:10, border:`1px solid ${C.gray[300]}` }} />
+            <input value={userForm.phone} onChange={(e) => handleUserFormChange('phone', e.target.value)} placeholder="Phone number" style={{ padding:'11px 12px', borderRadius:10, border:`1px solid ${C.gray[300]}` }} />
+            <input value={userForm.password} onChange={(e) => handleUserFormChange('password', e.target.value)} placeholder={editingUserId ? 'New password (optional)' : 'Password'} style={{ padding:'11px 12px', borderRadius:10, border:`1px solid ${C.gray[300]}` }} />
+            <select value={userForm.district} onChange={(e) => handleUserFormChange('district', e.target.value)} style={{ padding:'11px 12px', borderRadius:10, border:`1px solid ${C.gray[300]}` }}>
+              <option value="">Select district</option>
+              {DISTRICTS.map((district) => <option key={district} value={district}>{district}</option>)}
+            </select>
+            <select value={userForm.role} onChange={(e) => handleUserFormChange('role', e.target.value)} style={{ padding:'11px 12px', borderRadius:10, border:`1px solid ${C.gray[300]}` }}>
+              <option value="citizen">Citizen</option>
+              <option value="admin">Admin</option>
+            </select>
+            <select value={userForm.status} onChange={(e) => handleUserFormChange('status', e.target.value)} style={{ padding:'11px 12px', borderRadius:10, border:`1px solid ${C.gray[300]}` }}>
+              <option value="active">Active</option>
+              <option value="suspended">Suspended</option>
+            </select>
+          </div>
+
+          <button type="submit" disabled={isSavingUser} style={{ marginTop:14, border:'none', borderRadius:10, padding:'11px 14px', background:C.parliament[600], color:'#fff', fontWeight:700, cursor:'pointer', display:'inline-flex', alignItems:'center', gap:8 }}>
+            <Plus size={16} />
+            {isSavingUser ? 'Saving...' : editingUserId ? 'Update User' : 'Create User'}
+          </button>
+        </form>
+
+        <div style={{ background:C.gray[50], border:`1px solid ${C.gray[200]}`, borderRadius:16, padding:'16px' }}>
+          <div style={{ fontSize:14, fontWeight:700, color:C.gray[900], marginBottom:12 }}>Search Users</div>
+          <form onSubmit={handleUserSearch} style={{ display:'flex', gap:10, marginBottom:12 }}>
+            <input value={userSearchInput} onChange={(e) => setUserSearchInput(e.target.value)} placeholder="Search by name, email, district, role..." style={{ flex:1, padding:'11px 12px', borderRadius:10, border:`1px solid ${C.gray[300]}` }} />
+            <button type="submit" style={{ border:'none', borderRadius:10, padding:'0 16px', background:C.gray[900], color:'#fff', fontWeight:700, cursor:'pointer' }}>
+              Search
+            </button>
+          </form>
+          <button type="button" onClick={async () => { setUserSearchInput(''); setActiveUserSearch(''); setIsDataLoading(true); try { await fetchUsers(''); } finally { setIsDataLoading(false); } }} style={{ border:'none', background:'transparent', color:C.parliament[600], fontWeight:700, cursor:'pointer', padding:0 }}>
+            Clear search
+          </button>
+          {activeUserSearch && (
+            <div style={{ marginTop:14, fontSize:12, color:C.gray[500] }}>
+              Current filter: <span style={{ fontWeight:700, color:C.gray[700] }}>{activeUserSearch}</span>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {(dataError || userActionError) && (
+        <div style={{
+          marginBottom: 16,
+          background: '#FEF2F2',
+          border: `1px solid ${C.status.brokColor}`,
+          color: C.status.brokText,
+          borderRadius: 14,
+          padding: '14px 16px',
+          fontSize: 14,
+          fontWeight: 600,
+        }}>
+          {userActionError || dataError}
+        </div>
+      )}
+
+      {userActionSuccess && (
+        <div style={{
+          marginBottom: 16,
+          background: C.status.keptBg,
+          border: `1px solid ${C.status.keptColor}`,
+          color: C.status.keptText,
+          borderRadius: 14,
+          padding: '14px 16px',
+          fontSize: 14,
+          fontWeight: 600,
+        }}>
+          {userActionSuccess}
+        </div>
+      )}
+
+      <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
+        {displayedUsers.map((user) => (
           <div key={user._id} style={{
             display:'grid',
-            gridTemplateColumns:'1.2fr 1.2fr 0.7fr 0.8fr 0.8fr',
+            gridTemplateColumns:'1.1fr 1.2fr 0.75fr 0.75fr 0.55fr 0.95fr',
             gap:12,
             alignItems:'center',
             padding:'14px 16px',
@@ -240,6 +749,9 @@ const AdminDashboard = () => {
             <div style={{ fontSize:12, color:C.gray[700] }}>
               {user.district || 'No district'}
             </div>
+            <div style={{ fontSize:12, color:user.status === 'active' ? C.status.keptText : C.status.brokText, fontWeight:700 }}>
+              {user.status || 'active'}
+            </div>
             <div style={{ textAlign:'right' }}>
               <span style={{
                 fontSize:10,
@@ -251,12 +763,22 @@ const AdminDashboard = () => {
               }}>
                 {user.role}
               </span>
+              <div style={{ marginTop:8, display:'flex', justifyContent:'flex-end', gap:8 }}>
+                <button type="button" onClick={() => startEditUser(user)} style={{ border:'none', background:'transparent', color:C.civic[600], cursor:'pointer' }}>
+                  <Pencil size={14} />
+                </button>
+                <button type="button" disabled={deletingUserId === user._id || adminUser?._id === user._id} onClick={() => handleDeleteUser(user._id)} style={{ border:'none', background:'transparent', color:C.status.brokColor, cursor:'pointer', opacity: adminUser?._id === user._id ? 0.45 : 1 }}>
+                  <Trash2 size={14} />
+                </button>
+              </div>
             </div>
           </div>
         ))}
 
-        {!isDataLoading && users.length === 0 && (
-          <div style={{ fontSize:12, color:C.gray[500] }}>No users to display yet.</div>
+        {!isDataLoading && displayedUsers.length === 0 && (
+          <div style={{ fontSize:12, color:C.gray[500] }}>
+            {users.length === 0 ? 'No users to display yet.' : 'No users matched your search.'}
+          </div>
         )}
       </div>
     </div>
@@ -271,6 +793,7 @@ const AdminDashboard = () => {
     }
 
     const parsedUser = JSON.parse(storedUser);
+    setAdminUser(parsedUser);
     if (parsedUser.role !== 'admin') {
       navigate('/');
       return;
@@ -281,17 +804,10 @@ const AdminDashboard = () => {
       setDataError('');
 
       try {
-        const headers = {
-          Authorization: `Bearer ${parsedUser.token}`,
-        };
-
-        const [usersResponse, newsResponse] = await Promise.all([
-          axios.get(`${API_URL}/api/users`, { headers }),
-          axios.get(`${API_URL}/api/news`, { headers }),
+        await Promise.all([
+          fetchUsers(activeUserSearch),
+          fetchNews(),
         ]);
-
-        setUsers(Array.isArray(usersResponse.data) ? usersResponse.data : []);
-        setNewsItems(Array.isArray(newsResponse.data) ? newsResponse.data : []);
       } catch (error) {
         setDataError(error.response?.data?.message || 'Failed to load admin dashboard data.');
       } finally {
@@ -300,7 +816,7 @@ const AdminDashboard = () => {
     };
 
     fetchDashboardData();
-  }, [API_URL, navigate]);
+  }, [API_URL, navigate, activeUserSearch]);
 
   const handleLogout = () => {
     localStorage.removeItem('userInfo');
@@ -481,10 +997,10 @@ const AdminDashboard = () => {
             </button>
           <div>
               <div style={{ fontSize:16, fontWeight:700, color: C.gray[900] }}>
-                {isUsersPage ? 'User Management' : 'Overview Dashboard'}
+                {isUsersPage ? 'User Management' : isNewsPage ? 'News Management' : 'Overview Dashboard'}
               </div>
               <div style={{ fontSize:11, color: C.gray[400] }}>
-                {isUsersPage ? 'All registered users from the database' : 'Welcome back, Admin'}
+                {isUsersPage ? 'All registered users from the database' : isNewsPage ? 'All news records from the database' : 'Welcome back, Admin'}
               </div>
             </div>
           </div>
@@ -543,6 +1059,8 @@ const AdminDashboard = () => {
         <div style={{ flex:1, overflowY:'auto', padding:'24px 28px' }}>
           {isUsersPage ? (
             renderUsersTable()
+          ) : isNewsPage ? (
+            renderNewsTable()
           ) : (
           <>
 

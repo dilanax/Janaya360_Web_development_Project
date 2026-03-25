@@ -1,6 +1,8 @@
 import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
 
+const passwordValidator = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d@$!%*?&]{8,}$/;
+
 const userSchema = new mongoose.Schema(
   {
     name: {
@@ -26,14 +28,20 @@ const userSchema = new mongoose.Schema(
     password: {
       type: String,
       required: [true, "Password is required"],
-      minlength: 6,
-      select: false // ❗ password default eken return wenne na
+      minlength: 8,
+      match: [
+        passwordValidator,
+        "Password must be at least 8 characters and include letters and numbers"
+      ],
+      select: false // ??? password default eken return wenne na
     },
 
     phone: {
       type: String,
+      unique: true,
+      trim: true,
       required: true,
-      match: [/^[0-9]{10}$/, "Phone number must be 10 digits"]
+      match: [/^[0-9]{10}$/, "Phone number must be exactly 10 digits"]
     },
 
     district: {

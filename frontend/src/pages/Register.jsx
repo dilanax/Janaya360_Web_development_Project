@@ -57,6 +57,8 @@ const DISTRICTS = [
   'Ratnapura','Kegalle',
 ];
 
+const PASSWORD_RULE = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d@$!%*?&]{8,}$/;
+
 /* ─────────────────────────────────────────────────────────────
    KEY FIX: Each input manages its own focused state internally.
    This means focus/blur styling never goes stale between renders,
@@ -214,7 +216,8 @@ const Register = () => {
     if (formData.name.length > 50)                                         e.name = 'Name must be less than 50 characters';
     if (!/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,})+$/.test(formData.email)) e.email = 'Please enter a valid email address';
     if (!formData.email)                                                   e.email = 'Email is required';
-    if (!formData.password || formData.password.length < 6)               e.password = 'Password must be at least 6 characters';
+    if (!formData.password)                                                e.password = 'Password is required';
+    else if (!PASSWORD_RULE.test(formData.password))                       e.password = 'Password must be 8+ characters and include letters and numbers';
     if (formData.password !== formData.confirmPassword)                    e.confirmPassword = 'Passwords do not match';
     if (!formData.confirmPassword)                                         e.confirmPassword = 'Please confirm your password';
     if (!/^[0-9]{10}$/.test(formData.phone))                              e.phone = 'Phone number must be 10 digits';
@@ -240,6 +243,7 @@ const Register = () => {
     } catch (err) {
       if (err.response?.data?.message)     setApiError(err.response.data.message);
       else if (err.response?.data?.errors) setErrors(err.response.data.errors);
+      else if (err.request)                setApiError('Cannot connect to the server. Please make sure the backend is running.');
       else                                 setApiError('Registration failed. Please try again.');
     } finally {
       setIsLoading(false);
@@ -331,7 +335,7 @@ const Register = () => {
 
             {!errors.password && (
               <p style={{ marginTop:'-0.5rem', fontSize:'0.75rem', color:C.gray[500] }}>
-                Password must be at least 6 characters
+                Use at least 8 characters with letters and numbers
               </p>
             )}
           </div>

@@ -29,6 +29,7 @@ function App() {
           <Route path="/notifications" element={<Notifications />} />
           <Route path="/login" element={<Login />} />
           <Route path="/admin-dashboard" element={<AdminDashboard />} />
+          <Route path="/admin-news" element={<AdminDashboard />} />
           <Route path="/users" element={<AdminDashboard />} />
           <Route path="/register" element={<Register />} />
           <Route path="/profile" element={<Profile />} />

@@ -3,6 +3,7 @@ import {
   registerUser,
   loginUser,
   getUsers,
+  createUserByAdmin,
   deleteUser,
   searchUserByEmail,
   sendOTP,
@@ -23,6 +24,7 @@ router.post("/send-otp", sendOTP);
 router.post("/verify-otp", verifyOTP);
 router.get("/me", protect, getCurrentUser);
 router.put("/me", protect, updateCurrentUser);
+router.post("/", protect, authorizeRoles("admin"), createUserByAdmin);
 router.get("/", protect, authorizeRoles("admin"), getUsers);
 router.put("/:id", protect, authorizeRoles("admin"), updateUser);
 router.get("/search/email", protect, authorizeRoles("admin"), searchUserByEmail);

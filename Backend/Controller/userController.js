@@ -67,29 +67,109 @@ export const registerUser = async (req, res) => {
   try {
     const { name, email, password, phone, district, role } = req.body;
 
-    if (!name || !email || !password || !phone || !district || !role) {
-      return res.status(400).json({ message: "All fields required" });
+    if (!name || !email || !password || !phone || !district) {
+      return res.status(400).json({ message: "Name, email, password, phone and district are required" });
     }
 
-    // Check if user exists
-    const userExists = await User.findOne({ email });
+    const normalizedEmail = email.trim().toLowerCase();
+    const normalizedPhone = phone.trim();
+    const safeRole = role === "admin" ? "admin" : "citizen";
+
+    const userExists = await User.findOne({ email: normalizedEmail });
     if (userExists) {
-      return res.status(400).json({ message: "User already exists" });
+      return res.status(400).json({ message: "Email is already in use" });
     }
 
-    // Create user
+    const phoneExists = await User.findOne({ phone: normalizedPhone });
+    if (phoneExists) {
+      return res.status(400).json({ message: "Phone number is already in use" });
+    }
+
     const user = await User.create({
-      name,
-      email,
+      name: name.trim(),
+      email: normalizedEmail,
       password,
-      phone,
+      phone: normalizedPhone,
       district,
-      role: role || "citizen"
+      role: safeRole,
     });
 
     res.status(201).json(buildAuthUserResponse(user));
 
   } catch (error) {
+    if (error.code === 11000) {
+      if (error.keyPattern?.email) {
+        return res.status(400).json({ message: "Email is already in use" });
+      }
+
+      if (error.keyPattern?.phone) {
+        return res.status(400).json({ message: "Phone number is already in use" });
+      }
+
+      return res.status(400).json({ message: "User already exists" });
+    }
+
+    if (error.name === "ValidationError") {
+      const firstError = Object.values(error.errors)[0];
+      return res.status(400).json({ message: firstError?.message || "Invalid registration details" });
+    }
+
+    res.status(500).json({ message: error.message });
+  }
+};
+
+export const createUserByAdmin = async (req, res) => {
+  try {
+    const { name, email, password, phone, district, role, status } = req.body;
+
+    if (!name || !email || !password || !phone || !district) {
+      return res.status(400).json({ message: "Name, email, password, phone and district are required" });
+    }
+
+    const normalizedEmail = email.trim().toLowerCase();
+    const normalizedPhone = phone.trim();
+    const userExists = await User.findOne({ email: normalizedEmail });
+    if (userExists) {
+      return res.status(400).json({ message: "Email is already in use" });
+    }
+
+    const phoneExists = await User.findOne({ phone: normalizedPhone });
+    if (phoneExists) {
+      return res.status(400).json({ message: "Phone number is already in use" });
+    }
+
+    const user = await User.create({
+      name: name.trim(),
+      email: normalizedEmail,
+      password,
+      phone: normalizedPhone,
+      district,
+      role: role === "admin" ? "admin" : "citizen",
+      status: status === "suspended" ? "suspended" : "active",
+    });
+
+    res.status(201).json({
+      message: "User created successfully",
+      user: await User.findById(user._id).select("-password"),
+    });
+  } catch (error) {
+    if (error.code === 11000) {
+      if (error.keyPattern?.email) {
+        return res.status(400).json({ message: "Email is already in use" });
+      }
+
+      if (error.keyPattern?.phone) {
+        return res.status(400).json({ message: "Phone number is already in use" });
+      }
+
+      return res.status(400).json({ message: "User already exists" });
+    }
+
+    if (error.name === "ValidationError") {
+      const firstError = Object.values(error.errors)[0];
+      return res.status(400).json({ message: firstError?.message || "Invalid user details" });
+    }
+
     res.status(500).json({ message: error.message });
   }
 };
@@ -292,8 +372,17 @@ export const updateCurrentUser = async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
 
+    const nextPhone = req.body.phone ? req.body.phone.trim() : user.phone;
+
+    if (nextPhone !== user.phone) {
+      const phoneExists = await User.findOne({ phone: nextPhone, _id: { $ne: user._id } });
+      if (phoneExists) {
+        return res.status(400).json({ message: "Phone number is already in use" });
+      }
+    }
+
     user.name = req.body.name || user.name;
-    user.phone = req.body.phone || user.phone;
+    user.phone = nextPhone;
     user.district = req.body.district || user.district;
 
     if (req.body.password) {
@@ -326,8 +415,21 @@ export const updateCurrentUser = async (req, res) => {
 // =============================
 export const getUsers = async (req, res) => {
   try {
-    // ⚠️ Add admin middleware check here if needed
-    const users = await User.find().select("-password");
+    const { q } = req.query;
+    const filter = {};
+
+    if (q) {
+      filter.$or = [
+        { name: { $regex: q, $options: "i" } },
+        { email: { $regex: q, $options: "i" } },
+        { phone: { $regex: q, $options: "i" } },
+        { district: { $regex: q, $options: "i" } },
+        { role: { $regex: q, $options: "i" } },
+        { status: { $regex: q, $options: "i" } },
+      ];
+    }
+
+    const users = await User.find(filter).select("-password").sort({ createdAt: -1 });
     res.json(users);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -363,7 +465,16 @@ export const searchUserByEmail = async (req, res) => {
 // =============================
 export const deleteUser = async (req, res) => {
   try {
-    await User.findByIdAndDelete(req.params.id);
+    if (req.user._id.toString() === req.params.id) {
+      return res.status(400).json({ message: "You cannot delete your own admin account" });
+    }
+
+    const deletedUser = await User.findByIdAndDelete(req.params.id);
+
+    if (!deletedUser) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
     res.json({ message: "User deleted successfully" });
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -380,17 +491,36 @@ export const updateUser = async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
 
-    // Update allowed fields only
+    const nextEmail = req.body.email ? req.body.email.trim().toLowerCase() : user.email;
+    const nextPhone = req.body.phone ? req.body.phone.trim() : user.phone;
+
+    if (nextEmail !== user.email) {
+      const emailExists = await User.findOne({ email: nextEmail, _id: { $ne: user._id } });
+      if (emailExists) {
+        return res.status(400).json({ message: "Email is already in use" });
+      }
+    }
+
+    if (nextPhone !== user.phone) {
+      const phoneExists = await User.findOne({ phone: nextPhone, _id: { $ne: user._id } });
+      if (phoneExists) {
+        return res.status(400).json({ message: "Phone number is already in use" });
+      }
+    }
+
     user.name = req.body.name || user.name;
-    user.phone = req.body.phone || user.phone;
+    user.email = nextEmail;
+    user.phone = nextPhone;
     user.district = req.body.district || user.district;
 
-    // Optional: Allow role change only by admin
     if (req.user.role === "admin" && req.body.role) {
       user.role = req.body.role;
     }
 
-    // If password is changing
+    if (req.user.role === "admin" && req.body.status) {
+      user.status = req.body.status;
+    }
+
     if (req.body.password) {
       user.password = req.body.password;
     }
@@ -399,7 +529,7 @@ export const updateUser = async (req, res) => {
 
     res.json({
       message: "User updated successfully",
-      user: updatedUser
+      user: await User.findById(updatedUser._id).select("-password")
     });
 
   } catch (error) {

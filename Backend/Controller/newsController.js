@@ -16,6 +16,47 @@ export const getAllNews = async (req, res) => {
   }
 };
 
+export const getPublicNews = async (req, res) => {
+  try {
+    const news = await News.find().sort({ createdAt: -1 });
+    return res.json(news);
+  } catch (error) {
+    return res.status(500).json({
+      message: "Failed to fetch public news list",
+      error: error.message,
+    });
+  }
+};
+
+export const createNews = async (req, res) => {
+  try {
+    const { title, description, url, image, publishedAt, source, politician } = req.body;
+
+    if (!title || !source) {
+      return res.status(400).json({ message: "Title and source are required" });
+    }
+
+    const news = await News.create({
+      title: title.trim(),
+      description: description || "",
+      url: url || "",
+      image: image || "",
+      publishedAt: publishedAt || null,
+      source: source.trim(),
+      politician: politician || "",
+    });
+
+    return res.status(201).json({
+      message: "News created successfully",
+      news,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      message: error.message || "Failed to create news",
+    });
+  }
+};
+
 // ===============================
 // GET LIVE NEWS FROM GNEWS
 // ===============================
@@ -54,6 +95,10 @@ export const getNewsByPolitician = async (req, res) => {
 // ===============================
 export const getPoliticalTrends = async (req, res) => {
   try {
+    if (!process.env.NEWS_API_KEY) {
+      return res.status(400).json({ message: "NEWS_API_KEY is missing" });
+    }
+
     const response = await axios.get(
       "https://gnews.io/api/v4/search",
       {
@@ -67,8 +112,11 @@ export const getPoliticalTrends = async (req, res) => {
     return res.json(response.data);
 
   } catch (error) {
+    console.log("GNEWS TRENDS ERROR:", error.response?.data || error.message);
+
     return res.status(500).json({
       message: "Failed to fetch trends",
+      error: error.response?.data || error.message,
     });
   }
 };
