@@ -36,7 +36,8 @@ const notificationSchema = new mongoose.Schema(
             deliveredTo:{
                 type: mongoose.Schema.Types.ObjectId,
                 ref: 'User',
-                required: true
+                required: false,
+                default: null
             },
             sendDate:{
                 type:Date,

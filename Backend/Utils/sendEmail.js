@@ -26,13 +26,19 @@ if (!fs.existsSync(EMAIL_LOG_FILE)) {
 
 
 const getTransporter = () => {
+  // Check if SMTP credentials are configured
+  if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
+    console.warn("⚠️ WARNING: SMTP credentials not configured. Emails will be logged but not sent.");
+    console.warn("Set EMAIL_USER and EMAIL_PASS in .env file to enable email sending.");
+  }
+
   return nodemailer.createTransport({
     host: process.env.SMTP_HOST || "smtp.gmail.com",
     port: process.env.SMTP_PORT || 465,
     secure: true,
     auth: {
-      user: process.env.EMAIL_USER,
-      pass: process.env.EMAIL_PASS
+      user: process.env.EMAIL_USER || "",
+      pass: process.env.EMAIL_PASS || ""
     }
   });
 };
@@ -107,6 +113,13 @@ export const sendOTPEmail = async (email, otp, userName = null) => {
       throw new Error("Email and OTP are required");
     }
 
+    // Check if SMTP is configured
+    if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
+      console.warn("⚠️ Email sending disabled - SMTP credentials not configured");
+      logEmailRecord(email, "otp", "Login OTP", "skipped", { message: "SMTP not configured" });
+      return { success: true, messageId: "offline", email: email, note: "Email service offline" };
+    }
+
     const transporter = getTransporter();
 
     const htmlContent = `
@@ -169,6 +182,13 @@ export const sendNotificationEmail = async (email, notification, userName = null
       throw new Error("Email and notification are required");
     }
 
+    // Check if SMTP is configured
+    if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
+      console.warn("⚠️ Email sending disabled - SMTP credentials not configured");
+      logEmailRecord(email, "notification", notification.title, "skipped", { message: "SMTP not configured" });
+      return { success: true, messageId: "offline", email: email, note: "Email service offline" };
+    }
+
     const transporter = getTransporter();
 
     const htmlContent = `
@@ -178,7 +198,7 @@ export const sendNotificationEmail = async (email, notification, userName = null
           <p style="color: #999; font-size: 12px; margin-bottom: 20px;">📬 Notification - ${new Date(notification.sendDate).toLocaleString()}</p>
           
           <div style="background: #f9f9f9; padding: 20px; border-left: 4px solid #d32f2f; margin: 20px 0;">
-            <p style="color: #333; line-height: 1.6; margin: 0;">${notification.body}</p>
+            <p style="color: #333; line-height: 1.6; margin: 0;">${notification.body || notification.message}</p>
           </div>
           
           <p style="color: #666; font-size: 14px;">
@@ -208,7 +228,7 @@ export const sendNotificationEmail = async (email, notification, userName = null
       to: email,
       subject: `📬 New Notification: ${notification.title}`,
       html: htmlContent,
-      text: `${notification.title}\n\n${notification.body}`
+      text: `${notification.title}\n\n${notification.body || notification.message}`
     });
 
     logEmailRecord(email, "notification", notification.title, "success");
@@ -227,6 +247,13 @@ export const sendAlertEmail = async (email, alert) => {
   try {
     if (!email || !alert) {
       throw new Error("Email and alert are required");
+    }
+
+    // Check if SMTP is configured
+    if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
+      console.warn("⚠️ Email sending disabled - SMTP credentials not configured");
+      logEmailRecord(email, "alert", alert.title, "skipped", { message: "SMTP not configured" });
+      return { success: true, messageId: "offline", email: email, note: "Email service offline" };
     }
 
     const transporter = getTransporter();
@@ -283,6 +310,12 @@ export const sendBatchEmails = async (emailList, emailType, content) => {
   try {
     if (!emailList || emailList.length === 0) {
       throw new Error("Email list is empty");
+    }
+
+    // Check if SMTP is configured
+    if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
+      console.warn("⚠️ Email sending disabled - SMTP credentials not configured");
+      return { success: emailList, failed: [], note: "Email service offline - logged but not sent" };
     }
 
     const transporter = getTransporter();

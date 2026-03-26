@@ -154,18 +154,24 @@ async function sendNotificationByUserType(user, notification) {
     }
 
     // Send different email templates based on notification type
-    if (notification.type === 'emergency_alert') {
-      await sendAlertEmail(user.email, {
-        title: notification.title,
-        body: notification.body
-      });
-    } else {
-      await sendNotificationEmail(user.email, notification, user.name);
-    }
+    try {
+      if (notification.type === 'emergency_alert') {
+        await sendAlertEmail(user.email, {
+          title: notification.title,
+          body: notification.body
+        });
+      } else {
+        await sendNotificationEmail(user.email, notification, user.name);
+      }
 
-    console.log(`✅ Email notification sent to ${user.email} (${user.role})`);
+      console.log(`✅ Email notification sent to ${user.email} (${user.role})`);
+    } catch (emailError) {
+      console.warn(`⚠️ Email sending failed for ${user.email}, but notification still created:`, emailError.message);
+      // Log email failure but continue - don't throw
+    }
   } catch (error) {
-    console.error(`❌ Error sending notification to user ${user._id}:`, error.message);
+    console.error(`❌ Error in sendNotificationByUserType for user ${user._id}:`, error.message);
+    throw error;
   }
 }
 

@@ -19,10 +19,10 @@
     "react-router-dom": "^7.13.1",
     "web-vitals": "^2.1.4"
   },
-"scripts": {
-  "dev":     "vite",
-  "build":   "vite build",
-  "preview": "vite preview"
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
   },
   "eslintConfig": {
     "extends": [
