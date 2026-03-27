@@ -2264,5 +2264,860 @@
     "status": "failed",
     "errorMessage": "Invalid login: 535-5.7.8 Username and Password not accepted. For more information, go to\n535 5.7.8  https://support.google.com/mail/?p=BadCredentials 41be03b00d2f7-c767399e0casm4398321a12.31 - gsmtp",
     "responseCode": "EAUTH"
+  },
+  {
+    "timestamp": "2026-03-27T09:14:00.462Z",
+    "email": "admin@test12.com",
+    "type": "notification",
+    "subject": "saween",
+    "status": "failed",
+    "errorMessage": "Invalid login: 535-5.7.8 Username and Password not accepted. For more information, go to\n535 5.7.8  https://support.google.com/mail/?p=BadCredentials 41be03b00d2f7-c76737f20a0sm4045109a12.5 - gsmtp",
+    "responseCode": "EAUTH"
+  },
+  {
+    "timestamp": "2026-03-27T09:14:01.912Z",
+    "email": "admin@test123.com",
+    "type": "notification",
+    "subject": "saween",
+    "status": "failed",
+    "errorMessage": "Invalid login: 535-5.7.8 Username and Password not accepted. For more information, go to\n535 5.7.8  https://support.google.com/mail/?p=BadCredentials d9443c01a7336-2b0bc7c2942sm50725895ad.36 - gsmtp",
+    "responseCode": "EAUTH"
+  },
+  {
+    "timestamp": "2026-03-27T09:14:04.271Z",
+    "email": "admin2@example.com",
+    "type": "notification",
+    "subject": "saween",
+    "status": "failed",
+    "errorMessage": "Invalid login: 535-5.7.8 Username and Password not accepted. For more information, go to\n535 5.7.8  https://support.google.com/mail/?p=BadCredentials d9443c01a7336-2b0bc8f3b98sm50445415ad.70 - gsmtp",
+    "responseCode": "EAUTH"
+  },
+  {
+    "timestamp": "2026-03-27T09:14:06.209Z",
+    "email": "manuka@gmail.com",
+    "type": "notification",
+    "subject": "saween",
+    "status": "failed",
+    "errorMessage": "Invalid login: 535-5.7.8 Username and Password not accepted. For more information, go to\n535 5.7.8  https://support.google.com/mail/?p=BadCredentials 98e67ed59e1d1-35c22d09429sm4026301a91.17 - gsmtp",
+    "responseCode": "EAUTH"
+  },
+  {
+    "timestamp": "2026-03-27T09:14:07.750Z",
+    "email": "dilan@gmail.com",
+    "type": "notification",
+    "subject": "saween",
+    "status": "failed",
+    "errorMessage": "Invalid login: 535-5.7.8 Username and Password not accepted. For more information, go to\n535 5.7.8  https://support.google.com/mail/?p=BadCredentials d9443c01a7336-2b0bc912e50sm52439215ad.79 - gsmtp",
+    "responseCode": "EAUTH"
+  },
+  {
+    "timestamp": "2026-03-27T09:14:09.887Z",
+    "email": "one@gmail.com",
+    "type": "notification",
+    "subject": "saween",
+    "status": "failed",
+    "errorMessage": "Invalid login: 535-5.7.8 Username and Password not accepted. For more information, go to\n535 5.7.8  https://support.google.com/mail/?p=BadCredentials d9443c01a7336-2b0bc7a17c5sm65881985ad.26 - gsmtp",
+    "responseCode": "EAUTH"
+  },
+  {
+    "timestamp": "2026-03-27T09:14:12.581Z",
+    "email": "don@gmail.com",
+    "type": "notification",
+    "subject": "saween",
+    "status": "failed",
+    "errorMessage": "Invalid login: 535-5.7.8 Username and Password not accepted. For more information, go to\n535 5.7.8  https://support.google.com/mail/?p=BadCredentials d9443c01a7336-2b0bc8a89basm54508985ad.56 - gsmtp",
+    "responseCode": "EAUTH"
+  },
+  {
+    "timestamp": "2026-03-27T09:14:14.091Z",
+    "email": "kasthuri@gmail.com",
+    "type": "notification",
+    "subject": "saween",
+    "status": "failed",
+    "errorMessage": "Invalid login: 535-5.7.8 Username and Password not accepted. For more information, go to\n535 5.7.8  https://support.google.com/mail/?p=BadCredentials d2e1a72fcca58-82c7d3fa0a8sm4819471b3a.58 - gsmtp",
+    "responseCode": "EAUTH"
+  },
+  {
+    "timestamp": "2026-03-27T09:14:16.249Z",
+    "email": "manel@gmail.com",
+    "type": "notification",
+    "subject": "saween",
+    "status": "failed",
+    "errorMessage": "Invalid login: 535-5.7.8 Username and Password not accepted. For more information, go to\n535 5.7.8  https://support.google.com/mail/?p=BadCredentials d9443c01a7336-2b0bc79dffdsm70774305ad.24 - gsmtp",
+    "responseCode": "EAUTH"
+  },
+  {
+    "timestamp": "2026-03-27T09:14:18.309Z",
+    "email": "dont@gmail.com",
+    "type": "notification",
+    "subject": "saween",
+    "status": "failed",
+    "errorMessage": "Invalid login: 535-5.7.8 Username and Password not accepted. For more information, go to\n535 5.7.8  https://support.google.com/mail/?p=BadCredentials 41be03b00d2f7-c768b649a18sm240172a12.0 - gsmtp",
+    "responseCode": "EAUTH"
+  },
+  {
+    "timestamp": "2026-03-27T09:14:19.571Z",
+    "email": "palitha@gmail.com",
+    "type": "notification",
+    "subject": "saween",
+    "status": "failed",
+    "errorMessage": "Invalid login: 535-5.7.8 Username and Password not accepted. For more information, go to\n535 5.7.8  https://support.google.com/mail/?p=BadCredentials d2e1a72fcca58-82c7d390a4csm6286831b3a.31 - gsmtp",
+    "responseCode": "EAUTH"
+  },
+  {
+    "timestamp": "2026-03-27T09:14:20.581Z",
+    "email": "sethum@gmail.com",
+    "type": "notification",
+    "subject": "saween",
+    "status": "failed",
+    "errorMessage": "Invalid login: 535-5.7.8 Username and Password not accepted. For more information, go to\n535 5.7.8  https://support.google.com/mail/?p=BadCredentials d9443c01a7336-2b0bc8fac97sm51548345ad.71 - gsmtp",
+    "responseCode": "EAUTH"
+  },
+  {
+    "timestamp": "2026-03-27T09:14:22.295Z",
+    "email": "dilanavishka111@gmail.com",
+    "type": "notification",
+    "subject": "saween",
+    "status": "failed",
+    "errorMessage": "Invalid login: 535-5.7.8 Username and Password not accepted. For more information, go to\n535 5.7.8  https://support.google.com/mail/?p=BadCredentials d9443c01a7336-2b0bc883c0asm57456175ad.45 - gsmtp",
+    "responseCode": "EAUTH"
+  },
+  {
+    "timestamp": "2026-03-27T09:14:24.364Z",
+    "email": "sha@gmail.com",
+    "type": "notification",
+    "subject": "saween",
+    "status": "failed",
+    "errorMessage": "Invalid login: 535-5.7.8 Username and Password not accepted. For more information, go to\n535 5.7.8  https://support.google.com/mail/?p=BadCredentials 98e67ed59e1d1-35c228a80f7sm4139765a91.0 - gsmtp",
+    "responseCode": "EAUTH"
+  },
+  {
+    "timestamp": "2026-03-27T09:14:26.310Z",
+    "email": "test@gmail.com",
+    "type": "notification",
+    "subject": "saween",
+    "status": "failed",
+    "errorMessage": "Invalid login: 535-5.7.8 Username and Password not accepted. For more information, go to\n535 5.7.8  https://support.google.com/mail/?p=BadCredentials 41be03b00d2f7-c76737f42dcsm4357032a12.4 - gsmtp",
+    "responseCode": "EAUTH"
+  },
+  {
+    "timestamp": "2026-03-27T09:14:28.141Z",
+    "email": "chanuka@gmail.com",
+    "type": "notification",
+    "subject": "saween",
+    "status": "failed",
+    "errorMessage": "Invalid login: 535-5.7.8 Username and Password not accepted. For more information, go to\n535 5.7.8  https://support.google.com/mail/?p=BadCredentials d9443c01a7336-2b0bc8bb5fasm54892805ad.59 - gsmtp",
+    "responseCode": "EAUTH"
+  },
+  {
+    "timestamp": "2026-03-27T09:14:29.884Z",
+    "email": "dilan4@gmail.com",
+    "type": "notification",
+    "subject": "saween",
+    "status": "failed",
+    "errorMessage": "Invalid login: 535-5.7.8 Username and Password not accepted. For more information, go to\n535 5.7.8  https://support.google.com/mail/?p=BadCredentials d9443c01a7336-2b0bc882339sm52764125ad.43 - gsmtp",
+    "responseCode": "EAUTH"
+  },
+  {
+    "timestamp": "2026-03-27T09:14:30.930Z",
+    "email": "m@gmail.com",
+    "type": "notification",
+    "subject": "saween",
+    "status": "failed",
+    "errorMessage": "Invalid login: 535-5.7.8 Username and Password not accepted. For more information, go to\n535 5.7.8  https://support.google.com/mail/?p=BadCredentials d9443c01a7336-2b0bc76b8c3sm72739205ad.14 - gsmtp",
+    "responseCode": "EAUTH"
+  },
+  {
+    "timestamp": "2026-03-27T09:14:32.690Z",
+    "email": "bupathi@gmail.com",
+    "type": "notification",
+    "subject": "saween",
+    "status": "failed",
+    "errorMessage": "Invalid login: 535-5.7.8 Username and Password not accepted. For more information, go to\n535 5.7.8  https://support.google.com/mail/?p=BadCredentials d2e1a72fcca58-82c7d216a8csm5036257b3a.16 - gsmtp",
+    "responseCode": "EAUTH"
+  },
+  {
+    "timestamp": "2026-03-27T09:14:33.972Z",
+    "email": "palitha123@gmail.com",
+    "type": "notification",
+    "subject": "saween",
+    "status": "failed",
+    "errorMessage": "Invalid login: 535-5.7.8 Username and Password not accepted. For more information, go to\n535 5.7.8  https://support.google.com/mail/?p=BadCredentials d2e1a72fcca58-82c7d3888e8sm5091210b3a.39 - gsmtp",
+    "responseCode": "EAUTH"
+  },
+  {
+    "timestamp": "2026-03-27T09:14:36.032Z",
+    "email": "dilanuser@gmail.com",
+    "type": "notification",
+    "subject": "saween",
+    "status": "failed",
+    "errorMessage": "Invalid login: 535-5.7.8 Username and Password not accepted. For more information, go to\n535 5.7.8  https://support.google.com/mail/?p=BadCredentials d9443c01a7336-2b0bc76b8c3sm72743485ad.14 - gsmtp",
+    "responseCode": "EAUTH"
+  },
+  {
+    "timestamp": "2026-03-27T09:14:37.039Z",
+    "email": "dilanadmin@gmail.com",
+    "type": "notification",
+    "subject": "saween",
+    "status": "failed",
+    "errorMessage": "Invalid login: 535-5.7.8 Username and Password not accepted. For more information, go to\n535 5.7.8  https://support.google.com/mail/?p=BadCredentials d9443c01a7336-2b0bc76bbdcsm56253015ad.5 - gsmtp",
+    "responseCode": "EAUTH"
+  },
+  {
+    "timestamp": "2026-03-27T09:14:38.809Z",
+    "email": "tk@gmail.com",
+    "type": "notification",
+    "subject": "saween",
+    "status": "failed",
+    "errorMessage": "Invalid login: 535-5.7.8 Username and Password not accepted. For more information, go to\n535 5.7.8  https://support.google.com/mail/?p=BadCredentials d9443c01a7336-2b0bc8f6c11sm53217895ad.69 - gsmtp",
+    "responseCode": "EAUTH"
+  },
+  {
+    "timestamp": "2026-03-27T09:14:40.542Z",
+    "email": "tk1@gmail.com",
+    "type": "notification",
+    "subject": "saween",
+    "status": "failed",
+    "errorMessage": "Invalid login: 535-5.7.8 Username and Password not accepted. For more information, go to\n535 5.7.8  https://support.google.com/mail/?p=BadCredentials 98e67ed59e1d1-35c22a82231sm6183291a91.6 - gsmtp",
+    "responseCode": "EAUTH"
+  },
+  {
+    "timestamp": "2026-03-27T09:14:41.678Z",
+    "email": "dilanuser123@gmail.com",
+    "type": "notification",
+    "subject": "saween",
+    "status": "failed",
+    "errorMessage": "Invalid login: 535-5.7.8 Username and Password not accepted. For more information, go to\n535 5.7.8  https://support.google.com/mail/?p=BadCredentials d2e1a72fcca58-82c7d388d06sm5139464b3a.35 - gsmtp",
+    "responseCode": "EAUTH"
+  },
+  {
+    "timestamp": "2026-03-27T09:14:42.884Z",
+    "email": "dilanuser1234@gmail.com",
+    "type": "notification",
+    "subject": "saween",
+    "status": "failed",
+    "errorMessage": "Invalid login: 535-5.7.8 Username and Password not accepted. For more information, go to\n535 5.7.8  https://support.google.com/mail/?p=BadCredentials d2e1a72fcca58-82c7d1e63b6sm5328603b3a.12 - gsmtp",
+    "responseCode": "EAUTH"
+  },
+  {
+    "timestamp": "2026-03-27T09:14:45.458Z",
+    "email": "tk13456@gmail.com",
+    "type": "notification",
+    "subject": "saween",
+    "status": "failed",
+    "errorMessage": "Invalid login: 535-5.7.8 Username and Password not accepted. For more information, go to\n535 5.7.8  https://support.google.com/mail/?p=BadCredentials 98e67ed59e1d1-35c22b9fc96sm3877323a91.7 - gsmtp",
+    "responseCode": "EAUTH"
+  },
+  {
+    "timestamp": "2026-03-27T09:14:46.708Z",
+    "email": "sandun@gmail.com",
+    "type": "notification",
+    "subject": "saween",
+    "status": "failed",
+    "errorMessage": "Invalid login: 535-5.7.8 Username and Password not accepted. For more information, go to\n535 5.7.8  https://support.google.com/mail/?p=BadCredentials 98e67ed59e1d1-35c22d09573sm4206304a91.16 - gsmtp",
+    "responseCode": "EAUTH"
+  },
+  {
+    "timestamp": "2026-03-27T09:14:48.138Z",
+    "email": "sheharanethmi89@gmail.com",
+    "type": "notification",
+    "subject": "saween",
+    "status": "failed",
+    "errorMessage": "Invalid login: 535-5.7.8 Username and Password not accepted. For more information, go to\n535 5.7.8  https://support.google.com/mail/?p=BadCredentials d9443c01a7336-2b0bc773472sm55150785ad.7 - gsmtp",
+    "responseCode": "EAUTH"
+  },
+  {
+    "timestamp": "2026-03-27T09:14:49.849Z",
+    "email": "indunisankalpani6@gmail.com",
+    "type": "notification",
+    "subject": "saween",
+    "status": "failed",
+    "errorMessage": "Invalid login: 535-5.7.8 Username and Password not accepted. For more information, go to\n535 5.7.8  https://support.google.com/mail/?p=BadCredentials 41be03b00d2f7-c767382bcecsm4130474a12.13 - gsmtp",
+    "responseCode": "EAUTH"
+  },
+  {
+    "timestamp": "2026-03-27T09:14:50.888Z",
+    "email": "sandundeshapriya206@gmail.com",
+    "type": "notification",
+    "subject": "saween",
+    "status": "failed",
+    "errorMessage": "Invalid login: 535-5.7.8 Username and Password not accepted. For more information, go to\n535 5.7.8  https://support.google.com/mail/?p=BadCredentials 98e67ed59e1d1-35c22cba9f7sm4258954a91.11 - gsmtp",
+    "responseCode": "EAUTH"
+  },
+  {
+    "timestamp": "2026-03-27T09:33:35.567Z",
+    "email": "admin@test12.com",
+    "type": "notification",
+    "subject": "Save",
+    "status": "failed",
+    "errorMessage": "Invalid login: 535-5.7.8 Username and Password not accepted. For more information, go to\n535 5.7.8  https://support.google.com/mail/?p=BadCredentials d9443c01a7336-2b0bc90c44esm56585295ad.76 - gsmtp",
+    "responseCode": "EAUTH"
+  },
+  {
+    "timestamp": "2026-03-27T09:33:38.309Z",
+    "email": "admin@test123.com",
+    "type": "notification",
+    "subject": "Save",
+    "status": "failed",
+    "errorMessage": "Invalid login: 535-5.7.8 Username and Password not accepted. For more information, go to\n535 5.7.8  https://support.google.com/mail/?p=BadCredentials d9443c01a7336-2b0bc79c471sm57298305ad.22 - gsmtp",
+    "responseCode": "EAUTH"
+  },
+  {
+    "timestamp": "2026-03-27T09:33:40.763Z",
+    "email": "admin2@example.com",
+    "type": "notification",
+    "subject": "Save",
+    "status": "failed",
+    "errorMessage": "Invalid login: 535-5.7.8 Username and Password not accepted. For more information, go to\n535 5.7.8  https://support.google.com/mail/?p=BadCredentials 98e67ed59e1d1-35c22d09573sm4264916a91.16 - gsmtp",
+    "responseCode": "EAUTH"
+  },
+  {
+    "timestamp": "2026-03-27T09:33:42.326Z",
+    "email": "manuka@gmail.com",
+    "type": "notification",
+    "subject": "Save",
+    "status": "failed",
+    "errorMessage": "Invalid login: 535-5.7.8 Username and Password not accepted. For more information, go to\n535 5.7.8  https://support.google.com/mail/?p=BadCredentials d2e1a72fcca58-82c7d23841fsm6031267b3a.26 - gsmtp",
+    "responseCode": "EAUTH"
+  },
+  {
+    "timestamp": "2026-03-27T09:33:44.454Z",
+    "email": "dilan@gmail.com",
+    "type": "notification",
+    "subject": "Save",
+    "status": "failed",
+    "errorMessage": "Invalid login: 535-5.7.8 Username and Password not accepted. For more information, go to\n535 5.7.8  https://support.google.com/mail/?p=BadCredentials 41be03b00d2f7-c7685ce90c5sm1260459a12.16 - gsmtp",
+    "responseCode": "EAUTH"
+  },
+  {
+    "timestamp": "2026-03-27T09:33:46.616Z",
+    "email": "one@gmail.com",
+    "type": "notification",
+    "subject": "Save",
+    "status": "failed",
+    "errorMessage": "Invalid login: 535-5.7.8 Username and Password not accepted. For more information, go to\n535 5.7.8  https://support.google.com/mail/?p=BadCredentials d9443c01a7336-2b0bc90d2cdsm67837805ad.75 - gsmtp",
+    "responseCode": "EAUTH"
+  },
+  {
+    "timestamp": "2026-03-27T09:33:48.705Z",
+    "email": "don@gmail.com",
+    "type": "notification",
+    "subject": "Save",
+    "status": "failed",
+    "errorMessage": "Invalid login: 535-5.7.8 Username and Password not accepted. For more information, go to\n535 5.7.8  https://support.google.com/mail/?p=BadCredentials 41be03b00d2f7-c767382c2a6sm4193714a12.12 - gsmtp",
+    "responseCode": "EAUTH"
+  },
+  {
+    "timestamp": "2026-03-27T09:33:50.999Z",
+    "email": "kasthuri@gmail.com",
+    "type": "notification",
+    "subject": "Save",
+    "status": "failed",
+    "errorMessage": "Invalid login: 535-5.7.8 Username and Password not accepted. For more information, go to\n535 5.7.8  https://support.google.com/mail/?p=BadCredentials d2e1a72fcca58-82c7d3c0e3bsm6421667b3a.45 - gsmtp",
+    "responseCode": "EAUTH"
+  },
+  {
+    "timestamp": "2026-03-27T09:33:52.493Z",
+    "email": "manel@gmail.com",
+    "type": "notification",
+    "subject": "Save",
+    "status": "failed",
+    "errorMessage": "Invalid login: 535-5.7.8 Username and Password not accepted. For more information, go to\n535 5.7.8  https://support.google.com/mail/?p=BadCredentials d2e1a72fcca58-82c7d3c289dsm4875869b3a.47 - gsmtp",
+    "responseCode": "EAUTH"
+  },
+  {
+    "timestamp": "2026-03-27T09:33:54.192Z",
+    "email": "dont@gmail.com",
+    "type": "notification",
+    "subject": "Save",
+    "status": "failed",
+    "errorMessage": "Invalid login: 535-5.7.8 Username and Password not accepted. For more information, go to\n535 5.7.8  https://support.google.com/mail/?p=BadCredentials d9443c01a7336-2b0bc76b92asm53706905ad.15 - gsmtp",
+    "responseCode": "EAUTH"
+  },
+  {
+    "timestamp": "2026-03-27T09:33:56.558Z",
+    "email": "palitha@gmail.com",
+    "type": "notification",
+    "subject": "Save",
+    "status": "failed",
+    "errorMessage": "Invalid login: 535-5.7.8 Username and Password not accepted. For more information, go to\n535 5.7.8  https://support.google.com/mail/?p=BadCredentials 98e67ed59e1d1-35c22ce693csm4101161a91.14 - gsmtp",
+    "responseCode": "EAUTH"
+  },
+  {
+    "timestamp": "2026-03-27T09:33:59.129Z",
+    "email": "sethum@gmail.com",
+    "type": "notification",
+    "subject": "Save",
+    "status": "failed",
+    "errorMessage": "Invalid login: 535-5.7.8 Username and Password not accepted. For more information, go to\n535 5.7.8  https://support.google.com/mail/?p=BadCredentials d2e1a72fcca58-82c7d216a8csm5093916b3a.16 - gsmtp",
+    "responseCode": "EAUTH"
+  },
+  {
+    "timestamp": "2026-03-27T09:34:01.563Z",
+    "email": "dilanavishka111@gmail.com",
+    "type": "notification",
+    "subject": "Save",
+    "status": "failed",
+    "errorMessage": "Invalid login: 535-5.7.8 Username and Password not accepted. For more information, go to\n535 5.7.8  https://support.google.com/mail/?p=BadCredentials d9443c01a7336-2b0bc8c1c6fsm54647575ad.62 - gsmtp",
+    "responseCode": "EAUTH"
+  },
+  {
+    "timestamp": "2026-03-27T09:34:03.306Z",
+    "email": "sha@gmail.com",
+    "type": "notification",
+    "subject": "Save",
+    "status": "failed",
+    "errorMessage": "Invalid login: 535-5.7.8 Username and Password not accepted. For more information, go to\n535 5.7.8  https://support.google.com/mail/?p=BadCredentials d9443c01a7336-2b0bc881bacsm54096365ad.46 - gsmtp",
+    "responseCode": "EAUTH"
+  },
+  {
+    "timestamp": "2026-03-27T09:34:04.928Z",
+    "email": "test@gmail.com",
+    "type": "notification",
+    "subject": "Save",
+    "status": "failed",
+    "errorMessage": "Invalid login: 535-5.7.8 Username and Password not accepted. For more information, go to\n535 5.7.8  https://support.google.com/mail/?p=BadCredentials 98e67ed59e1d1-35c2f3ccd5asm885876a91.2 - gsmtp",
+    "responseCode": "EAUTH"
+  },
+  {
+    "timestamp": "2026-03-27T09:34:07.396Z",
+    "email": "chanuka@gmail.com",
+    "type": "notification",
+    "subject": "Save",
+    "status": "failed",
+    "errorMessage": "Invalid login: 535-5.7.8 Username and Password not accepted. For more information, go to\n535 5.7.8  https://support.google.com/mail/?p=BadCredentials 98e67ed59e1d1-35c228a80f7sm4195733a91.0 - gsmtp",
+    "responseCode": "EAUTH"
+  },
+  {
+    "timestamp": "2026-03-27T09:34:09.127Z",
+    "email": "dilan4@gmail.com",
+    "type": "notification",
+    "subject": "Save",
+    "status": "failed",
+    "errorMessage": "Invalid login: 535-5.7.8 Username and Password not accepted. For more information, go to\n535 5.7.8  https://support.google.com/mail/?p=BadCredentials d9443c01a7336-2b0bc912e50sm52988935ad.79 - gsmtp",
+    "responseCode": "EAUTH"
+  },
+  {
+    "timestamp": "2026-03-27T09:34:10.500Z",
+    "email": "m@gmail.com",
+    "type": "notification",
+    "subject": "Save",
+    "status": "failed",
+    "errorMessage": "Invalid login: 535-5.7.8 Username and Password not accepted. For more information, go to\n535 5.7.8  https://support.google.com/mail/?p=BadCredentials 41be03b00d2f7-c767382c12asm4035400a12.14 - gsmtp",
+    "responseCode": "EAUTH"
+  },
+  {
+    "timestamp": "2026-03-27T09:34:11.903Z",
+    "email": "bupathi@gmail.com",
+    "type": "notification",
+    "subject": "Save",
+    "status": "failed",
+    "errorMessage": "Invalid login: 535-5.7.8 Username and Password not accepted. For more information, go to\n535 5.7.8  https://support.google.com/mail/?p=BadCredentials d2e1a72fcca58-82c7d5d89b5sm5120912b3a.41 - gsmtp",
+    "responseCode": "EAUTH"
+  },
+  {
+    "timestamp": "2026-03-27T09:34:13.771Z",
+    "email": "palitha123@gmail.com",
+    "type": "notification",
+    "subject": "Save",
+    "status": "failed",
+    "errorMessage": "Invalid login: 535-5.7.8 Username and Password not accepted. For more information, go to\n535 5.7.8  https://support.google.com/mail/?p=BadCredentials d2e1a72fcca58-82c7d385601sm4885500b3a.33 - gsmtp",
+    "responseCode": "EAUTH"
+  },
+  {
+    "timestamp": "2026-03-27T09:34:15.518Z",
+    "email": "dilanuser@gmail.com",
+    "type": "notification",
+    "subject": "Save",
+    "status": "failed",
+    "errorMessage": "Invalid login: 535-5.7.8 Username and Password not accepted. For more information, go to\n535 5.7.8  https://support.google.com/mail/?p=BadCredentials d2e1a72fcca58-82c7d216a0esm5126231b3a.17 - gsmtp",
+    "responseCode": "EAUTH"
+  },
+  {
+    "timestamp": "2026-03-27T09:34:17.545Z",
+    "email": "dilanadmin@gmail.com",
+    "type": "notification",
+    "subject": "Save",
+    "status": "failed",
+    "errorMessage": "Invalid login: 535-5.7.8 Username and Password not accepted. For more information, go to\n535 5.7.8  https://support.google.com/mail/?p=BadCredentials d9443c01a7336-2b0bc881fe7sm59520645ad.48 - gsmtp",
+    "responseCode": "EAUTH"
+  },
+  {
+    "timestamp": "2026-03-27T09:34:19.485Z",
+    "email": "tk@gmail.com",
+    "type": "notification",
+    "subject": "Save",
+    "status": "failed",
+    "errorMessage": "Invalid login: 535-5.7.8 Username and Password not accepted. For more information, go to\n535 5.7.8  https://support.google.com/mail/?p=BadCredentials d2e1a72fcca58-82c7d3f95basm5434285b3a.59 - gsmtp",
+    "responseCode": "EAUTH"
+  },
+  {
+    "timestamp": "2026-03-27T09:34:21.420Z",
+    "email": "tk1@gmail.com",
+    "type": "notification",
+    "subject": "Save",
+    "status": "failed",
+    "errorMessage": "Invalid login: 535-5.7.8 Username and Password not accepted. For more information, go to\n535 5.7.8  https://support.google.com/mail/?p=BadCredentials d9443c01a7336-2b0bc79c471sm57319565ad.22 - gsmtp",
+    "responseCode": "EAUTH"
+  },
+  {
+    "timestamp": "2026-03-27T09:34:23.153Z",
+    "email": "dilanuser123@gmail.com",
+    "type": "notification",
+    "subject": "Save",
+    "status": "failed",
+    "errorMessage": "Invalid login: 535-5.7.8 Username and Password not accepted. For more information, go to\n535 5.7.8  https://support.google.com/mail/?p=BadCredentials 41be03b00d2f7-c7685ce90c5sm1261848a12.16 - gsmtp",
+    "responseCode": "EAUTH"
+  },
+  {
+    "timestamp": "2026-03-27T09:34:24.794Z",
+    "email": "dilanuser1234@gmail.com",
+    "type": "notification",
+    "subject": "Save",
+    "status": "failed",
+    "errorMessage": "Invalid login: 535-5.7.8 Username and Password not accepted. For more information, go to\n535 5.7.8  https://support.google.com/mail/?p=BadCredentials 98e67ed59e1d1-35c22a4c9fdsm5623545a91.2 - gsmtp",
+    "responseCode": "EAUTH"
+  },
+  {
+    "timestamp": "2026-03-27T09:34:26.235Z",
+    "email": "tk13456@gmail.com",
+    "type": "notification",
+    "subject": "Save",
+    "status": "failed",
+    "errorMessage": "Invalid login: 535-5.7.8 Username and Password not accepted. For more information, go to\n535 5.7.8  https://support.google.com/mail/?p=BadCredentials 41be03b00d2f7-c76739345b2sm3579364a12.17 - gsmtp",
+    "responseCode": "EAUTH"
+  },
+  {
+    "timestamp": "2026-03-27T09:34:28.401Z",
+    "email": "sandun@gmail.com",
+    "type": "notification",
+    "subject": "Save",
+    "status": "failed",
+    "errorMessage": "Invalid login: 535-5.7.8 Username and Password not accepted. For more information, go to\n535 5.7.8  https://support.google.com/mail/?p=BadCredentials d2e1a72fcca58-82c7d20fc0fsm6316720b3a.19 - gsmtp",
+    "responseCode": "EAUTH"
+  },
+  {
+    "timestamp": "2026-03-27T09:34:30.647Z",
+    "email": "sheharanethmi89@gmail.com",
+    "type": "notification",
+    "subject": "Save",
+    "status": "failed",
+    "errorMessage": "Invalid login: 535-5.7.8 Username and Password not accepted. For more information, go to\n535 5.7.8  https://support.google.com/mail/?p=BadCredentials d2e1a72fcca58-82c7d216a8csm5095829b3a.16 - gsmtp",
+    "responseCode": "EAUTH"
+  },
+  {
+    "timestamp": "2026-03-27T09:34:32.172Z",
+    "email": "indunisankalpani6@gmail.com",
+    "type": "notification",
+    "subject": "Save",
+    "status": "failed",
+    "errorMessage": "Invalid login: 535-5.7.8 Username and Password not accepted. For more information, go to\n535 5.7.8  https://support.google.com/mail/?p=BadCredentials d9443c01a7336-2b0bc90d2cdsm67861555ad.75 - gsmtp",
+    "responseCode": "EAUTH"
+  },
+  {
+    "timestamp": "2026-03-27T09:34:34.014Z",
+    "email": "sandundeshapriya206@gmail.com",
+    "type": "notification",
+    "subject": "Save",
+    "status": "failed",
+    "errorMessage": "Invalid login: 535-5.7.8 Username and Password not accepted. For more information, go to\n535 5.7.8  https://support.google.com/mail/?p=BadCredentials 98e67ed59e1d1-35c228a80f7sm4197023a91.0 - gsmtp",
+    "responseCode": "EAUTH"
+  },
+  {
+    "timestamp": "2026-03-27T09:34:35.455Z",
+    "email": "it23748330@my.sliit.lk",
+    "type": "notification",
+    "subject": "Save",
+    "status": "failed",
+    "errorMessage": "Invalid login: 535-5.7.8 Username and Password not accepted. For more information, go to\n535 5.7.8  https://support.google.com/mail/?p=BadCredentials d9443c01a7336-2b0bc881e9csm58560615ad.42 - gsmtp",
+    "responseCode": "EAUTH"
+  },
+  {
+    "timestamp": "2026-03-27T09:38:03.985Z",
+    "email": "admin@test12.com",
+    "type": "alert",
+    "subject": "saveing",
+    "status": "failed",
+    "errorMessage": "Invalid login: 535-5.7.8 Username and Password not accepted. For more information, go to\n535 5.7.8  https://support.google.com/mail/?p=BadCredentials d9443c01a7336-2b0bc8837e6sm55023635ad.52 - gsmtp",
+    "responseCode": "EAUTH"
+  },
+  {
+    "timestamp": "2026-03-27T09:38:06.294Z",
+    "email": "admin@test123.com",
+    "type": "alert",
+    "subject": "saveing",
+    "status": "failed",
+    "errorMessage": "Invalid login: 535-5.7.8 Username and Password not accepted. For more information, go to\n535 5.7.8  https://support.google.com/mail/?p=BadCredentials d9443c01a7336-2b0bc76bbdcsm56926645ad.5 - gsmtp",
+    "responseCode": "EAUTH"
+  },
+  {
+    "timestamp": "2026-03-27T09:38:08.672Z",
+    "email": "admin2@example.com",
+    "type": "alert",
+    "subject": "saveing",
+    "status": "failed",
+    "errorMessage": "Invalid login: 535-5.7.8 Username and Password not accepted. For more information, go to\n535 5.7.8  https://support.google.com/mail/?p=BadCredentials 41be03b00d2f7-c767382c12asm4043286a12.14 - gsmtp",
+    "responseCode": "EAUTH"
+  },
+  {
+    "timestamp": "2026-03-27T09:38:10.094Z",
+    "email": "manuka@gmail.com",
+    "type": "alert",
+    "subject": "saveing",
+    "status": "failed",
+    "errorMessage": "Invalid login: 535-5.7.8 Username and Password not accepted. For more information, go to\n535 5.7.8  https://support.google.com/mail/?p=BadCredentials 98e67ed59e1d1-35c22b9e187sm4166163a91.9 - gsmtp",
+    "responseCode": "EAUTH"
+  },
+  {
+    "timestamp": "2026-03-27T09:38:11.314Z",
+    "email": "dilan@gmail.com",
+    "type": "alert",
+    "subject": "saveing",
+    "status": "failed",
+    "errorMessage": "Invalid login: 535-5.7.8 Username and Password not accepted. For more information, go to\n535 5.7.8  https://support.google.com/mail/?p=BadCredentials 98e67ed59e1d1-35c22a81744sm4333598a91.5 - gsmtp",
+    "responseCode": "EAUTH"
+  },
+  {
+    "timestamp": "2026-03-27T09:38:13.359Z",
+    "email": "one@gmail.com",
+    "type": "alert",
+    "subject": "saveing",
+    "status": "failed",
+    "errorMessage": "Invalid login: 535-5.7.8 Username and Password not accepted. For more information, go to\n535 5.7.8  https://support.google.com/mail/?p=BadCredentials d9443c01a7336-2b0bc8de61esm72526205ad.65 - gsmtp",
+    "responseCode": "EAUTH"
+  },
+  {
+    "timestamp": "2026-03-27T09:38:15.134Z",
+    "email": "don@gmail.com",
+    "type": "alert",
+    "subject": "saveing",
+    "status": "failed",
+    "errorMessage": "Invalid login: 535-5.7.8 Username and Password not accepted. For more information, go to\n535 5.7.8  https://support.google.com/mail/?p=BadCredentials 98e67ed59e1d1-35c22db1321sm4180280a91.14 - gsmtp",
+    "responseCode": "EAUTH"
+  },
+  {
+    "timestamp": "2026-03-27T09:38:17.673Z",
+    "email": "kasthuri@gmail.com",
+    "type": "alert",
+    "subject": "saveing",
+    "status": "failed",
+    "errorMessage": "Invalid login: 535-5.7.8 Username and Password not accepted. For more information, go to\n535 5.7.8  https://support.google.com/mail/?p=BadCredentials 98e67ed59e1d1-35c22de7443sm3869045a91.17 - gsmtp",
+    "responseCode": "EAUTH"
+  },
+  {
+    "timestamp": "2026-03-27T09:38:19.721Z",
+    "email": "manel@gmail.com",
+    "type": "alert",
+    "subject": "saveing",
+    "status": "failed",
+    "errorMessage": "Invalid login: 535-5.7.8 Username and Password not accepted. For more information, go to\n535 5.7.8  https://support.google.com/mail/?p=BadCredentials d2e1a72fcca58-82c7d1e637asm5037786b3a.6 - gsmtp",
+    "responseCode": "EAUTH"
+  },
+  {
+    "timestamp": "2026-03-27T09:38:21.370Z",
+    "email": "dont@gmail.com",
+    "type": "alert",
+    "subject": "saveing",
+    "status": "failed",
+    "errorMessage": "Invalid login: 535-5.7.8 Username and Password not accepted. For more information, go to\n535 5.7.8  https://support.google.com/mail/?p=BadCredentials 98e67ed59e1d1-35c22ba7b86sm5841446a91.10 - gsmtp",
+    "responseCode": "EAUTH"
+  },
+  {
+    "timestamp": "2026-03-27T09:38:23.060Z",
+    "email": "palitha@gmail.com",
+    "type": "alert",
+    "subject": "saveing",
+    "status": "failed",
+    "errorMessage": "Invalid login: 535-5.7.8 Username and Password not accepted. For more information, go to\n535 5.7.8  https://support.google.com/mail/?p=BadCredentials d2e1a72fcca58-82c7d1e14e7sm5047852b3a.4 - gsmtp",
+    "responseCode": "EAUTH"
+  },
+  {
+    "timestamp": "2026-03-27T09:38:24.629Z",
+    "email": "sethum@gmail.com",
+    "type": "alert",
+    "subject": "saveing",
+    "status": "failed",
+    "errorMessage": "Invalid login: 535-5.7.8 Username and Password not accepted. For more information, go to\n535 5.7.8  https://support.google.com/mail/?p=BadCredentials d2e1a72fcca58-82c7d3f95basm5448647b3a.59 - gsmtp",
+    "responseCode": "EAUTH"
+  },
+  {
+    "timestamp": "2026-03-27T09:38:27.509Z",
+    "email": "dilanavishka111@gmail.com",
+    "type": "alert",
+    "subject": "saveing",
+    "status": "failed",
+    "errorMessage": "Invalid login: 535-5.7.8 Username and Password not accepted. For more information, go to\n535 5.7.8  https://support.google.com/mail/?p=BadCredentials d9443c01a7336-2b0bc883c0asm58195215ad.45 - gsmtp",
+    "responseCode": "EAUTH"
+  },
+  {
+    "timestamp": "2026-03-27T09:38:29.852Z",
+    "email": "sha@gmail.com",
+    "type": "alert",
+    "subject": "saveing",
+    "status": "failed",
+    "errorMessage": "Invalid login: 535-5.7.8 Username and Password not accepted. For more information, go to\n535 5.7.8  https://support.google.com/mail/?p=BadCredentials d9443c01a7336-2b0bc883c0asm58196715ad.45 - gsmtp",
+    "responseCode": "EAUTH"
+  },
+  {
+    "timestamp": "2026-03-27T09:38:31.674Z",
+    "email": "test@gmail.com",
+    "type": "alert",
+    "subject": "saveing",
+    "status": "failed",
+    "errorMessage": "Invalid login: 535-5.7.8 Username and Password not accepted. For more information, go to\n535 5.7.8  https://support.google.com/mail/?p=BadCredentials d2e1a72fcca58-82c7d38d7f5sm4942937b3a.29 - gsmtp",
+    "responseCode": "EAUTH"
+  },
+  {
+    "timestamp": "2026-03-27T09:38:33.035Z",
+    "email": "chanuka@gmail.com",
+    "type": "alert",
+    "subject": "saveing",
+    "status": "failed",
+    "errorMessage": "Invalid login: 535-5.7.8 Username and Password not accepted. For more information, go to\n535 5.7.8  https://support.google.com/mail/?p=BadCredentials 41be03b00d2f7-c7673819da1sm4797690a12.11 - gsmtp",
+    "responseCode": "EAUTH"
+  },
+  {
+    "timestamp": "2026-03-27T09:38:34.996Z",
+    "email": "dilan4@gmail.com",
+    "type": "alert",
+    "subject": "saveing",
+    "status": "failed",
+    "errorMessage": "Invalid login: 535-5.7.8 Username and Password not accepted. For more information, go to\n535 5.7.8  https://support.google.com/mail/?p=BadCredentials d2e1a72fcca58-82c7d1e6439sm5069206b3a.11 - gsmtp",
+    "responseCode": "EAUTH"
+  },
+  {
+    "timestamp": "2026-03-27T09:38:37.535Z",
+    "email": "m@gmail.com",
+    "type": "alert",
+    "subject": "saveing",
+    "status": "failed",
+    "errorMessage": "Invalid login: 535-5.7.8 Username and Password not accepted. For more information, go to\n535 5.7.8  https://support.google.com/mail/?p=BadCredentials 98e67ed59e1d1-35c2ebe2c98sm786123a91.6 - gsmtp",
+    "responseCode": "EAUTH"
+  },
+  {
+    "timestamp": "2026-03-27T09:38:39.468Z",
+    "email": "bupathi@gmail.com",
+    "type": "alert",
+    "subject": "saveing",
+    "status": "failed",
+    "errorMessage": "Invalid login: 535-5.7.8 Username and Password not accepted. For more information, go to\n535 5.7.8  https://support.google.com/mail/?p=BadCredentials 98e67ed59e1d1-35c22b9fc96sm3944963a91.7 - gsmtp",
+    "responseCode": "EAUTH"
+  },
+  {
+    "timestamp": "2026-03-27T09:38:41.539Z",
+    "email": "palitha123@gmail.com",
+    "type": "alert",
+    "subject": "saveing",
+    "status": "failed",
+    "errorMessage": "Invalid login: 535-5.7.8 Username and Password not accepted. For more information, go to\n535 5.7.8  https://support.google.com/mail/?p=BadCredentials d2e1a72fcca58-82c7d1e619esm5289746b3a.9 - gsmtp",
+    "responseCode": "EAUTH"
+  },
+  {
+    "timestamp": "2026-03-27T09:38:43.266Z",
+    "email": "dilanuser@gmail.com",
+    "type": "alert",
+    "subject": "saveing",
+    "status": "failed",
+    "errorMessage": "Invalid login: 535-5.7.8 Username and Password not accepted. For more information, go to\n535 5.7.8  https://support.google.com/mail/?p=BadCredentials d9443c01a7336-2b0bc8837e6sm55042135ad.52 - gsmtp",
+    "responseCode": "EAUTH"
+  },
+  {
+    "timestamp": "2026-03-27T09:38:44.699Z",
+    "email": "dilanadmin@gmail.com",
+    "type": "alert",
+    "subject": "saveing",
+    "status": "failed",
+    "errorMessage": "Invalid login: 535-5.7.8 Username and Password not accepted. For more information, go to\n535 5.7.8  https://support.google.com/mail/?p=BadCredentials d9443c01a7336-2b0bc773997sm57137475ad.6 - gsmtp",
+    "responseCode": "EAUTH"
+  },
+  {
+    "timestamp": "2026-03-27T09:38:46.584Z",
+    "email": "tk@gmail.com",
+    "type": "alert",
+    "subject": "saveing",
+    "status": "failed",
+    "errorMessage": "Invalid login: 535-5.7.8 Username and Password not accepted. For more information, go to\n535 5.7.8  https://support.google.com/mail/?p=BadCredentials d2e1a72fcca58-82c7d2341d6sm4999431b3a.25 - gsmtp",
+    "responseCode": "EAUTH"
+  },
+  {
+    "timestamp": "2026-03-27T09:38:48.796Z",
+    "email": "tk1@gmail.com",
+    "type": "alert",
+    "subject": "saveing",
+    "status": "failed",
+    "errorMessage": "Invalid login: 535-5.7.8 Username and Password not accepted. For more information, go to\n535 5.7.8  https://support.google.com/mail/?p=BadCredentials d2e1a72fcca58-82c7d38d7f5sm4943725b3a.29 - gsmtp",
+    "responseCode": "EAUTH"
+  },
+  {
+    "timestamp": "2026-03-27T09:38:50.106Z",
+    "email": "dilanuser123@gmail.com",
+    "type": "alert",
+    "subject": "saveing",
+    "status": "failed",
+    "errorMessage": "Invalid login: 535-5.7.8 Username and Password not accepted. For more information, go to\n535 5.7.8  https://support.google.com/mail/?p=BadCredentials d2e1a72fcca58-82c7d23841fsm6049482b3a.26 - gsmtp",
+    "responseCode": "EAUTH"
+  },
+  {
+    "timestamp": "2026-03-27T09:38:51.829Z",
+    "email": "dilanuser1234@gmail.com",
+    "type": "alert",
+    "subject": "saveing",
+    "status": "failed",
+    "errorMessage": "Invalid login: 535-5.7.8 Username and Password not accepted. For more information, go to\n535 5.7.8  https://support.google.com/mail/?p=BadCredentials d9443c01a7336-2b0bc8a89basm55280875ad.56 - gsmtp",
+    "responseCode": "EAUTH"
+  },
+  {
+    "timestamp": "2026-03-27T09:38:54.115Z",
+    "email": "tk13456@gmail.com",
+    "type": "alert",
+    "subject": "saveing",
+    "status": "failed",
+    "errorMessage": "Invalid login: 535-5.7.8 Username and Password not accepted. For more information, go to\n535 5.7.8  https://support.google.com/mail/?p=BadCredentials d9443c01a7336-2b0bc79dffdsm71682055ad.24 - gsmtp",
+    "responseCode": "EAUTH"
+  },
+  {
+    "timestamp": "2026-03-27T09:38:55.559Z",
+    "email": "sandun@gmail.com",
+    "type": "alert",
+    "subject": "saveing",
+    "status": "failed",
+    "errorMessage": "Invalid login: 535-5.7.8 Username and Password not accepted. For more information, go to\n535 5.7.8  https://support.google.com/mail/?p=BadCredentials d9443c01a7336-2b0bc881b80sm54405795ad.54 - gsmtp",
+    "responseCode": "EAUTH"
+  },
+  {
+    "timestamp": "2026-03-27T09:38:57.093Z",
+    "email": "sheharanethmi89@gmail.com",
+    "type": "alert",
+    "subject": "saveing",
+    "status": "failed",
+    "errorMessage": "Invalid login: 535-5.7.8 Username and Password not accepted. For more information, go to\n535 5.7.8  https://support.google.com/mail/?p=BadCredentials d9443c01a7336-2b0bc7a7e3bsm72716485ad.27 - gsmtp",
+    "responseCode": "EAUTH"
+  },
+  {
+    "timestamp": "2026-03-27T09:38:59.169Z",
+    "email": "indunisankalpani6@gmail.com",
+    "type": "alert",
+    "subject": "saveing",
+    "status": "failed",
+    "errorMessage": "Invalid login: 535-5.7.8 Username and Password not accepted. For more information, go to\n535 5.7.8  https://support.google.com/mail/?p=BadCredentials d9443c01a7336-2b0bc881e9csm58689975ad.42 - gsmtp",
+    "responseCode": "EAUTH"
+  },
+  {
+    "timestamp": "2026-03-27T09:39:01.492Z",
+    "email": "sandundeshapriya206@gmail.com",
+    "type": "alert",
+    "subject": "saveing",
+    "status": "failed",
+    "errorMessage": "Invalid login: 535-5.7.8 Username and Password not accepted. For more information, go to\n535 5.7.8  https://support.google.com/mail/?p=BadCredentials d2e1a72fcca58-82c7d1e63c7sm6112948b3a.2 - gsmtp",
+    "responseCode": "EAUTH"
+  },
+  {
+    "timestamp": "2026-03-27T09:39:03.643Z",
+    "email": "it23748330@my.sliit.lk",
+    "type": "alert",
+    "subject": "saveing",
+    "status": "failed",
+    "errorMessage": "Invalid login: 535-5.7.8 Username and Password not accepted. For more information, go to\n535 5.7.8  https://support.google.com/mail/?p=BadCredentials 98e67ed59e1d1-35c2ec90431sm594372a91.11 - gsmtp",
+    "responseCode": "EAUTH"
   }
 ]

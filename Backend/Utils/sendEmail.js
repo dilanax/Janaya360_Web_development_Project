@@ -25,22 +25,61 @@ if (!fs.existsSync(EMAIL_LOG_FILE)) {
 }
 
 
-const getTransporter = () => {
-  // Check if SMTP credentials are configured
-  if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
-    console.warn("⚠️ WARNING: SMTP credentials not configured. Emails will be logged but not sent.");
-    console.warn("Set EMAIL_USER and EMAIL_PASS in .env file to enable email sending.");
-  }
+// Cached transporter so we only create once
+let cachedTransporter = null;
 
-  return nodemailer.createTransport({
-    host: process.env.SMTP_HOST || "smtp.gmail.com",
-    port: process.env.SMTP_PORT || 465,
-    secure: true,
+const createEtherealTransporter = async () => {
+  console.log("⚠️ Creating Ethereal test account for emails...");
+  const testAccount = await nodemailer.createTestAccount();
+
+  const transporter = nodemailer.createTransport({
+    host: "smtp.ethereal.email",
+    port: 587,
+    secure: false,
     auth: {
-      user: process.env.EMAIL_USER || "",
-      pass: process.env.EMAIL_PASS || ""
+      user: testAccount.user,
+      pass: testAccount.pass
     }
   });
+
+  console.log("✅ Ethereal test email account created:");
+  console.log(`   User: ${testAccount.user}`);
+  console.log("   Emails will be viewable at: https://ethereal.email/messages");
+  return transporter;
+};
+
+const getTransporter = async () => {
+  if (cachedTransporter) return cachedTransporter;
+
+  const emailUser = process.env.EMAIL_USER;
+  const emailPass = process.env.EMAIL_PASS;
+
+  // If real SMTP credentials are configured, try them first
+  if (emailUser && emailPass && !emailUser.includes('your-') && !emailPass.includes('your-')) {
+    try {
+      const gmailTransporter = nodemailer.createTransport({
+        host: process.env.SMTP_HOST || "smtp.gmail.com",
+        port: parseInt(process.env.SMTP_PORT) || 465,
+        secure: true,
+        auth: {
+          user: emailUser,
+          pass: emailPass
+        }
+      });
+      // Verify credentials actually work before using
+      await gmailTransporter.verify();
+      console.log("✅ Using Gmail SMTP for email delivery");
+      cachedTransporter = gmailTransporter;
+      return cachedTransporter;
+    } catch (err) {
+      console.log("❌ Gmail SMTP login failed:", err.message);
+      console.log("   Falling back to Ethereal test email...");
+    }
+  }
+
+  // Fallback: create Ethereal test account (free, no config needed)
+  cachedTransporter = await createEtherealTransporter();
+  return cachedTransporter;
 };
 
 
@@ -113,14 +152,7 @@ export const sendOTPEmail = async (email, otp, userName = null) => {
       throw new Error("Email and OTP are required");
     }
 
-    // Check if SMTP is configured
-    if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
-      console.warn("⚠️ Email sending disabled - SMTP credentials not configured");
-      logEmailRecord(email, "otp", "Login OTP", "skipped", { message: "SMTP not configured" });
-      return { success: true, messageId: "offline", email: email, note: "Email service offline" };
-    }
-
-    const transporter = getTransporter();
+    const transporter = await getTransporter();
 
     const htmlContent = `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background: #f5f5f5;">
@@ -153,13 +185,22 @@ export const sendOTPEmail = async (email, otp, userName = null) => {
       </div>
     `;
 
+    const fromEmail = process.env.EMAIL_USER && !process.env.EMAIL_USER.includes('your-')
+      ? process.env.EMAIL_USER
+      : "otp@janaya360.lk";
+
     const info = await transporter.sendMail({
-      from: `"JusticeLink - OTP Verification" <${process.env.EMAIL_USER}>`,
+      from: `"Janaya360 - OTP Verification" <${fromEmail}>`,
       to: email,
-      subject: "🔐 Your JusticeLink OTP Code",
+      subject: "🔐 Your Janaya360 OTP Code",
       html: htmlContent,
       text: `Your OTP is ${otp}. It is valid for 5 minutes. Never share this OTP with anyone.`
     });
+
+    const previewUrl = nodemailer.getTestMessageUrl(info);
+    if (previewUrl) {
+      console.log(`📧 Preview OTP email: ${previewUrl}`);
+    }
 
     logOTPRecord(email, otp, "sent", "success");
     logEmailRecord(email, "otp", "Login OTP", "success");
@@ -182,14 +223,7 @@ export const sendNotificationEmail = async (email, notification, userName = null
       throw new Error("Email and notification are required");
     }
 
-    // Check if SMTP is configured
-    if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
-      console.warn("⚠️ Email sending disabled - SMTP credentials not configured");
-      logEmailRecord(email, "notification", notification.title, "skipped", { message: "SMTP not configured" });
-      return { success: true, messageId: "offline", email: email, note: "Email service offline" };
-    }
-
-    const transporter = getTransporter();
+    const transporter = await getTransporter();
 
     const htmlContent = `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
@@ -223,17 +257,27 @@ export const sendNotificationEmail = async (email, notification, userName = null
       </div>
     `;
 
+    const fromEmail = process.env.EMAIL_USER && !process.env.EMAIL_USER.includes('your-')
+      ? process.env.EMAIL_USER
+      : "notifications@janaya360.lk";
+
     const info = await transporter.sendMail({
-      from: `"JusticeLink Notifications" <${process.env.EMAIL_USER}>`,
+      from: `"Janaya360 Notifications" <${fromEmail}>`,
       to: email,
       subject: `📬 New Notification: ${notification.title}`,
       html: htmlContent,
       text: `${notification.title}\n\n${notification.body || notification.message}`
     });
 
+    // Show Ethereal preview URL if using test account
+    const previewUrl = nodemailer.getTestMessageUrl(info);
+    if (previewUrl) {
+      console.log(`📧 Preview email: ${previewUrl}`);
+    }
+
     logEmailRecord(email, "notification", notification.title, "success");
     console.log(`✅ Notification email sent to ${email}`);
-    return { success: true, messageId: info.messageId, email: email };
+    return { success: true, messageId: info.messageId, email: email, previewUrl: previewUrl || null };
 
   } catch (error) {
     console.error("❌ Notification email sending failed:", error.message);
@@ -249,14 +293,7 @@ export const sendAlertEmail = async (email, alert) => {
       throw new Error("Email and alert are required");
     }
 
-    // Check if SMTP is configured
-    if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
-      console.warn("⚠️ Email sending disabled - SMTP credentials not configured");
-      logEmailRecord(email, "alert", alert.title, "skipped", { message: "SMTP not configured" });
-      return { success: true, messageId: "offline", email: email, note: "Email service offline" };
-    }
-
-    const transporter = getTransporter();
+    const transporter = await getTransporter();
 
     const htmlContent = `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
@@ -280,19 +317,28 @@ export const sendAlertEmail = async (email, alert) => {
           <hr style="border: none; border-top: 1px solid #ddd; margin: 30px 0;">
           
           <p style="color: #999; font-size: 12px;">
-            © 2026 JusticeLink. All rights reserved.
+            © 2026 Janaya360. All rights reserved.
           </p>
         </div>
       </div>
     `;
 
+    const fromEmail = process.env.EMAIL_USER && !process.env.EMAIL_USER.includes('your-')
+      ? process.env.EMAIL_USER
+      : "alerts@janaya360.lk";
+
     const info = await transporter.sendMail({
-      from: `"JusticeLink Emergency Alert" <${process.env.EMAIL_USER}>`,
+      from: `"Janaya360 Emergency Alert" <${fromEmail}>`,
       to: email,
       subject: `🚨 EMERGENCY ALERT: ${alert.title}`,
       html: htmlContent,
       text: `EMERGENCY: ${alert.title}\n\n${alert.body}`
     });
+
+    const previewUrl = nodemailer.getTestMessageUrl(info);
+    if (previewUrl) {
+      console.log(`📧 Preview alert email: ${previewUrl}`);
+    }
 
     logEmailRecord(email, "alert", alert.title, "success");
     console.log(`✅ Alert email sent to ${email}`);
@@ -312,24 +358,26 @@ export const sendBatchEmails = async (emailList, emailType, content) => {
       throw new Error("Email list is empty");
     }
 
-    // Check if SMTP is configured
-    if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
-      console.warn("⚠️ Email sending disabled - SMTP credentials not configured");
-      return { success: emailList, failed: [], note: "Email service offline - logged but not sent" };
-    }
-
-    const transporter = getTransporter();
+    const transporter = await getTransporter();
+    const fromEmail = process.env.EMAIL_USER && !process.env.EMAIL_USER.includes('your-')
+      ? process.env.EMAIL_USER
+      : "notifications@janaya360.lk";
     const results = { success: [], failed: [] };
 
     for (const email of emailList) {
       try {
         const info = await transporter.sendMail({
-          from: `"JusticeLink" <${process.env.EMAIL_USER}>`,
+          from: `"Janaya360" <${fromEmail}>`,
           to: email,
           subject: content.subject,
           html: content.html,
           text: content.text
         });
+
+        const previewUrl = nodemailer.getTestMessageUrl(info);
+        if (previewUrl) {
+          console.log(`📧 Preview: ${previewUrl}`);
+        }
 
         logEmailRecord(email, emailType, content.subject, "success");
         results.success.push(email);
@@ -357,15 +405,23 @@ export const sendEmail = async (options) => {
       throw new Error("Email, subject, and HTML content are required");
     }
 
-    const transporter = getTransporter();
+    const transporter = await getTransporter();
+    const fromEmail = process.env.EMAIL_USER && !process.env.EMAIL_USER.includes('your-')
+      ? process.env.EMAIL_USER
+      : "noreply@janaya360.lk";
 
     const info = await transporter.sendMail({
-      from: `"JusticeLink" <${process.env.EMAIL_USER}>`,
+      from: `"Janaya360" <${fromEmail}>`,
       to: to,
       subject: subject,
       html: html,
       text: text || html
     });
+
+    const previewUrl = nodemailer.getTestMessageUrl(info);
+    if (previewUrl) {
+      console.log(`📧 Preview: ${previewUrl}`);
+    }
 
     logEmailRecord(to, "generic", subject, "success");
     return { success: true, messageId: info.messageId };
