@@ -16,6 +16,17 @@ const feedbackSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    citizenName: {
+    type: String,
+    },
+
+   feedbackType: {
+    type: String,
+   },
+
+  district: {
+  type: String,
+   },
     evidenceUrl: {
       type: String,
     },

@@ -4,6 +4,9 @@ import axios from "axios";
 const Feedback = ({ promiseId }) => {
   const [comment, setComment] = useState("");
   const [feedbackList, setFeedbackList] = useState([]);
+  const [citizenName, setCitizenName] = useState("");
+  const [feedbackType, setFeedbackType] = useState("");
+  const [district, setDistrict] = useState("");
   const [loading, setLoading] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [editText, setEditText] = useState("");
@@ -29,7 +32,12 @@ const Feedback = ({ promiseId }) => {
 
     try {
       setLoading(true);
-      await axios.post(`${API_URL}/api/feedback/${activePromiseId}`, { comment });
+      await axios.post(`${API_URL}/api/feedback/${activePromiseId}`, {
+      comment,
+      citizenName,
+      feedbackType,
+     district
+    });
       setComment("");
       getFeedback();
     } catch (err) {
@@ -78,6 +86,35 @@ const updateFeedback = async (id) => {
   }
 };
 
+ const districts = [
+  // Western Province
+  "Colombo", "Gampaha", "Kalutara",
+
+  // Central Province
+  "Kandy", "Matale", "Nuwara Eliya",
+
+  // Southern Province
+  "Galle", "Matara", "Hambantota",
+
+  // Northern Province
+  "Jaffna", "Kilinochchi", "Mannar", "Vavuniya", "Mullaitivu",
+
+  // Eastern Province
+  "Batticaloa", "Ampara", "Trincomalee",
+
+  // North Western Province
+  "Kurunegala", "Puttalam",
+
+  // North Central Province
+  "Anuradhapura", "Polonnaruwa",
+
+  // Uva Province
+  "Badulla", "Monaragala",
+
+  // Sabaragamuwa Province
+  "Ratnapura", "Kegalle"
+];
+
   return (
     <div className="bg-gray-50 py-10">
       <div className="max-w-7xl mx-auto px-7">
@@ -111,6 +148,42 @@ const updateFeedback = async (id) => {
                 value={comment}
                 onChange={(e) => setComment(e.target.value)}
               />
+              <input
+               type="text"
+               placeholder="Your Name (optional)"
+               className="w-full bg-gray-50 border border-gray-300 rounded-lg p-3 text-sm mb-3"
+               value={citizenName}
+               onChange={(e) => setCitizenName(e.target.value)}
+              />
+
+              <select
+              className="w-full bg-gray-50 border border-gray-300 rounded-lg p-3 text-sm mb-3"
+              value={feedbackType}
+              onChange={(e) => setFeedbackType(e.target.value)}
+              >
+              <option value="">Select Feedback Type</option>
+              <option value="Opinion">Opinion</option>
+              <option value="Evidence">Evidence</option>
+              <option value="Suggestion">Suggestion</option>
+              <option value="Complaint">Complaint</option>
+             </select>
+
+
+             <select
+            className="w-full bg-gray-50 border border-gray-300 rounded-lg p-3 text-sm mb-3"
+            value={district}
+            onChange={(e) => setDistrict(e.target.value)}
+            >
+           <option value="">Select District</option>
+
+           {districts.map((d) => (
+           <option key={d} value={d}>
+           {d}
+          </option>
+            ))}
+          </select>
+
+            
 
               <div className="text-xs text-gray-400 text-right mt-1">
                 {comment.length} / 300 characters
@@ -153,74 +226,90 @@ const updateFeedback = async (id) => {
 
           {feedbackList.map((item) => (
             <div
-              key={item._id}
-              className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm"
-            >
-              {editingId === item._id ? (
-              <textarea
-              className="w-full border p-2 rounded text-sm"
-              value={editText}
-              onChange={(e) => setEditText(e.target.value)}
-            />
-          ) : (
-                <p className="text-gray-700 text-sm">{item.comment}</p>
-          )}
+  key={item._id}
+  className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm"
+>
+  <div className="flex justify-between items-start gap-4">
 
+    {/* LEFT SIDE — COMMENT & DETAILS (UNCHANGED LOGIC) */}
+    <div className="flex-1">
+      {editingId === item._id ? (
+        <textarea
+          className="w-full border p-2 rounded text-sm"
+          value={editText}
+          onChange={(e) => setEditText(e.target.value)}
+        />
+      ) : (
+        <p className="text-gray-700 text-sm">{item.comment}</p>
+      )}
 
-              <p className="text-xs text-gray-500 mt-1">
-                Sentiment: {item.sentiment}
-              </p>
+      <p className="text-xs text-gray-500 mt-1">
+        Name: {item.citizenName || "Anonymous"}
+      </p>
 
-              <p className="text-xs text-gray-400 mt-1">
-                {new Date(item.createdAt).toLocaleDateString()}
-              </p>
+      <p className="text-xs text-gray-500">
+        Type: {item.feedbackType || "Not specified"}
+      </p>
 
-              <div className="flex gap-2 mt-3">
-              <button
-              onClick={() => vote(item._id, "up")}
-              className="px-3 py-1 rounded-full bg-[#DCFCE7] text-[#14532D]"
-              >
-              👍 {item.upvotes}
-             </button>
+      <p className="text-xs text-gray-500">
+        District: {item.district || "Not specified"}
+      </p>
 
-             <button
-             onClick={() => vote(item._id, "down")}
-            className="px-3 py-1 rounded-full bg-[#FEE2E2] text-[#7F1D1D]"
-             >
-             👎 {item.downvotes}
-            </button>
+      <p className="text-xs text-gray-500 mt-1">
+        Sentiment: {item.sentiment}
+      </p>
 
-           <button
-          onClick={() => deleteFeedback(item._id)}
-          className="text-xs text-gray-400 hover:text-red-600"
-          >
-         Delete
-        </button>
+      <p className="text-xs text-gray-400 mt-1">
+        {new Date(item.createdAt).toLocaleDateString()}
+      </p>
+    </div>
 
-        {/* ✅ EDIT BUTTON */}
-        {editingId !== item._id && (
-        <button
-        onClick={() => {
-        setEditingId(item._id);
-        setEditText(item.comment);
-      }}
-      className="text-xs text-blue-600 hover:underline"
-       >
-       Edit
+    {/* RIGHT SIDE — ONLY BUTTONS (NEW) */}
+    <div className="flex gap-2 items-center">
+      <button
+        onClick={() => vote(item._id, "up")}
+        className="px-2 py-1 rounded-full bg-[#DCFCE7] text-[#14532D]"
+      >
+        👍 {item.upvotes}
       </button>
-    )}
 
-      {/* ✅ SAVE BUTTON */}
-      {editingId === item._id && (
-     <button
-      onClick={() => updateFeedback(item._id)}
-      className="text-xs text-green-600 hover:underline"
-     >
-      Save
-    </button>
-    )}
-   </div>
-            </div>
+      <button
+        onClick={() => vote(item._id, "down")}
+        className="px-2 py-1 rounded-full bg-[#FEE2E2] text-[#7F1D1D]"
+      >
+        👎 {item.downvotes}
+      </button>
+
+      {editingId !== item._id ? (
+        <button
+          onClick={() => {
+            setEditingId(item._id);
+            setEditText(item.comment);
+          }}
+          className="text-blue-600 text-sm"
+        >
+          ✏️
+        </button>
+      ) : (
+        <button
+          onClick={() => updateFeedback(item._id)}
+          className="text-green-600 text-sm"
+        >
+          💾
+        </button>
+      )}
+
+      <button
+        onClick={() => deleteFeedback(item._id)}
+        className="text-red-600 text-sm"
+      >
+        🗑
+      </button>
+    </div>
+
+  </div>
+</div>
+            
           ))}
         </div>
 

@@ -35,6 +35,10 @@ export const createFeedback = async (req, res) => {
     const feedback = await Feedback.create({
       promiseId: req.params.promiseId,  // promiseId from URL
       
+     citizenName,
+     feedbackType,
+     district,
+
     // ✅ Allow anonymous citizen feedback
     userId: req.user ? req.user.id : null,
             // logged-in user
