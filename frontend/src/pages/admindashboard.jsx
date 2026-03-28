@@ -5,7 +5,7 @@ import CountUp from 'react-countup';
 import { useInView } from 'react-intersection-observer';
 import {
   LayoutDashboard, Users, FileText, MessageSquare,
-  Newspaper, Bell, Settings, LogOut, Search,
+  Newspaper, Bell, BellRing, Settings, LogOut, Search,
   TrendingUp, TrendingDown, ChevronRight,
   CheckCircle, MapPin, BarChart2, ThumbsUp, ThumbsDown,
   ExternalLink, Home, Plus, Pencil, Trash2,
@@ -116,7 +116,7 @@ const NAV = [
   { label:'Promises',      icon:FileText,        path:'/promises',        badge:'247' },
   { label:'Feedback',      icon:MessageSquare,   path:'/feedback',        badge:'12'  },
   { label:'News',          icon:Newspaper,       path:'/admin-news',      badge:null  },
-  { label:'Notifications', icon:Bell,            path:'/notifications',   badge:'5'   },
+  { label:'Notifications', icon:BellRing,        path:'/notifications',   badge:'5'   },
   { label:'Users',         icon:Users,           path:'/users',           badge:null  },
   { label:'Settings',      icon:Settings,        path:'/settings',        badge:null  },
 ];

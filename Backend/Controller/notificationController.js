@@ -11,29 +11,78 @@ import {
   getEmailLogs
 } from '../Utils/sendEmail.js';
 
+// ==================== VALIDATION HELPERS ====================
+const VALID_TYPES = ["general", "complaint_update", "emergency_alert"];
+const VALID_STATUSES = ['unread', 'read', 'archived', 'overdue'];
+const TITLE_MIN = 3;
+const TITLE_MAX = 120;
+const BODY_MIN = 10;
+const BODY_MAX = 500;
+
+function isValidObjectId(id) {
+  return mongoose.Types.ObjectId.isValid(id);
+}
+
+function validateTitle(title) {
+  if (!title || typeof title !== 'string') return 'Title is required';
+  const trimmed = title.trim();
+  if (trimmed.length < TITLE_MIN) return `Title must be at least ${TITLE_MIN} characters`;
+  if (trimmed.length > TITLE_MAX) return `Title must not exceed ${TITLE_MAX} characters`;
+  return null;
+}
+
+function validateBody(body) {
+  if (!body || typeof body !== 'string') return 'Body is required';
+  const trimmed = body.trim();
+  if (trimmed.length < BODY_MIN) return `Body must be at least ${BODY_MIN} characters`;
+  if (trimmed.length > BODY_MAX) return `Body must not exceed ${BODY_MAX} characters`;
+  return null;
+}
+
+function validateType(type) {
+  if (!type) return 'Type is required';
+  if (!VALID_TYPES.includes(type)) return `Invalid type. Must be one of: ${VALID_TYPES.join(', ')}`;
+  return null;
+}
+
+function sanitize(str) {
+  if (typeof str !== 'string') return str;
+  return str.replace(/[<>]/g, '').trim();
+}
+
 export async function createNotification(req, res) {
   try {
     const { title, body, type = "general", recipients, expiryDays = 7 } = req.body;
 
     // Validate required fields
-    if (!title || !body || !type) {
-      return res.status(400).json({ message: 'title, body, and type are required' });
+    const errors = {};
+    const titleErr = validateTitle(title);
+    if (titleErr) errors.title = titleErr;
+    const bodyErr = validateBody(body);
+    if (bodyErr) errors.body = bodyErr;
+    const typeErr = validateType(type);
+    if (typeErr) errors.type = typeErr;
+
+    // Validate expiryDays
+    if (expiryDays !== undefined && expiryDays !== null) {
+      const days = Number(expiryDays);
+      if (isNaN(days) || !Number.isInteger(days) || days < 1 || days > 365) {
+        errors.expiryDays = 'Expiry days must be a whole number between 1 and 365';
+      }
     }
 
-    // Validate notification type
-    const validTypes = ["general", "complaint_update", "emergency_alert"];
-    if (!validTypes.includes(type)) {
-      return res.status(400).json({ message: `Invalid notification type. Must be one of: ${validTypes.join(', ')}` });
+    if (Object.keys(errors).length > 0) {
+      return res.status(400).json({ message: 'Validation failed', errors });
     }
 
     // Calculate expiry date
     const expiryDate = new Date();
-    expiryDate.setDate(expiryDate.getDate() + expiryDays);
+    expiryDate.setDate(expiryDate.getDate() + Number(expiryDays));
 
-    // Create notification
+    // Create notification with sanitized inputs
     const notification = new Notification({
-      title,
-      body,
+      title: sanitize(title),
+      body: sanitize(body),
       type,
       status: 'unread',
       deliveredTo: req.user?._id || null,
@@ -65,6 +114,23 @@ export async function sendNotification(req, res) {
 
     if (!notificationId) {
       return res.status(400).json({ message: 'notificationId is required' });
+    }
+
+    if (!isValidObjectId(notificationId)) {
+      return res.status(400).json({ message: 'Invalid notification ID format' });
+    }
+
+    // Validate recipientUserIds if provided
+    if (recipientUserIds && Array.isArray(recipientUserIds)) {
+      const invalidIds = recipientUserIds.filter(id => !isValidObjectId(id));
+      if (invalidIds.length > 0) {
+        return res.status(400).json({ message: 'One or more recipient user IDs are invalid' });
+      }
+    }
+
+    // Validate sendToRole if provided
+    if (sendToRole && typeof sendToRole !== 'string') {
+      return res.status(400).json({ message: 'sendToRole must be a string' });
     }
 
     // Find the notification
@@ -248,13 +314,16 @@ export async function updateNotificationStatus(req, res) {
     const { notificationId } = req.params;
     const { status } = req.body;
 
+    if (!notificationId || !isValidObjectId(notificationId)) {
+      return res.status(400).json({ message: 'A valid notification ID is required' });
+    }
+
     if (!status) {
       return res.status(400).json({ message: 'status is required' });
     }
 
-    const validStatuses = ['unread', 'read', 'archived', 'overdue'];
-    if (!validStatuses.includes(status)) {
-      return res.status(400).json({ message: `Invalid status. Must be one of: ${validStatuses.join(', ')}` });
+    if (!VALID_STATUSES.includes(status)) {
+      return res.status(400).json({ message: `Invalid status. Must be one of: ${VALID_STATUSES.join(', ')}` });
     }
 
     const notification = await Notification.findByIdAndUpdate(
@@ -285,6 +354,10 @@ export async function updateNotificationStatus(req, res) {
 export async function markAsExpired(req, res) {
   try {
     const { notificationId } = req.params;
+
+    if (!notificationId || !isValidObjectId(notificationId)) {
+      return res.status(400).json({ message: 'A valid notification ID is required' });
+    }
 
     const notification = await Notification.findByIdAndUpdate(
       notificationId,
@@ -341,6 +414,10 @@ export async function autoExpireNotifications(req, res) {
 export async function markAsDeleted(req, res) {
   try {
     const { notificationId } = req.params;
+
+    if (!notificationId || !isValidObjectId(notificationId)) {
+      return res.status(400).json({ message: 'A valid notification ID is required' });
+    }
 
     const notification = await Notification.findByIdAndUpdate(
       notificationId,
@@ -519,15 +596,24 @@ export async function getNotificationsByType(req, res) {
 export async function createPromotionalNotification(req, res) {
   try {
     const { title, body, recipientRole = "all", notificationType = "general" } = req.body;
-    if (!title || !body) {
-      return res.status(400).json({ message: "Please provide title and body." });
+
+    const errors = {};
+    const titleErr = validateTitle(title);
+    if (titleErr) errors.title = titleErr;
+    const bodyErr = validateBody(body);
+    if (bodyErr) errors.body = bodyErr;
+    const typeErr = validateType(notificationType);
+    if (typeErr) errors.type = typeErr;
+
+    if (Object.keys(errors).length > 0) {
+      return res.status(400).json({ message: 'Validation failed', errors });
     }
 
     const adminName = req.user?.name || req.user?.username || 'Admin';
 
     const notification = new Notification({
-      title,
-      body,
+      title: sanitize(title),
+      body: sanitize(body),
       type: notificationType,
       status: "unread",
       deliveredTo: null,
@@ -591,13 +677,22 @@ export async function createPromotionalNotification(req, res) {
 export async function createNotificationForUser(req, res) {
   try {
     const { title, body, type, userId } = req.body;
-    if (!title || !body || !userId || !type) {
-      return res.status(400).json({ message: 'title, body, userId, and type are required' });
+
+    const errors = {};
+    const titleErr = validateTitle(title);
+    if (titleErr) errors.title = titleErr;
+    const bodyErr = validateBody(body);
+    if (bodyErr) errors.body = bodyErr;
+    const typeErr = validateType(type);
+    if (typeErr) errors.type = typeErr;
+    if (!userId) {
+      errors.userId = 'userId is required';
+    } else if (!isValidObjectId(userId)) {
+      errors.userId = 'Invalid userId format';
     }
 
-    const validTypes = ["general", "complaint_update", "emergency_alert"];
-    if (!validTypes.includes(type)) {
-      return res.status(400).json({ message: `Invalid type. Must be one of: ${validTypes.join(', ')}` });
+    if (Object.keys(errors).length > 0) {
+      return res.status(400).json({ message: 'Validation failed', errors });
     }
 
     const user = await User.findById(userId);
@@ -606,8 +701,8 @@ export async function createNotificationForUser(req, res) {
     }
 
     const notification = new Notification({
-      title,
-      body,
+      title: sanitize(title),
+      body: sanitize(body),
       type,
       status: 'unread',
       deliveredTo: userId,
@@ -661,23 +756,29 @@ export async function updateNotification(req, res) {
     const id = req.params.id;
     const { title, body, type } = req.body;
 
-    // Validate input
-    if (!title || !body) {
-      return res.status(400).json({ message: 'Title and body are required' });
+    if (!id || !isValidObjectId(id)) {
+      return res.status(400).json({ message: 'A valid notification ID is required' });
     }
 
-    // Validate notification type if provided
+    // Validate input
+    const errors = {};
+    const titleErr = validateTitle(title);
+    if (titleErr) errors.title = titleErr;
+    const bodyErr = validateBody(body);
+    if (bodyErr) errors.body = bodyErr;
     if (type) {
-      const validTypes = ["general", "complaint_update", "emergency_alert"];
-      if (!validTypes.includes(type)) {
-        return res.status(400).json({ message: `Invalid notification type. Must be one of: ${validTypes.join(', ')}` });
-      }
+      const typeErr = validateType(type);
+      if (typeErr) errors.type = typeErr;
+    }
+
+    if (Object.keys(errors).length > 0) {
+      return res.status(400).json({ message: 'Validation failed', errors });
     }
 
     // Update the notification
     const updateData = {
-      title: title.trim(),
-      body: body.trim(),
+      title: sanitize(title).trim(),
+      body: sanitize(body).trim(),
       updatedAt: new Date()
     };
 
@@ -713,8 +814,8 @@ export async function deleteNotification(req, res) {
   try {
     const id = req.params.id;
 
-    if (!id) {
-      return res.status(400).json({ message: 'Notification ID is required' });
+    if (!id || !isValidObjectId(id)) {
+      return res.status(400).json({ message: 'A valid notification ID is required' });
     }
 
     // Delete the notification

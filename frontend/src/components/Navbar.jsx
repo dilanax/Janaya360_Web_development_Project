@@ -1,5 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
+import axios from 'axios';
+
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
 /* ─── colour tokens (matches tailwind.config.js palette) ──────────────────
    parliament-600  #EA580C   primary orange
@@ -25,13 +28,46 @@ const C = {
   redBg:      '#FEF2F2',
 };
 
+/* ─── SVG icon components for nav links ───────────────────────────────── */
+const NavIcons = {
+  Home: (color) => (
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>
+    </svg>
+  ),
+  Politicians: (color) => (
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+    </svg>
+  ),
+  Promises: (color) => (
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>
+    </svg>
+  ),
+  Feedback: (color) => (
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+    </svg>
+  ),
+  News: (color) => (
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2"/><line x1="10" y1="6" x2="18" y2="6"/><line x1="10" y1="10" x2="18" y2="10"/><line x1="10" y1="14" x2="14" y2="14"/>
+    </svg>
+  ),
+  Notifications: (color) => (
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/><path d="M2 8c0-2.2.7-4.3 2-6"/><path d="M22 8a10 10 0 0 0-2-6"/>
+    </svg>
+  ),
+};
+
 const NAV_LINKS = [
-  { path: '/',              label: 'Home'          },
-  { path: '/politicians',  label: 'Politicians'   },
-  { path: '/promises',     label: 'Promises'      },
-  { path: '/feedback',     label: 'Feedback'      },
-  { path: '/news',         label: 'News'          },
-  { path: '/notifications',label: 'Notifications' },
+  { path: '/',              label: 'Home',          icon: 'Home'          },
+  { path: '/politicians',  label: 'Politicians',   icon: 'Politicians'   },
+  { path: '/promises',     label: 'Promises',      icon: 'Promises'      },
+  { path: '/feedback',     label: 'Feedback',      icon: 'Feedback'      },
+  { path: '/news',         label: 'News',           icon: 'News'          },
 ];
 
 /* ─── Logout confirmation modal ───────────────────────────────────────── */
@@ -115,6 +151,267 @@ const LogoutModal = ({ userName, onConfirm, onCancel }) => (
   </div>
 );
 
+/* ─── Shared helpers ──────────────────────────────────────────────────── */
+const NOTIF_TYPE_META = {
+  general:          { bg: '#EFF6FF', color: '#2563EB', dot: '#2563EB', label: 'General',          icon: (c) => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg> },
+  complaint_update: { bg: '#FFF7ED', color: '#EA580C', dot: '#EA580C', label: 'Complaint Update', icon: (c) => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> },
+  emergency_alert:  { bg: '#FEF2F2', color: '#DC2626', dot: '#DC2626', label: 'Emergency Alert',  icon: (c) => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> },
+};
+const notifTimeAgo = (date) => {
+  const s = Math.floor((Date.now() - new Date(date)) / 1000);
+  if (s < 60) return 'Just now';
+  if (s < 3600) return `${Math.floor(s / 60)}m ago`;
+  if (s < 86400) return `${Math.floor(s / 3600)}h ago`;
+  if (s < 604800) return `${Math.floor(s / 86400)}d ago`;
+  return new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+};
+
+/* ─── Notification detail modal ───────────────────────────────────────── */
+const NotificationDetailModal = ({ notification, onClose, onMarkRead }) => {
+  if (!notification) return null;
+  const tc = NOTIF_TYPE_META[notification.type] || NOTIF_TYPE_META.general;
+  const isUnread = !(notification.isRead || notification.status === 'read');
+  return (
+    <div style={{ position: 'fixed', inset: 0, zIndex: 10000, background: 'rgba(0,0,0,0.45)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 16px' }} onClick={onClose}>
+      <div onClick={e => e.stopPropagation()} style={{ background: C.white, borderRadius: 22, width: '100%', maxWidth: 460, boxShadow: '0 25px 70px rgba(0,0,0,0.20)', animation: 'navModalIn 0.22s ease', overflow: 'hidden' }}>
+        {/* Accent bar */}
+        <div style={{ height: 4, background: `linear-gradient(90deg, ${tc.color}, ${tc.color}88)` }} />
+
+        <div style={{ padding: '24px 26px 26px' }}>
+          {/* Type + time row */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 18 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <div style={{ width: 28, height: 28, borderRadius: 8, background: tc.bg, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                {tc.icon(tc.color)}
+              </div>
+              <span style={{ fontSize: 12, fontWeight: 600, color: tc.color, textTransform: 'capitalize' }}>{tc.label}</span>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={C.gray500} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              <span style={{ fontSize: 12, color: C.gray500 }}>{notifTimeAgo(notification.createdAt)}</span>
+            </div>
+          </div>
+
+          {/* Title */}
+          <h3 style={{ fontSize: 18, fontWeight: 700, color: C.gray900, margin: '0 0 14px', lineHeight: 1.45, letterSpacing: '-0.2px' }}>{notification.title}</h3>
+
+          {/* Body */}
+          <div style={{ padding: '14px 16px', background: C.gray50, borderRadius: 12, borderLeft: `3px solid ${tc.color}`, marginBottom: 22 }}>
+            <p style={{ fontSize: 14, color: C.gray700, lineHeight: 1.75, margin: 0, whiteSpace: 'pre-wrap' }}>{notification.body || notification.message}</p>
+          </div>
+
+          {/* Actions */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            {isUnread && onMarkRead ? (
+              <button
+                onClick={() => onMarkRead(notification)}
+                style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '8px 16px', borderRadius: 10, border: `1px solid ${C.gray200}`, background: C.white, color: C.gray700, fontSize: 13, fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s' }}
+                onMouseEnter={e => { e.currentTarget.style.borderColor = C.orange; e.currentTarget.style.color = C.orange; e.currentTarget.style.background = C.orangeBg; }}
+                onMouseLeave={e => { e.currentTarget.style.borderColor = C.gray200; e.currentTarget.style.color = C.gray700; e.currentTarget.style.background = C.white; }}
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                Mark as read
+              </button>
+            ) : (
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 12, color: '#16A34A', fontWeight: 600 }}>
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#16A34A" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                Read
+              </span>
+            )}
+            <button onClick={onClose} style={{ padding: '9px 26px', borderRadius: 10, border: 'none', background: `linear-gradient(135deg, ${C.orange}, ${C.orangeHov})`, color: C.white, fontSize: 13, fontWeight: 700, cursor: 'pointer', boxShadow: '0 4px 14px rgba(234,88,12,0.30)', transition: 'opacity 0.15s' }}
+              onMouseEnter={e => e.currentTarget.style.opacity = '0.88'}
+              onMouseLeave={e => e.currentTarget.style.opacity = '1'}>
+              Close
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+/* ─── Notification dropdown panel ─────────────────────────────────────── */
+const NotificationDropdown = ({ notifications, onMarkRead, onMarkAllRead, onView, onClose, dropdownRef }) => {
+  const unreadCount = notifications.filter(n => !(n.isRead || n.status === 'read')).length;
+
+  return (
+    <div ref={dropdownRef} style={{
+      position: 'absolute', top: 'calc(100% + 10px)', right: -8, zIndex: 200,
+      width: 400, maxHeight: 510,
+      background: C.white, borderRadius: 18,
+      border: `1px solid ${C.gray200}`,
+      boxShadow: '0 24px 80px rgba(0,0,0,0.16), 0 8px 24px rgba(0,0,0,0.08)',
+      animation: 'notifDropIn 0.22s cubic-bezier(0.16,1,0.3,1)',
+      overflow: 'hidden',
+    }}>
+      <style>{`
+        @keyframes notifDropIn{from{opacity:0;transform:translateY(-10px) scale(0.96)}to{opacity:1;transform:translateY(0) scale(1)}}
+        .pw-notif-item{transition:all 0.18s ease !important}
+        .pw-notif-item:hover{background:#F8F9FB !important}
+        .pw-notif-item:hover .pw-notif-actions{opacity:1 !important;transform:translateY(0) !important}
+        .pw-notif-item:active{transform:scale(0.995)}
+        .pw-markread-btn{transition:all 0.18s ease !important}
+        .pw-markread-btn:hover{background:${C.orangeBg} !important;color:${C.orange} !important;border-color:${C.orange} !important}
+        .pw-markall-btn{transition:all 0.15s ease !important}
+        .pw-markall-btn:hover{background:${C.orangeBg} !important}
+        .pw-viewall-link{transition:all 0.15s ease !important}
+        .pw-viewall-link:hover{background:${C.orangeBg} !important;letter-spacing:0.2px !important}
+        .pw-notif-scroll::-webkit-scrollbar{width:4px}
+        .pw-notif-scroll::-webkit-scrollbar-thumb{background:${C.gray200};border-radius:4px}
+        .pw-notif-scroll::-webkit-scrollbar-thumb:hover{background:${C.gray500}}
+      `}</style>
+
+      {/* Header */}
+      <div style={{ padding: '18px 20px 14px', borderBottom: `1px solid ${C.gray100}`, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <div style={{ width: 30, height: 30, borderRadius: 9, background: C.orangeBg, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            {NavIcons.Notifications(C.orange)}
+          </div>
+          <div>
+            <span style={{ fontSize: 15, fontWeight: 700, color: C.gray900, display: 'block', lineHeight: 1 }}>Notifications</span>
+            <span style={{ fontSize: 11, color: C.gray500, marginTop: 2, display: 'block' }}>
+              {unreadCount > 0 ? `${unreadCount} unread` : 'All caught up'}
+            </span>
+          </div>
+        </div>
+        {unreadCount > 0 && (
+          <button onClick={onMarkAllRead} className="pw-markall-btn" style={{
+            display: 'inline-flex', alignItems: 'center', gap: 5,
+            fontSize: 12, fontWeight: 600, color: C.orange,
+            background: 'none', border: 'none', cursor: 'pointer',
+            padding: '6px 12px', borderRadius: 8,
+          }}>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            Mark all read
+          </button>
+        )}
+      </div>
+
+      {/* List */}
+      <div className="pw-notif-scroll" style={{ maxHeight: 390, overflowY: 'auto' }}>
+        {notifications.length === 0 ? (
+          <div style={{ padding: '48px 20px', textAlign: 'center' }}>
+            <div style={{ width: 56, height: 56, borderRadius: 16, background: C.gray50, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 14px' }}>
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke={C.gray500} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+            </div>
+            <p style={{ fontSize: 15, fontWeight: 700, color: C.gray900, margin: '0 0 5px' }}>No notifications</p>
+            <p style={{ fontSize: 13, color: C.gray500, margin: 0, lineHeight: 1.5 }}>When you receive notifications,<br/>they'll appear here.</p>
+          </div>
+        ) : (
+          notifications.slice(0, 20).map((notif, idx) => {
+            const isUnread = !(notif.isRead || notif.status === 'read');
+            const tc = NOTIF_TYPE_META[notif.type] || NOTIF_TYPE_META.general;
+            return (
+              <div
+                key={notif.id || notif._id || notif.notificationId}
+                className="pw-notif-item"
+                style={{
+                  padding: '14px 20px',
+                  borderBottom: idx < 19 && idx < notifications.length - 1 ? `1px solid ${C.gray100}` : 'none',
+                  background: isUnread ? '#FFFBF5' : 'transparent',
+                  cursor: 'pointer',
+                  position: 'relative',
+                }}
+                onClick={() => onView(notif)}
+              >
+                <div style={{ display: 'flex', gap: 14 }}>
+                  {/* Type icon circle */}
+                  <div style={{
+                    width: 38, height: 38, borderRadius: 12, flexShrink: 0,
+                    background: isUnread ? tc.bg : C.gray50,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    border: `1px solid ${isUnread ? tc.color + '20' : C.gray200}`,
+                    position: 'relative',
+                  }}>
+                    {tc.icon(isUnread ? tc.color : C.gray500)}
+                    {isUnread && (
+                      <div style={{
+                        position: 'absolute', top: -2, right: -2,
+                        width: 9, height: 9, borderRadius: '50%',
+                        background: tc.dot,
+                        border: `2px solid ${C.white}`,
+                        boxShadow: `0 0 0 1px ${tc.dot}30`,
+                      }} />
+                    )}
+                  </div>
+
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    {/* Title + time */}
+                    <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 8, marginBottom: 3 }}>
+                      <span style={{
+                        fontSize: 13, fontWeight: isUnread ? 700 : 500,
+                        color: isUnread ? C.gray900 : C.gray700,
+                        overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                        flex: 1,
+                      }}>{notif.title}</span>
+                      <span style={{ fontSize: 11, color: C.gray500, flexShrink: 0, marginTop: 1 }}>{notifTimeAgo(notif.createdAt)}</span>
+                    </div>
+
+                    {/* Body preview */}
+                    <p style={{
+                      fontSize: 12, color: C.gray500, margin: '0 0 8px',
+                      overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                      lineHeight: 1.4,
+                    }}>{notif.body || notif.message}</p>
+
+                    {/* Type badge + mark read button */}
+                    <div className="pw-notif-actions" style={{ display: 'flex', alignItems: 'center', gap: 8, opacity: isUnread ? 1 : 0.7, transition: 'all 0.18s' }}>
+                      <span style={{
+                        fontSize: 10, fontWeight: 600, padding: '3px 9px', borderRadius: 6,
+                        background: tc.bg, color: tc.color, textTransform: 'capitalize',
+                        letterSpacing: '0.2px',
+                      }}>{notif.type?.replace('_', ' ')}</span>
+
+                      {isUnread && (
+                        <button
+                          onClick={e => { e.stopPropagation(); onMarkRead(notif); }}
+                          className="pw-markread-btn"
+                          style={{
+                            display: 'inline-flex', alignItems: 'center', gap: 4,
+                            fontSize: 11, fontWeight: 600, color: C.gray500,
+                            background: C.white, border: `1px solid ${C.gray200}`,
+                            cursor: 'pointer', padding: '3px 10px', borderRadius: 6,
+                            lineHeight: 1,
+                          }}
+                        >
+                          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                          Mark as read
+                        </button>
+                      )}
+
+                      {!isUnread && (
+                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 3, fontSize: 10, fontWeight: 600, color: '#16A34A' }}>
+                          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#16A34A" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                          Read
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            );
+          })
+        )}
+      </div>
+
+      {/* Footer */}
+      {notifications.length > 0 && (
+        <div style={{ borderTop: `1px solid ${C.gray100}` }}>
+          <Link to="/notifications" onClick={onClose} className="pw-viewall-link" style={{
+            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+            padding: '13px 20px',
+            fontSize: 13, fontWeight: 700, color: C.orange,
+            textDecoration: 'none', borderRadius: '0 0 18px 18px',
+          }}>
+            View all notifications
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+          </Link>
+        </div>
+      )}
+    </div>
+  );
+};
+
 /* ═══════════════════════════════════════════════════════════════════════
    NAVBAR
 ═══════════════════════════════════════════════════════════════════════ */
@@ -127,6 +424,88 @@ const Navbar = () => {
   const [userInfo,    setUserInfo]    = useState(() => {
     try { return JSON.parse(localStorage.getItem('userInfo')); } catch { return null; }
   });
+
+  /* ─── Notification state ─── */
+  const [notifications, setNotifications] = useState([]);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [notifOpen, setNotifOpen] = useState(false);
+  const [selectedNotif, setSelectedNotif] = useState(null);
+  const notifRef = useRef(null);
+  const bellRef = useRef(null);
+
+  const getToken = useCallback(() => {
+    try {
+      const info = JSON.parse(localStorage.getItem('userInfo'));
+      return info?.token || localStorage.getItem('token') || localStorage.getItem('authToken');
+    } catch { return localStorage.getItem('token') || localStorage.getItem('authToken'); }
+  }, []);
+
+  /* Fetch notifications */
+  const fetchNotifications = useCallback(async () => {
+    const token = getToken();
+    if (!token) return;
+    try {
+      const [notifRes, statsRes] = await Promise.all([
+        axios.get(`${API_URL}/api/notifications/my`, { headers: { Authorization: `Bearer ${token}` } }),
+        axios.get(`${API_URL}/api/notifications/stats`, { headers: { Authorization: `Bearer ${token}` } }),
+      ]);
+      setNotifications(Array.isArray(notifRes.data) ? notifRes.data : []);
+      setUnreadCount(statsRes.data?.unread ?? 0);
+    } catch { /* silent */ }
+  }, [getToken]);
+
+  /* Poll every 5 seconds */
+  useEffect(() => {
+    if (!userInfo) { setNotifications([]); setUnreadCount(0); return; }
+    fetchNotifications();
+    const iv = setInterval(fetchNotifications, 5000);
+    return () => clearInterval(iv);
+  }, [userInfo, fetchNotifications]);
+
+  /* Close dropdown on click outside */
+  useEffect(() => {
+    const handler = (e) => {
+      if (
+        notifOpen &&
+        notifRef.current && !notifRef.current.contains(e.target) &&
+        bellRef.current && !bellRef.current.contains(e.target)
+      ) {
+        setNotifOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [notifOpen]);
+
+  /* Mark single as read */
+  const handleMarkRead = async (notif) => {
+    const token = getToken();
+    if (!token) return;
+    const nid = notif.notificationId || notif._id || notif.id;
+    try {
+      await axios.patch(`${API_URL}/api/notifications/read/${nid}`, {}, { headers: { Authorization: `Bearer ${token}` } });
+      fetchNotifications();
+    } catch { /* silent */ }
+  };
+
+  /* Mark all as read */
+  const handleMarkAllRead = async () => {
+    const token = getToken();
+    if (!token) return;
+    try {
+      await axios.patch(`${API_URL}/api/notifications/read`, {}, { headers: { Authorization: `Bearer ${token}` } });
+      fetchNotifications();
+    } catch { /* silent */ }
+  };
+
+  /* View notification detail */
+  const handleViewNotif = (notif) => {
+    setSelectedNotif(notif);
+    setNotifOpen(false);
+    // Auto mark as read when viewing
+    const isUnread = !(notif.isRead || notif.status === 'read');
+    if (isUnread) handleMarkRead(notif);
+  };
 
   /* scroll effect */
   useEffect(() => {
@@ -171,7 +550,7 @@ const Navbar = () => {
 
   const navLinkStyle = (active) => ({
     ...ff,
-    display: 'inline-flex', alignItems: 'center',
+    display: 'inline-flex', alignItems: 'center', gap: 6,
     padding: '7px 14px', borderRadius: 10,
     fontSize: 13, fontWeight: active ? 600 : 500,
     textDecoration: 'none', transition: 'all 0.2s',
@@ -181,7 +560,8 @@ const Navbar = () => {
 
   const mobileNavLinkStyle = (active) => ({
     ...ff,
-    display: 'block', padding: '10px 14px', borderRadius: 10,
+    display: 'flex', alignItems: 'center', gap: 8,
+    padding: '10px 14px', borderRadius: 10,
     fontSize: 14, fontWeight: active ? 600 : 500,
     textDecoration: 'none', transition: 'all 0.2s',
     background: active ? C.orange : 'transparent',
@@ -243,6 +623,7 @@ const Navbar = () => {
             <div style={{ display: 'flex', alignItems: 'center', gap: 2 }} className="hidden-mobile">
               {NAV_LINKS.map(link => {
                 const active = isActive(link.path);
+                const iconColor = active ? C.white : C.gray500;
                 return (
                   <Link
                     key={link.path}
@@ -250,6 +631,7 @@ const Navbar = () => {
                     className={`pw-nav-link${active ? ' active' : ''}`}
                     style={navLinkStyle(active)}
                   >
+                    {link.icon && NavIcons[link.icon] && NavIcons[link.icon](iconColor)}
                     {link.label}
                   </Link>
                 );
@@ -287,6 +669,49 @@ const Navbar = () => {
                       {userInfo.name}
                     </span>
                   </button>
+
+                  {/* Notification bell + dropdown */}
+                  <div style={{ position: 'relative' }}>
+                    <button
+                      ref={bellRef}
+                      onClick={() => setNotifOpen(o => !o)}
+                      title="Notifications"
+                      style={{
+                        position: 'relative',
+                        width: 36, height: 36,
+                        background: notifOpen || isActive('/notifications') ? C.orangeBg : C.gray50,
+                        border: `1px solid ${notifOpen || isActive('/notifications') ? C.orange : C.gray200}`,
+                        borderRadius: 10,
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        cursor: 'pointer', transition: 'all 0.2s',
+                      }}
+                    >
+                      {NavIcons.Notifications(notifOpen || isActive('/notifications') ? C.orange : C.gray500)}
+                      {unreadCount > 0 && (
+                        <span style={{
+                          position: 'absolute', top: -4, right: -4,
+                          minWidth: 18, height: 18, padding: '0 5px',
+                          background: '#DC2626', borderRadius: 20,
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          fontSize: 10, fontWeight: 700, color: C.white,
+                          border: `2px solid ${C.white}`,
+                          lineHeight: 1,
+                        }}>
+                          {unreadCount > 99 ? '99+' : unreadCount}
+                        </span>
+                      )}
+                    </button>
+                    {notifOpen && (
+                      <NotificationDropdown
+                        notifications={notifications}
+                        onMarkRead={handleMarkRead}
+                        onMarkAllRead={handleMarkAllRead}
+                        onView={handleViewNotif}
+                        onClose={() => setNotifOpen(false)}
+                        dropdownRef={notifRef}
+                      />
+                    )}
+                  </div>
 
                   <button
                     onClick={() => setShowLogout(true)}
@@ -366,6 +791,7 @@ const Navbar = () => {
 
               {NAV_LINKS.map(link => {
                 const active = isActive(link.path);
+                const iconColor = active ? C.white : C.gray500;
                 return (
                   <Link
                     key={link.path}
@@ -373,6 +799,7 @@ const Navbar = () => {
                     className={`pw-mobile-link${active ? ' active' : ''}`}
                     style={mobileNavLinkStyle(active)}
                   >
+                    {link.icon && NavIcons[link.icon] && NavIcons[link.icon](iconColor)}
                     {link.label}
                   </Link>
                 );
@@ -381,26 +808,71 @@ const Navbar = () => {
               <div style={{ borderTop: `1px solid ${C.gray100}`, marginTop: 10, paddingTop: 12, display: 'flex', flexDirection: 'column', gap: 8 }}>
                 {userInfo ? (
                   <>
-                    <button
-                      onClick={openProfile}
-                      title="View profile"
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 9,
-                        padding: '8px 12px',
-                        background: C.orangeBg,
-                        borderRadius: 10,
-                        border: 'none',
-                        cursor: 'pointer',
-                        textAlign: 'left',
-                      }}
-                    >
-                      <div style={{ width: 30, height: 30, borderRadius: '50%', background: `linear-gradient(135deg,${C.orange},${C.orangeHov})`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 700, color: C.white }}>
-                        {userInfo.name?.charAt(0).toUpperCase() || 'U'}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 2 }}>
+                      <button
+                        onClick={openProfile}
+                        title="View profile"
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 9,
+                          padding: '8px 12px',
+                          background: C.orangeBg,
+                          borderRadius: 10,
+                          border: 'none',
+                          cursor: 'pointer',
+                          textAlign: 'left',
+                          flex: 1,
+                        }}
+                      >
+                        <div style={{ width: 30, height: 30, borderRadius: '50%', background: `linear-gradient(135deg,${C.orange},${C.orangeHov})`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 700, color: C.white }}>
+                          {userInfo.name?.charAt(0).toUpperCase() || 'U'}
+                        </div>
+                        <span style={{ fontSize: 14, fontWeight: 600, color: C.orange }}>{userInfo.name}</span>
+                      </button>
+
+                      {/* Notification bell (mobile) */}
+                      <div style={{ position: 'relative' }}>
+                        <button
+                          onClick={() => setNotifOpen(o => !o)}
+                          title="Notifications"
+                          style={{
+                            position: 'relative',
+                            width: 40, height: 40, flexShrink: 0,
+                            background: notifOpen || isActive('/notifications') ? C.orangeBg : C.gray50,
+                            border: `1px solid ${notifOpen || isActive('/notifications') ? C.orange : C.gray200}`,
+                            borderRadius: 10,
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            cursor: 'pointer',
+                          }}
+                        >
+                          {NavIcons.Notifications(notifOpen || isActive('/notifications') ? C.orange : C.gray500)}
+                          {unreadCount > 0 && (
+                            <span style={{
+                              position: 'absolute', top: -4, right: -4,
+                              minWidth: 18, height: 18, padding: '0 5px',
+                              background: '#DC2626', borderRadius: 20,
+                              display: 'flex', alignItems: 'center', justifyContent: 'center',
+                              fontSize: 10, fontWeight: 700, color: C.white,
+                              border: `2px solid ${C.white}`,
+                              lineHeight: 1,
+                            }}>
+                              {unreadCount > 99 ? '99+' : unreadCount}
+                            </span>
+                          )}
+                        </button>
+                        {notifOpen && (
+                          <NotificationDropdown
+                            notifications={notifications}
+                            onMarkRead={handleMarkRead}
+                            onMarkAllRead={handleMarkAllRead}
+                            onView={handleViewNotif}
+                            onClose={() => setNotifOpen(false)}
+                            dropdownRef={notifRef}
+                          />
+                        )}
                       </div>
-                      <span style={{ fontSize: 14, fontWeight: 600, color: C.orange }}>{userInfo.name}</span>
-                    </button>
+                    </div>
                     <button
                       onClick={() => setShowLogout(true)}
                       style={{
@@ -462,6 +934,15 @@ const Navbar = () => {
           }
         `}</style>
       </nav>
+
+      {/* ── Notification detail modal ── */}
+      {selectedNotif && (
+        <NotificationDetailModal
+          notification={selectedNotif}
+          onClose={() => setSelectedNotif(null)}
+          onMarkRead={handleMarkRead}
+        />
+      )}
 
       {/* ── Logout modal ── */}
       {showLogout && (

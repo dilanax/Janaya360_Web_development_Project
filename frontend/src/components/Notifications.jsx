@@ -52,6 +52,26 @@ const formatDate = (dateValue) => {
   }).format(date);
 };
 
+const TITLE_MIN = 3;
+const TITLE_MAX = 120;
+const BODY_MIN = 10;
+const BODY_MAX = 500;
+
+const validateField = (name, value) => {
+  const v = (value || '').trim();
+  if (name === 'title') {
+    if (!v) return 'Title is required';
+    if (v.length < TITLE_MIN) return `Title must be at least ${TITLE_MIN} characters`;
+    if (v.length > TITLE_MAX) return `Title must not exceed ${TITLE_MAX} characters`;
+  }
+  if (name === 'body') {
+    if (!v) return 'Message is required';
+    if (v.length < BODY_MIN) return `Message must be at least ${BODY_MIN} characters`;
+    if (v.length > BODY_MAX) return `Message must not exceed ${BODY_MAX} characters`;
+  }
+  return '';
+};
+
 const Notifications = () => {
   const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
@@ -77,6 +97,8 @@ const Notifications = () => {
     body: '',
     type: 'general',
   });
+  const [createErrors, setCreateErrors] = useState({});
+  const [editErrors, setEditErrors] = useState({});
 
   const userInfo = useMemo(() => {
     try {
@@ -118,6 +140,8 @@ const Notifications = () => {
     [API_URL, token]
   );
 
+  const initialLoadDone = React.useRef(false);
+
   const loadNotifications = useCallback(async () => {
     if (!token) {
       setLoading(false);
@@ -126,7 +150,8 @@ const Notifications = () => {
     }
 
     try {
-      setLoading(true);
+      // Only show loading spinner on initial load, not on background polls
+      if (!initialLoadDone.current) setLoading(true);
 
       // For non-admin users, use /my endpoint
       if (!isAdmin) {
@@ -145,7 +170,7 @@ const Notifications = () => {
           });
         } catch (error) {
           console.error('Error loading user notifications:', error);
-          toast.error('Failed to load notifications');
+          if (!initialLoadDone.current) toast.error('Failed to load notifications');
           setNotifications([]);
         }
       } else {
@@ -168,16 +193,17 @@ const Notifications = () => {
       }
     } catch (error) {
       console.error('Error in loadNotifications:', error);
-      toast.error(error.response?.data?.message || 'Failed to load notifications');
+      if (!initialLoadDone.current) toast.error(error.response?.data?.message || 'Failed to load notifications');
     } finally {
       setLoading(false);
+      initialLoadDone.current = true;
     }
   }, [api, token, isAdmin]);
 
   useEffect(() => {
     loadNotifications();
-    // Auto-refresh every 30 seconds
-    const interval = setInterval(loadNotifications, 30000);
+    // Auto-refresh every 5 seconds
+    const interval = setInterval(loadNotifications, 5000);
     return () => clearInterval(interval);
   }, [loadNotifications]);
 
@@ -234,8 +260,15 @@ const Notifications = () => {
 
   const handleCreateNotification = async (e) => {
     e.preventDefault();
-    if (!createForm.title.trim() || !createForm.body.trim()) {
-      toast.error('Title and message are required');
+
+    const titleErr = validateField('title', createForm.title);
+    const bodyErr = validateField('body', createForm.body);
+    const errors = {};
+    if (titleErr) errors.title = titleErr;
+    if (bodyErr) errors.body = bodyErr;
+    setCreateErrors(errors);
+    if (Object.keys(errors).length > 0) {
+      toast.error('Please fix the validation errors');
       return;
     }
 
@@ -264,6 +297,7 @@ const Notifications = () => {
         body: '',
         type: 'general',
       });
+      setCreateErrors({});
       await loadNotifications();
     } catch (error) {
       console.error('Error creating notification:', error);
@@ -298,14 +332,21 @@ const Notifications = () => {
       body: '',
       type: 'general',
     });
+    setEditErrors({});
   };
 
   const handleUpdateNotification = async (e) => {
     e.preventDefault();
     console.log('Update form submitted. editingId:', editingId, 'isAdmin:', isAdmin);
     
-    if (!editForm.title.trim() || !editForm.body.trim()) {
-      toast.error('Title and message are required');
+    const titleErr = validateField('title', editForm.title);
+    const bodyErr = validateField('body', editForm.body);
+    const errors = {};
+    if (titleErr) errors.title = titleErr;
+    if (bodyErr) errors.body = bodyErr;
+    setEditErrors(errors);
+    if (Object.keys(errors).length > 0) {
+      toast.error('Please fix the validation errors');
       return;
     }
 
@@ -511,12 +552,22 @@ const Notifications = () => {
                   </label>
                   <input
                     value={createForm.title}
-                    onChange={(e) => setCreateForm((prev) => ({ ...prev, title: e.target.value }))}
+                    onChange={(e) => {
+                      setCreateForm((prev) => ({ ...prev, title: e.target.value }));
+                      if (createErrors.title) setCreateErrors((prev) => ({ ...prev, title: validateField('title', e.target.value) }));
+                    }}
+                    onBlur={(e) => setCreateErrors((prev) => ({ ...prev, title: validateField('title', e.target.value) }))}
                     placeholder="Enter notification title"
                     className="w-full px-3 py-2.5 rounded-xl border text-sm outline-none"
-                    style={{ borderColor: C.gray[300], color: C.gray[900], background: C.gray[50] }}
-                    maxLength={120}
+                    style={{ borderColor: createErrors.title ? '#EF4444' : C.gray[300], color: C.gray[900], background: C.gray[50] }}
+                    maxLength={TITLE_MAX}
                   />
+                  <div className="flex justify-between mt-1">
+                    {createErrors.title
+                      ? <span className="text-xs" style={{ color: '#EF4444' }}>{createErrors.title}</span>
+                      : <span />}
+                    <span className="text-xs" style={{ color: C.gray[400] }}>{createForm.title.length}/{TITLE_MAX}</span>
+                  </div>
                 </div>
 
                 <div className="md:col-span-2">
@@ -525,12 +576,22 @@ const Notifications = () => {
                   </label>
                   <textarea
                     value={createForm.body}
-                    onChange={(e) => setCreateForm((prev) => ({ ...prev, body: e.target.value }))}
+                    onChange={(e) => {
+                      setCreateForm((prev) => ({ ...prev, body: e.target.value }));
+                      if (createErrors.body) setCreateErrors((prev) => ({ ...prev, body: validateField('body', e.target.value) }));
+                    }}
+                    onBlur={(e) => setCreateErrors((prev) => ({ ...prev, body: validateField('body', e.target.value) }))}
                     placeholder="Write the notification message..."
                     className="w-full px-3 py-2.5 rounded-xl border text-sm outline-none min-h-[120px]"
-                    style={{ borderColor: C.gray[300], color: C.gray[900], background: C.gray[50] }}
-                    maxLength={500}
+                    style={{ borderColor: createErrors.body ? '#EF4444' : C.gray[300], color: C.gray[900], background: C.gray[50] }}
+                    maxLength={BODY_MAX}
                   />
+                  <div className="flex justify-between mt-1">
+                    {createErrors.body
+                      ? <span className="text-xs" style={{ color: '#EF4444' }}>{createErrors.body}</span>
+                      : <span />}
+                    <span className="text-xs" style={{ color: C.gray[400] }}>{createForm.body.length}/{BODY_MAX}</span>
+                  </div>
                 </div>
 
                 <div>
@@ -835,12 +896,22 @@ const Notifications = () => {
                   </label>
                   <input
                     value={editForm.title}
-                    onChange={(e) => setEditForm((prev) => ({ ...prev, title: e.target.value }))}
+                    onChange={(e) => {
+                      setEditForm((prev) => ({ ...prev, title: e.target.value }));
+                      if (editErrors.title) setEditErrors((prev) => ({ ...prev, title: validateField('title', e.target.value) }));
+                    }}
+                    onBlur={(e) => setEditErrors((prev) => ({ ...prev, title: validateField('title', e.target.value) }))}
                     placeholder="Enter notification title"
                     className="w-full px-3 py-2.5 rounded-xl border text-sm outline-none"
-                    style={{ borderColor: C.gray[300], color: C.gray[900], background: C.gray[50] }}
-                    maxLength={120}
+                    style={{ borderColor: editErrors.title ? '#EF4444' : C.gray[300], color: C.gray[900], background: C.gray[50] }}
+                    maxLength={TITLE_MAX}
                   />
+                  <div className="flex justify-between mt-1">
+                    {editErrors.title
+                      ? <span className="text-xs" style={{ color: '#EF4444' }}>{editErrors.title}</span>
+                      : <span />}
+                    <span className="text-xs" style={{ color: C.gray[400] }}>{editForm.title.length}/{TITLE_MAX}</span>
+                  </div>
                 </div>
 
                 <div>
@@ -849,12 +920,22 @@ const Notifications = () => {
                   </label>
                   <textarea
                     value={editForm.body}
-                    onChange={(e) => setEditForm((prev) => ({ ...prev, body: e.target.value }))}
+                    onChange={(e) => {
+                      setEditForm((prev) => ({ ...prev, body: e.target.value }));
+                      if (editErrors.body) setEditErrors((prev) => ({ ...prev, body: validateField('body', e.target.value) }));
+                    }}
+                    onBlur={(e) => setEditErrors((prev) => ({ ...prev, body: validateField('body', e.target.value) }))}
                     placeholder="Write the notification message..."
                     className="w-full px-3 py-2.5 rounded-xl border text-sm outline-none min-h-[120px]"
-                    style={{ borderColor: C.gray[300], color: C.gray[900], background: C.gray[50] }}
-                    maxLength={500}
+                    style={{ borderColor: editErrors.body ? '#EF4444' : C.gray[300], color: C.gray[900], background: C.gray[50] }}
+                    maxLength={BODY_MAX}
                   />
+                  <div className="flex justify-between mt-1">
+                    {editErrors.body
+                      ? <span className="text-xs" style={{ color: '#EF4444' }}>{editErrors.body}</span>
+                      : <span />}
+                    <span className="text-xs" style={{ color: C.gray[400] }}>{editForm.body.length}/{BODY_MAX}</span>
+                  </div>
                 </div>
 
                 <div>

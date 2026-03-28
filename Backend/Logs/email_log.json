@@ -3119,5 +3119,1157 @@
     "status": "failed",
     "errorMessage": "Invalid login: 535-5.7.8 Username and Password not accepted. For more information, go to\n535 5.7.8  https://support.google.com/mail/?p=BadCredentials 98e67ed59e1d1-35c2ec90431sm594372a91.11 - gsmtp",
     "responseCode": "EAUTH"
+  },
+  {
+    "timestamp": "2026-03-28T07:33:49.112Z",
+    "email": "admin@test12.com",
+    "type": "notification",
+    "subject": "dede",
+    "status": "success",
+    "errorMessage": null,
+    "responseCode": null
+  },
+  {
+    "timestamp": "2026-03-28T07:33:51.572Z",
+    "email": "admin@test123.com",
+    "type": "notification",
+    "subject": "dede",
+    "status": "success",
+    "errorMessage": null,
+    "responseCode": null
+  },
+  {
+    "timestamp": "2026-03-28T07:33:54.342Z",
+    "email": "admin2@example.com",
+    "type": "notification",
+    "subject": "dede",
+    "status": "success",
+    "errorMessage": null,
+    "responseCode": null
+  },
+  {
+    "timestamp": "2026-03-28T07:33:57.924Z",
+    "email": "manuka@gmail.com",
+    "type": "notification",
+    "subject": "dede",
+    "status": "success",
+    "errorMessage": null,
+    "responseCode": null
+  },
+  {
+    "timestamp": "2026-03-28T07:34:00.904Z",
+    "email": "dilan@gmail.com",
+    "type": "notification",
+    "subject": "dede",
+    "status": "success",
+    "errorMessage": null,
+    "responseCode": null
+  },
+  {
+    "timestamp": "2026-03-28T07:34:03.428Z",
+    "email": "one@gmail.com",
+    "type": "notification",
+    "subject": "dede",
+    "status": "success",
+    "errorMessage": null,
+    "responseCode": null
+  },
+  {
+    "timestamp": "2026-03-28T07:34:06.130Z",
+    "email": "don@gmail.com",
+    "type": "notification",
+    "subject": "dede",
+    "status": "success",
+    "errorMessage": null,
+    "responseCode": null
+  },
+  {
+    "timestamp": "2026-03-28T07:34:09.166Z",
+    "email": "kasthuri@gmail.com",
+    "type": "notification",
+    "subject": "dede",
+    "status": "success",
+    "errorMessage": null,
+    "responseCode": null
+  },
+  {
+    "timestamp": "2026-03-28T07:34:12.121Z",
+    "email": "manel@gmail.com",
+    "type": "notification",
+    "subject": "dede",
+    "status": "success",
+    "errorMessage": null,
+    "responseCode": null
+  },
+  {
+    "timestamp": "2026-03-28T07:34:14.571Z",
+    "email": "dont@gmail.com",
+    "type": "notification",
+    "subject": "dede",
+    "status": "success",
+    "errorMessage": null,
+    "responseCode": null
+  },
+  {
+    "timestamp": "2026-03-28T07:34:17.402Z",
+    "email": "palitha@gmail.com",
+    "type": "notification",
+    "subject": "dede",
+    "status": "success",
+    "errorMessage": null,
+    "responseCode": null
+  },
+  {
+    "timestamp": "2026-03-28T07:34:20.332Z",
+    "email": "sethum@gmail.com",
+    "type": "notification",
+    "subject": "dede",
+    "status": "success",
+    "errorMessage": null,
+    "responseCode": null
+  },
+  {
+    "timestamp": "2026-03-28T07:34:23.398Z",
+    "email": "dilanavishka111@gmail.com",
+    "type": "notification",
+    "subject": "dede",
+    "status": "success",
+    "errorMessage": null,
+    "responseCode": null
+  },
+  {
+    "timestamp": "2026-03-28T07:34:27.430Z",
+    "email": "sha@gmail.com",
+    "type": "notification",
+    "subject": "dede",
+    "status": "success",
+    "errorMessage": null,
+    "responseCode": null
+  },
+  {
+    "timestamp": "2026-03-28T07:34:30.499Z",
+    "email": "test@gmail.com",
+    "type": "notification",
+    "subject": "dede",
+    "status": "success",
+    "errorMessage": null,
+    "responseCode": null
+  },
+  {
+    "timestamp": "2026-03-28T07:34:32.904Z",
+    "email": "chanuka@gmail.com",
+    "type": "notification",
+    "subject": "dede",
+    "status": "success",
+    "errorMessage": null,
+    "responseCode": null
+  },
+  {
+    "timestamp": "2026-03-28T07:34:35.580Z",
+    "email": "dilan4@gmail.com",
+    "type": "notification",
+    "subject": "dede",
+    "status": "success",
+    "errorMessage": null,
+    "responseCode": null
+  },
+  {
+    "timestamp": "2026-03-28T07:34:38.300Z",
+    "email": "m@gmail.com",
+    "type": "notification",
+    "subject": "dede",
+    "status": "success",
+    "errorMessage": null,
+    "responseCode": null
+  },
+  {
+    "timestamp": "2026-03-28T07:34:41.824Z",
+    "email": "bupathi@gmail.com",
+    "type": "notification",
+    "subject": "dede",
+    "status": "success",
+    "errorMessage": null,
+    "responseCode": null
+  },
+  {
+    "timestamp": "2026-03-28T07:34:45.008Z",
+    "email": "palitha123@gmail.com",
+    "type": "notification",
+    "subject": "dede",
+    "status": "success",
+    "errorMessage": null,
+    "responseCode": null
+  },
+  {
+    "timestamp": "2026-03-28T07:34:47.578Z",
+    "email": "dilanuser@gmail.com",
+    "type": "notification",
+    "subject": "dede",
+    "status": "success",
+    "errorMessage": null,
+    "responseCode": null
+  },
+  {
+    "timestamp": "2026-03-28T07:34:49.931Z",
+    "email": "dilanadmin@gmail.com",
+    "type": "notification",
+    "subject": "dede",
+    "status": "success",
+    "errorMessage": null,
+    "responseCode": null
+  },
+  {
+    "timestamp": "2026-03-28T07:34:53.629Z",
+    "email": "tk@gmail.com",
+    "type": "notification",
+    "subject": "dede",
+    "status": "success",
+    "errorMessage": null,
+    "responseCode": null
+  },
+  {
+    "timestamp": "2026-03-28T07:34:56.253Z",
+    "email": "tk1@gmail.com",
+    "type": "notification",
+    "subject": "dede",
+    "status": "success",
+    "errorMessage": null,
+    "responseCode": null
+  },
+  {
+    "timestamp": "2026-03-28T07:34:58.822Z",
+    "email": "dilanuser123@gmail.com",
+    "type": "notification",
+    "subject": "dede",
+    "status": "success",
+    "errorMessage": null,
+    "responseCode": null
+  },
+  {
+    "timestamp": "2026-03-28T07:35:01.122Z",
+    "email": "dilanuser1234@gmail.com",
+    "type": "notification",
+    "subject": "dede",
+    "status": "success",
+    "errorMessage": null,
+    "responseCode": null
+  },
+  {
+    "timestamp": "2026-03-28T07:35:03.547Z",
+    "email": "tk13456@gmail.com",
+    "type": "notification",
+    "subject": "dede",
+    "status": "success",
+    "errorMessage": null,
+    "responseCode": null
+  },
+  {
+    "timestamp": "2026-03-28T07:35:06.616Z",
+    "email": "sandun@gmail.com",
+    "type": "notification",
+    "subject": "dede",
+    "status": "success",
+    "errorMessage": null,
+    "responseCode": null
+  },
+  {
+    "timestamp": "2026-03-28T07:35:10.631Z",
+    "email": "sheharanethmi89@gmail.com",
+    "type": "notification",
+    "subject": "dede",
+    "status": "success",
+    "errorMessage": null,
+    "responseCode": null
+  },
+  {
+    "timestamp": "2026-03-28T07:35:14.906Z",
+    "email": "indunisankalpani6@gmail.com",
+    "type": "notification",
+    "subject": "dede",
+    "status": "success",
+    "errorMessage": null,
+    "responseCode": null
+  },
+  {
+    "timestamp": "2026-03-28T07:35:17.331Z",
+    "email": "sandundeshapriya206@gmail.com",
+    "type": "notification",
+    "subject": "dede",
+    "status": "success",
+    "errorMessage": null,
+    "responseCode": null
+  },
+  {
+    "timestamp": "2026-03-28T07:35:19.913Z",
+    "email": "it23748330@my.sliit.lk",
+    "type": "notification",
+    "subject": "dede",
+    "status": "success",
+    "errorMessage": null,
+    "responseCode": null
+  },
+  {
+    "timestamp": "2026-03-28T08:09:46.362Z",
+    "email": "admin@test12.com",
+    "type": "notification",
+    "subject": "jjnhjbyvfjvfrr",
+    "status": "success",
+    "errorMessage": null,
+    "responseCode": null
+  },
+  {
+    "timestamp": "2026-03-28T08:09:50.559Z",
+    "email": "admin@test123.com",
+    "type": "notification",
+    "subject": "jjnhjbyvfjvfrr",
+    "status": "success",
+    "errorMessage": null,
+    "responseCode": null
+  },
+  {
+    "timestamp": "2026-03-28T08:09:54.951Z",
+    "email": "admin2@example.com",
+    "type": "notification",
+    "subject": "jjnhjbyvfjvfrr",
+    "status": "success",
+    "errorMessage": null,
+    "responseCode": null
+  },
+  {
+    "timestamp": "2026-03-28T08:09:59.138Z",
+    "email": "manuka@gmail.com",
+    "type": "notification",
+    "subject": "jjnhjbyvfjvfrr",
+    "status": "success",
+    "errorMessage": null,
+    "responseCode": null
+  },
+  {
+    "timestamp": "2026-03-28T08:10:01.954Z",
+    "email": "dilan@gmail.com",
+    "type": "notification",
+    "subject": "jjnhjbyvfjvfrr",
+    "status": "success",
+    "errorMessage": null,
+    "responseCode": null
+  },
+  {
+    "timestamp": "2026-03-28T08:10:04.820Z",
+    "email": "one@gmail.com",
+    "type": "notification",
+    "subject": "jjnhjbyvfjvfrr",
+    "status": "success",
+    "errorMessage": null,
+    "responseCode": null
+  },
+  {
+    "timestamp": "2026-03-28T08:10:07.432Z",
+    "email": "don@gmail.com",
+    "type": "notification",
+    "subject": "jjnhjbyvfjvfrr",
+    "status": "success",
+    "errorMessage": null,
+    "responseCode": null
+  },
+  {
+    "timestamp": "2026-03-28T08:10:11.705Z",
+    "email": "kasthuri@gmail.com",
+    "type": "notification",
+    "subject": "jjnhjbyvfjvfrr",
+    "status": "success",
+    "errorMessage": null,
+    "responseCode": null
+  },
+  {
+    "timestamp": "2026-03-28T08:10:14.963Z",
+    "email": "manel@gmail.com",
+    "type": "notification",
+    "subject": "jjnhjbyvfjvfrr",
+    "status": "success",
+    "errorMessage": null,
+    "responseCode": null
+  },
+  {
+    "timestamp": "2026-03-28T08:10:17.762Z",
+    "email": "dont@gmail.com",
+    "type": "notification",
+    "subject": "jjnhjbyvfjvfrr",
+    "status": "success",
+    "errorMessage": null,
+    "responseCode": null
+  },
+  {
+    "timestamp": "2026-03-28T08:10:20.372Z",
+    "email": "palitha@gmail.com",
+    "type": "notification",
+    "subject": "jjnhjbyvfjvfrr",
+    "status": "success",
+    "errorMessage": null,
+    "responseCode": null
+  },
+  {
+    "timestamp": "2026-03-28T08:10:23.658Z",
+    "email": "sethum@gmail.com",
+    "type": "notification",
+    "subject": "jjnhjbyvfjvfrr",
+    "status": "success",
+    "errorMessage": null,
+    "responseCode": null
+  },
+  {
+    "timestamp": "2026-03-28T08:10:26.126Z",
+    "email": "dilanavishka111@gmail.com",
+    "type": "notification",
+    "subject": "jjnhjbyvfjvfrr",
+    "status": "success",
+    "errorMessage": null,
+    "responseCode": null
+  },
+  {
+    "timestamp": "2026-03-28T08:10:28.905Z",
+    "email": "sha@gmail.com",
+    "type": "notification",
+    "subject": "jjnhjbyvfjvfrr",
+    "status": "success",
+    "errorMessage": null,
+    "responseCode": null
+  },
+  {
+    "timestamp": "2026-03-28T08:10:33.079Z",
+    "email": "test@gmail.com",
+    "type": "notification",
+    "subject": "jjnhjbyvfjvfrr",
+    "status": "success",
+    "errorMessage": null,
+    "responseCode": null
+  },
+  {
+    "timestamp": "2026-03-28T08:10:37.156Z",
+    "email": "chanuka@gmail.com",
+    "type": "notification",
+    "subject": "jjnhjbyvfjvfrr",
+    "status": "success",
+    "errorMessage": null,
+    "responseCode": null
+  },
+  {
+    "timestamp": "2026-03-28T08:10:41.357Z",
+    "email": "dilan4@gmail.com",
+    "type": "notification",
+    "subject": "jjnhjbyvfjvfrr",
+    "status": "success",
+    "errorMessage": null,
+    "responseCode": null
+  },
+  {
+    "timestamp": "2026-03-28T08:10:44.854Z",
+    "email": "m@gmail.com",
+    "type": "notification",
+    "subject": "jjnhjbyvfjvfrr",
+    "status": "success",
+    "errorMessage": null,
+    "responseCode": null
+  },
+  {
+    "timestamp": "2026-03-28T08:10:47.870Z",
+    "email": "bupathi@gmail.com",
+    "type": "notification",
+    "subject": "jjnhjbyvfjvfrr",
+    "status": "success",
+    "errorMessage": null,
+    "responseCode": null
+  },
+  {
+    "timestamp": "2026-03-28T08:10:50.320Z",
+    "email": "palitha123@gmail.com",
+    "type": "notification",
+    "subject": "jjnhjbyvfjvfrr",
+    "status": "success",
+    "errorMessage": null,
+    "responseCode": null
+  },
+  {
+    "timestamp": "2026-03-28T08:10:52.859Z",
+    "email": "dilanuser@gmail.com",
+    "type": "notification",
+    "subject": "jjnhjbyvfjvfrr",
+    "status": "success",
+    "errorMessage": null,
+    "responseCode": null
+  },
+  {
+    "timestamp": "2026-03-28T08:10:55.968Z",
+    "email": "dilanadmin@gmail.com",
+    "type": "notification",
+    "subject": "jjnhjbyvfjvfrr",
+    "status": "success",
+    "errorMessage": null,
+    "responseCode": null
+  },
+  {
+    "timestamp": "2026-03-28T08:10:59.488Z",
+    "email": "tk@gmail.com",
+    "type": "notification",
+    "subject": "jjnhjbyvfjvfrr",
+    "status": "success",
+    "errorMessage": null,
+    "responseCode": null
+  },
+  {
+    "timestamp": "2026-03-28T08:11:03.267Z",
+    "email": "tk1@gmail.com",
+    "type": "notification",
+    "subject": "jjnhjbyvfjvfrr",
+    "status": "success",
+    "errorMessage": null,
+    "responseCode": null
+  },
+  {
+    "timestamp": "2026-03-28T08:11:07.304Z",
+    "email": "dilanuser123@gmail.com",
+    "type": "notification",
+    "subject": "jjnhjbyvfjvfrr",
+    "status": "success",
+    "errorMessage": null,
+    "responseCode": null
+  },
+  {
+    "timestamp": "2026-03-28T08:11:09.642Z",
+    "email": "dilanuser1234@gmail.com",
+    "type": "notification",
+    "subject": "jjnhjbyvfjvfrr",
+    "status": "success",
+    "errorMessage": null,
+    "responseCode": null
+  },
+  {
+    "timestamp": "2026-03-28T08:11:12.987Z",
+    "email": "tk13456@gmail.com",
+    "type": "notification",
+    "subject": "jjnhjbyvfjvfrr",
+    "status": "success",
+    "errorMessage": null,
+    "responseCode": null
+  },
+  {
+    "timestamp": "2026-03-28T08:11:15.913Z",
+    "email": "sandun@gmail.com",
+    "type": "notification",
+    "subject": "jjnhjbyvfjvfrr",
+    "status": "success",
+    "errorMessage": null,
+    "responseCode": null
+  },
+  {
+    "timestamp": "2026-03-28T08:11:18.275Z",
+    "email": "sheharanethmi89@gmail.com",
+    "type": "notification",
+    "subject": "jjnhjbyvfjvfrr",
+    "status": "success",
+    "errorMessage": null,
+    "responseCode": null
+  },
+  {
+    "timestamp": "2026-03-28T08:11:21.096Z",
+    "email": "indunisankalpani6@gmail.com",
+    "type": "notification",
+    "subject": "jjnhjbyvfjvfrr",
+    "status": "success",
+    "errorMessage": null,
+    "responseCode": null
+  },
+  {
+    "timestamp": "2026-03-28T08:11:24.554Z",
+    "email": "sandundeshapriya206@gmail.com",
+    "type": "notification",
+    "subject": "jjnhjbyvfjvfrr",
+    "status": "success",
+    "errorMessage": null,
+    "responseCode": null
+  },
+  {
+    "timestamp": "2026-03-28T08:11:27.190Z",
+    "email": "it23748330@my.sliit.lk",
+    "type": "notification",
+    "subject": "jjnhjbyvfjvfrr",
+    "status": "success",
+    "errorMessage": null,
+    "responseCode": null
+  },
+  {
+    "timestamp": "2026-03-28T08:11:54.430Z",
+    "email": "admin@test12.com",
+    "type": "notification",
+    "subject": "new ffnnfjjkcdjc sd",
+    "status": "success",
+    "errorMessage": null,
+    "responseCode": null
+  },
+  {
+    "timestamp": "2026-03-28T08:11:58.322Z",
+    "email": "admin@test123.com",
+    "type": "notification",
+    "subject": "new ffnnfjjkcdjc sd",
+    "status": "success",
+    "errorMessage": null,
+    "responseCode": null
+  },
+  {
+    "timestamp": "2026-03-28T08:12:02.206Z",
+    "email": "admin2@example.com",
+    "type": "notification",
+    "subject": "new ffnnfjjkcdjc sd",
+    "status": "success",
+    "errorMessage": null,
+    "responseCode": null
+  },
+  {
+    "timestamp": "2026-03-28T08:12:06.107Z",
+    "email": "manuka@gmail.com",
+    "type": "notification",
+    "subject": "new ffnnfjjkcdjc sd",
+    "status": "success",
+    "errorMessage": null,
+    "responseCode": null
+  },
+  {
+    "timestamp": "2026-03-28T08:12:09.607Z",
+    "email": "dilan@gmail.com",
+    "type": "notification",
+    "subject": "new ffnnfjjkcdjc sd",
+    "status": "success",
+    "errorMessage": null,
+    "responseCode": null
+  },
+  {
+    "timestamp": "2026-03-28T08:12:12.259Z",
+    "email": "one@gmail.com",
+    "type": "notification",
+    "subject": "new ffnnfjjkcdjc sd",
+    "status": "success",
+    "errorMessage": null,
+    "responseCode": null
+  },
+  {
+    "timestamp": "2026-03-28T08:12:15.763Z",
+    "email": "don@gmail.com",
+    "type": "notification",
+    "subject": "new ffnnfjjkcdjc sd",
+    "status": "success",
+    "errorMessage": null,
+    "responseCode": null
+  },
+  {
+    "timestamp": "2026-03-28T08:12:19.030Z",
+    "email": "kasthuri@gmail.com",
+    "type": "notification",
+    "subject": "new ffnnfjjkcdjc sd",
+    "status": "success",
+    "errorMessage": null,
+    "responseCode": null
+  },
+  {
+    "timestamp": "2026-03-28T08:12:21.734Z",
+    "email": "manel@gmail.com",
+    "type": "notification",
+    "subject": "new ffnnfjjkcdjc sd",
+    "status": "success",
+    "errorMessage": null,
+    "responseCode": null
+  },
+  {
+    "timestamp": "2026-03-28T08:12:25.577Z",
+    "email": "dont@gmail.com",
+    "type": "notification",
+    "subject": "new ffnnfjjkcdjc sd",
+    "status": "success",
+    "errorMessage": null,
+    "responseCode": null
+  },
+  {
+    "timestamp": "2026-03-28T08:12:28.149Z",
+    "email": "palitha@gmail.com",
+    "type": "notification",
+    "subject": "new ffnnfjjkcdjc sd",
+    "status": "success",
+    "errorMessage": null,
+    "responseCode": null
+  },
+  {
+    "timestamp": "2026-03-28T08:12:32.865Z",
+    "email": "sethum@gmail.com",
+    "type": "notification",
+    "subject": "new ffnnfjjkcdjc sd",
+    "status": "success",
+    "errorMessage": null,
+    "responseCode": null
+  },
+  {
+    "timestamp": "2026-03-28T08:12:35.452Z",
+    "email": "dilanavishka111@gmail.com",
+    "type": "notification",
+    "subject": "new ffnnfjjkcdjc sd",
+    "status": "success",
+    "errorMessage": null,
+    "responseCode": null
+  },
+  {
+    "timestamp": "2026-03-28T08:12:38.326Z",
+    "email": "sha@gmail.com",
+    "type": "notification",
+    "subject": "new ffnnfjjkcdjc sd",
+    "status": "success",
+    "errorMessage": null,
+    "responseCode": null
+  },
+  {
+    "timestamp": "2026-03-28T08:12:40.992Z",
+    "email": "test@gmail.com",
+    "type": "notification",
+    "subject": "new ffnnfjjkcdjc sd",
+    "status": "success",
+    "errorMessage": null,
+    "responseCode": null
+  },
+  {
+    "timestamp": "2026-03-28T08:12:43.633Z",
+    "email": "chanuka@gmail.com",
+    "type": "notification",
+    "subject": "new ffnnfjjkcdjc sd",
+    "status": "success",
+    "errorMessage": null,
+    "responseCode": null
+  },
+  {
+    "timestamp": "2026-03-28T08:12:46.699Z",
+    "email": "dilan4@gmail.com",
+    "type": "notification",
+    "subject": "new ffnnfjjkcdjc sd",
+    "status": "success",
+    "errorMessage": null,
+    "responseCode": null
+  },
+  {
+    "timestamp": "2026-03-28T08:12:49.388Z",
+    "email": "m@gmail.com",
+    "type": "notification",
+    "subject": "new ffnnfjjkcdjc sd",
+    "status": "success",
+    "errorMessage": null,
+    "responseCode": null
+  },
+  {
+    "timestamp": "2026-03-28T08:12:52.474Z",
+    "email": "bupathi@gmail.com",
+    "type": "notification",
+    "subject": "new ffnnfjjkcdjc sd",
+    "status": "success",
+    "errorMessage": null,
+    "responseCode": null
+  },
+  {
+    "timestamp": "2026-03-28T08:12:56.252Z",
+    "email": "palitha123@gmail.com",
+    "type": "notification",
+    "subject": "new ffnnfjjkcdjc sd",
+    "status": "success",
+    "errorMessage": null,
+    "responseCode": null
+  },
+  {
+    "timestamp": "2026-03-28T08:12:58.568Z",
+    "email": "dilanuser@gmail.com",
+    "type": "notification",
+    "subject": "new ffnnfjjkcdjc sd",
+    "status": "success",
+    "errorMessage": null,
+    "responseCode": null
+  },
+  {
+    "timestamp": "2026-03-28T08:13:03.381Z",
+    "email": "dilanadmin@gmail.com",
+    "type": "notification",
+    "subject": "new ffnnfjjkcdjc sd",
+    "status": "success",
+    "errorMessage": null,
+    "responseCode": null
+  },
+  {
+    "timestamp": "2026-03-28T08:13:06.905Z",
+    "email": "tk@gmail.com",
+    "type": "notification",
+    "subject": "new ffnnfjjkcdjc sd",
+    "status": "success",
+    "errorMessage": null,
+    "responseCode": null
+  },
+  {
+    "timestamp": "2026-03-28T08:13:10.275Z",
+    "email": "tk1@gmail.com",
+    "type": "notification",
+    "subject": "new ffnnfjjkcdjc sd",
+    "status": "success",
+    "errorMessage": null,
+    "responseCode": null
+  },
+  {
+    "timestamp": "2026-03-28T08:13:13.037Z",
+    "email": "dilanuser123@gmail.com",
+    "type": "notification",
+    "subject": "new ffnnfjjkcdjc sd",
+    "status": "success",
+    "errorMessage": null,
+    "responseCode": null
+  },
+  {
+    "timestamp": "2026-03-28T08:13:16.059Z",
+    "email": "dilanuser1234@gmail.com",
+    "type": "notification",
+    "subject": "new ffnnfjjkcdjc sd",
+    "status": "success",
+    "errorMessage": null,
+    "responseCode": null
+  },
+  {
+    "timestamp": "2026-03-28T08:13:19.293Z",
+    "email": "tk13456@gmail.com",
+    "type": "notification",
+    "subject": "new ffnnfjjkcdjc sd",
+    "status": "success",
+    "errorMessage": null,
+    "responseCode": null
+  },
+  {
+    "timestamp": "2026-03-28T08:13:22.373Z",
+    "email": "sandun@gmail.com",
+    "type": "notification",
+    "subject": "new ffnnfjjkcdjc sd",
+    "status": "success",
+    "errorMessage": null,
+    "responseCode": null
+  },
+  {
+    "timestamp": "2026-03-28T08:13:24.775Z",
+    "email": "sheharanethmi89@gmail.com",
+    "type": "notification",
+    "subject": "new ffnnfjjkcdjc sd",
+    "status": "success",
+    "errorMessage": null,
+    "responseCode": null
+  },
+  {
+    "timestamp": "2026-03-28T08:13:27.414Z",
+    "email": "indunisankalpani6@gmail.com",
+    "type": "notification",
+    "subject": "new ffnnfjjkcdjc sd",
+    "status": "success",
+    "errorMessage": null,
+    "responseCode": null
+  },
+  {
+    "timestamp": "2026-03-28T08:13:30.049Z",
+    "email": "sandundeshapriya206@gmail.com",
+    "type": "notification",
+    "subject": "new ffnnfjjkcdjc sd",
+    "status": "success",
+    "errorMessage": null,
+    "responseCode": null
+  },
+  {
+    "timestamp": "2026-03-28T08:13:33.429Z",
+    "email": "it23748330@my.sliit.lk",
+    "type": "notification",
+    "subject": "new ffnnfjjkcdjc sd",
+    "status": "success",
+    "errorMessage": null,
+    "responseCode": null
+  },
+  {
+    "timestamp": "2026-03-28T08:18:41.865Z",
+    "email": "admin@test12.com",
+    "type": "notification",
+    "subject": "test 123",
+    "status": "success",
+    "errorMessage": null,
+    "responseCode": null
+  },
+  {
+    "timestamp": "2026-03-28T08:18:44.321Z",
+    "email": "admin@test123.com",
+    "type": "notification",
+    "subject": "test 123",
+    "status": "success",
+    "errorMessage": null,
+    "responseCode": null
+  },
+  {
+    "timestamp": "2026-03-28T08:18:46.934Z",
+    "email": "admin2@example.com",
+    "type": "notification",
+    "subject": "test 123",
+    "status": "success",
+    "errorMessage": null,
+    "responseCode": null
+  },
+  {
+    "timestamp": "2026-03-28T08:18:49.407Z",
+    "email": "manuka@gmail.com",
+    "type": "notification",
+    "subject": "test 123",
+    "status": "success",
+    "errorMessage": null,
+    "responseCode": null
+  },
+  {
+    "timestamp": "2026-03-28T08:18:51.969Z",
+    "email": "dilan@gmail.com",
+    "type": "notification",
+    "subject": "test 123",
+    "status": "success",
+    "errorMessage": null,
+    "responseCode": null
+  },
+  {
+    "timestamp": "2026-03-28T08:18:54.920Z",
+    "email": "one@gmail.com",
+    "type": "notification",
+    "subject": "test 123",
+    "status": "success",
+    "errorMessage": null,
+    "responseCode": null
+  },
+  {
+    "timestamp": "2026-03-28T08:18:58.346Z",
+    "email": "don@gmail.com",
+    "type": "notification",
+    "subject": "test 123",
+    "status": "success",
+    "errorMessage": null,
+    "responseCode": null
+  },
+  {
+    "timestamp": "2026-03-28T08:19:02.388Z",
+    "email": "kasthuri@gmail.com",
+    "type": "notification",
+    "subject": "test 123",
+    "status": "success",
+    "errorMessage": null,
+    "responseCode": null
+  },
+  {
+    "timestamp": "2026-03-28T08:19:06.383Z",
+    "email": "manel@gmail.com",
+    "type": "notification",
+    "subject": "test 123",
+    "status": "success",
+    "errorMessage": null,
+    "responseCode": null
+  },
+  {
+    "timestamp": "2026-03-28T08:19:10.966Z",
+    "email": "dont@gmail.com",
+    "type": "notification",
+    "subject": "test 123",
+    "status": "success",
+    "errorMessage": null,
+    "responseCode": null
+  },
+  {
+    "timestamp": "2026-03-28T08:19:13.273Z",
+    "email": "palitha@gmail.com",
+    "type": "notification",
+    "subject": "test 123",
+    "status": "success",
+    "errorMessage": null,
+    "responseCode": null
+  },
+  {
+    "timestamp": "2026-03-28T08:19:16.755Z",
+    "email": "sethum@gmail.com",
+    "type": "notification",
+    "subject": "test 123",
+    "status": "success",
+    "errorMessage": null,
+    "responseCode": null
+  },
+  {
+    "timestamp": "2026-03-28T08:19:19.219Z",
+    "email": "dilanavishka111@gmail.com",
+    "type": "notification",
+    "subject": "test 123",
+    "status": "success",
+    "errorMessage": null,
+    "responseCode": null
+  },
+  {
+    "timestamp": "2026-03-28T08:19:22.265Z",
+    "email": "sha@gmail.com",
+    "type": "notification",
+    "subject": "test 123",
+    "status": "success",
+    "errorMessage": null,
+    "responseCode": null
+  },
+  {
+    "timestamp": "2026-03-28T08:19:24.723Z",
+    "email": "test@gmail.com",
+    "type": "notification",
+    "subject": "test 123",
+    "status": "success",
+    "errorMessage": null,
+    "responseCode": null
+  },
+  {
+    "timestamp": "2026-03-28T08:19:27.369Z",
+    "email": "chanuka@gmail.com",
+    "type": "notification",
+    "subject": "test 123",
+    "status": "success",
+    "errorMessage": null,
+    "responseCode": null
+  },
+  {
+    "timestamp": "2026-03-28T08:19:30.086Z",
+    "email": "dilan4@gmail.com",
+    "type": "notification",
+    "subject": "test 123",
+    "status": "success",
+    "errorMessage": null,
+    "responseCode": null
+  },
+  {
+    "timestamp": "2026-03-28T08:19:34.087Z",
+    "email": "m@gmail.com",
+    "type": "notification",
+    "subject": "test 123",
+    "status": "success",
+    "errorMessage": null,
+    "responseCode": null
+  },
+  {
+    "timestamp": "2026-03-28T08:19:37.524Z",
+    "email": "bupathi@gmail.com",
+    "type": "notification",
+    "subject": "test 123",
+    "status": "success",
+    "errorMessage": null,
+    "responseCode": null
+  },
+  {
+    "timestamp": "2026-03-28T08:19:40.276Z",
+    "email": "palitha123@gmail.com",
+    "type": "notification",
+    "subject": "test 123",
+    "status": "success",
+    "errorMessage": null,
+    "responseCode": null
+  },
+  {
+    "timestamp": "2026-03-28T08:19:42.963Z",
+    "email": "dilanuser@gmail.com",
+    "type": "notification",
+    "subject": "test 123",
+    "status": "success",
+    "errorMessage": null,
+    "responseCode": null
+  },
+  {
+    "timestamp": "2026-03-28T08:19:45.435Z",
+    "email": "dilanadmin@gmail.com",
+    "type": "notification",
+    "subject": "test 123",
+    "status": "success",
+    "errorMessage": null,
+    "responseCode": null
+  },
+  {
+    "timestamp": "2026-03-28T08:19:47.873Z",
+    "email": "tk@gmail.com",
+    "type": "notification",
+    "subject": "test 123",
+    "status": "success",
+    "errorMessage": null,
+    "responseCode": null
+  },
+  {
+    "timestamp": "2026-03-28T08:19:50.226Z",
+    "email": "tk1@gmail.com",
+    "type": "notification",
+    "subject": "test 123",
+    "status": "success",
+    "errorMessage": null,
+    "responseCode": null
+  },
+  {
+    "timestamp": "2026-03-28T08:19:53.269Z",
+    "email": "dilanuser123@gmail.com",
+    "type": "notification",
+    "subject": "test 123",
+    "status": "success",
+    "errorMessage": null,
+    "responseCode": null
+  },
+  {
+    "timestamp": "2026-03-28T08:19:55.741Z",
+    "email": "dilanuser1234@gmail.com",
+    "type": "notification",
+    "subject": "test 123",
+    "status": "success",
+    "errorMessage": null,
+    "responseCode": null
+  },
+  {
+    "timestamp": "2026-03-28T08:19:59.940Z",
+    "email": "tk13456@gmail.com",
+    "type": "notification",
+    "subject": "test 123",
+    "status": "success",
+    "errorMessage": null,
+    "responseCode": null
+  },
+  {
+    "timestamp": "2026-03-28T08:20:03.603Z",
+    "email": "sandun@gmail.com",
+    "type": "notification",
+    "subject": "test 123",
+    "status": "success",
+    "errorMessage": null,
+    "responseCode": null
+  },
+  {
+    "timestamp": "2026-03-28T08:20:06.594Z",
+    "email": "sheharanethmi89@gmail.com",
+    "type": "notification",
+    "subject": "test 123",
+    "status": "success",
+    "errorMessage": null,
+    "responseCode": null
+  },
+  {
+    "timestamp": "2026-03-28T08:20:09.440Z",
+    "email": "indunisankalpani6@gmail.com",
+    "type": "notification",
+    "subject": "test 123",
+    "status": "success",
+    "errorMessage": null,
+    "responseCode": null
+  },
+  {
+    "timestamp": "2026-03-28T08:20:13.697Z",
+    "email": "sandundeshapriya206@gmail.com",
+    "type": "notification",
+    "subject": "test 123",
+    "status": "success",
+    "errorMessage": null,
+    "responseCode": null
+  },
+  {
+    "timestamp": "2026-03-28T08:20:17.630Z",
+    "email": "it23748330@my.sliit.lk",
+    "type": "notification",
+    "subject": "test 123",
+    "status": "success",
+    "errorMessage": null,
+    "responseCode": null
   }
 ]
