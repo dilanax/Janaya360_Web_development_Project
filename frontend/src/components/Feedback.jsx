@@ -3,6 +3,7 @@ import axios from "axios";
 
 const Feedback = ({ promiseId }) => {
   const [comment, setComment] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
   const [feedbackList, setFeedbackList] = useState([]);
   const [citizenName, setCitizenName] = useState("");
   const [feedbackType, setFeedbackType] = useState("");
@@ -10,8 +11,14 @@ const Feedback = ({ promiseId }) => {
   const [loading, setLoading] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [editText, setEditText] = useState("");
+  const [showToast, setShowToast] = useState(false);
+
 
   const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+  
+// Using default promise ID for demo/testing.
+// Supports dynamic promiseId when integrated with multiple promises.
+
   const activePromiseId = promiseId || "69a6af84dea6363b079b02ac";
 
   const getFeedback = async () => {
@@ -28,24 +35,38 @@ const Feedback = ({ promiseId }) => {
   }, [activePromiseId]);
 
   const addFeedback = async () => {
-    if (!comment.trim()) return;
+  if (!comment.trim()) return;
 
-    try {
-      setLoading(true);
-      await axios.post(`${API_URL}/api/feedback/${activePromiseId}`, {
+  try {
+    setLoading(true);
+
+    await axios.post(`${API_URL}/api/feedback/${activePromiseId}`, {
       comment,
       citizenName,
       feedbackType,
-     district
+      district
     });
-      setComment("");
-      getFeedback();
-    } catch (err) {
-      console.log(err);
-    } finally {
-      setLoading(false);
-    }
-  };
+
+    // ✅ Clear form
+    setComment("");
+    setCitizenName("");
+    setFeedbackType("");
+    setDistrict("");
+    setSearchTerm("");
+
+    // ✅ Show toast
+    setShowToast(true);
+
+    // ✅ Hide toast after 3 seconds
+    setTimeout(() => setShowToast(false), 3000);
+
+    await getFeedback();
+  } catch (err) {
+    console.log(err);
+  } finally {
+    setLoading(false);
+  }
+};
 
   const vote = async (id, type) => {
     try {
@@ -86,7 +107,7 @@ const updateFeedback = async (id) => {
   }
 };
 
- const districts = [
+  const districts = [
   // Western Province
   "Colombo", "Gampaha", "Kalutara",
 
@@ -112,11 +133,23 @@ const updateFeedback = async (id) => {
   "Badulla", "Monaragala",
 
   // Sabaragamuwa Province
-  "Ratnapura", "Kegalle"
+  "Ratnapura", "Kegalle",
 ];
 
+
   return (
-    <div className="bg-gray-50 py-10">
+    
+    <>
+    {/* ✅ SUCCESS TOAST */}
+   {showToast && (
+  <div className="fixed top-20 right-5 z-50">
+    <div className="bg-green-600 text-white px-6 py-4 rounded-xl shadow-2xl text-sm flex items-center gap-3">
+      ✅ <span className="font-semibold">Feedback submitted successfully</span>
+    </div>
+  </div>
+)}
+
+      <div className="bg-gray-50 py-10">
       <div className="max-w-7xl mx-auto px-7">
 
         {/* Header */}
@@ -150,7 +183,7 @@ const updateFeedback = async (id) => {
               />
               <input
                type="text"
-               placeholder="Your Name (optional)"
+               placeholder="citizenName (optional)"
                className="w-full bg-gray-50 border border-gray-300 rounded-lg p-3 text-sm mb-3"
                value={citizenName}
                onChange={(e) => setCitizenName(e.target.value)}
@@ -168,22 +201,19 @@ const updateFeedback = async (id) => {
               <option value="Complaint">Complaint</option>
              </select>
 
-
-             <select
+            <select
             className="w-full bg-gray-50 border border-gray-300 rounded-lg p-3 text-sm mb-3"
             value={district}
             onChange={(e) => setDistrict(e.target.value)}
             >
-           <option value="">Select District</option>
+            <option value="">Select District</option>
 
            {districts.map((d) => (
            <option key={d} value={d}>
            {d}
-          </option>
-            ))}
-          </select>
-
-            
+            </option>
+           ))}
+           </select>
 
               <div className="text-xs text-gray-400 text-right mt-1">
                 {comment.length} / 300 characters
@@ -216,6 +246,31 @@ const updateFeedback = async (id) => {
           </div>
         </div>
 
+       {/* 🔍 FULL‑WIDTH FEEDBACK SEARCH BAR */}
+<div className="mb-6">
+  <input
+    type="text"
+    placeholder="Search feedback by message, name, type, or district..."
+    value={searchTerm}
+    onChange={(e) => setSearchTerm(e.target.value)}
+    className="
+      w-full
+      bg-white
+      border
+      border-gray-300
+      rounded-lg
+      px-5
+      py-3
+      text-sm
+      shadow-sm
+      focus:outline-none
+      focus:ring-2
+      focus:ring-orange-400
+      "
+  />
+</div>
+
+
         {/* Feedback list */}
         <div className="space-y-4">
           {feedbackList.length === 0 && (
@@ -224,15 +279,24 @@ const updateFeedback = async (id) => {
             </div>
           )}
 
-          {feedbackList.map((item) => (
-            <div
-  key={item._id}
-  className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm"
->
-  <div className="flex justify-between items-start gap-4">
+         {feedbackList
+        .filter((item) => {
+         const term = searchTerm.toLowerCase();
 
-    {/* LEFT SIDE — COMMENT & DETAILS (UNCHANGED LOGIC) */}
-    <div className="flex-1">
+       return (
+       item.comment?.toLowerCase().includes(term) ||
+       item.citizenName?.toLowerCase().includes(term) ||
+       item.feedbackType?.toLowerCase().includes(term) ||
+       item.district?.toLowerCase().includes(term)
+       );
+     })
+     .map((item) => (
+  <div
+    key={item._id}
+    className="bg-orange-50 px-5 py-4 rounded-xl border border-orange-200 shadow-sm flex justify-between items-start"
+  >
+    {/* LEFT — FEEDBACK CONTENT */}
+    <div className="flex-1 pr-4">
       {editingId === item._id ? (
         <textarea
           className="w-full border p-2 rounded text-sm"
@@ -240,7 +304,9 @@ const updateFeedback = async (id) => {
           onChange={(e) => setEditText(e.target.value)}
         />
       ) : (
-        <p className="text-gray-700 text-sm">{item.comment}</p>
+        <p className="text-gray-800 text-sm font-medium">
+          {item.comment}
+        </p>
       )}
 
       <p className="text-xs text-gray-500 mt-1">
@@ -248,15 +314,12 @@ const updateFeedback = async (id) => {
       </p>
 
       <p className="text-xs text-gray-500">
-        Type: {item.feedbackType || "Not specified"}
+        Type: {item.feedbackType || "Not specified"} 
+       
       </p>
-
       <p className="text-xs text-gray-500">
         District: {item.district || "Not specified"}
-      </p>
-
-      <p className="text-xs text-gray-500 mt-1">
-        Sentiment: {item.sentiment}
+       
       </p>
 
       <p className="text-xs text-gray-400 mt-1">
@@ -264,18 +327,18 @@ const updateFeedback = async (id) => {
       </p>
     </div>
 
-    {/* RIGHT SIDE — ONLY BUTTONS (NEW) */}
-    <div className="flex gap-2 items-center">
+    {/* ✅ RIGHT — ACTION BUTTONS (LIKE YOUR IMAGE) */}
+    <div className="flex items-center gap-2">
       <button
         onClick={() => vote(item._id, "up")}
-        className="px-2 py-1 rounded-full bg-[#DCFCE7] text-[#14532D]"
+        className="flex items-center gap-1 px-2 py-1 rounded-full bg-green-100 text-green-700 text-xs"
       >
         👍 {item.upvotes}
       </button>
 
       <button
         onClick={() => vote(item._id, "down")}
-        className="px-2 py-1 rounded-full bg-[#FEE2E2] text-[#7F1D1D]"
+        className="flex items-center gap-1 px-2 py-1 rounded-full bg-red-100 text-red-700 text-xs"
       >
         👎 {item.downvotes}
       </button>
@@ -286,14 +349,16 @@ const updateFeedback = async (id) => {
             setEditingId(item._id);
             setEditText(item.comment);
           }}
-          className="text-blue-600 text-sm"
+          className="p-1 rounded-full bg-orange-100 text-orange-700 text-xs"
+          title="Edit"
         >
           ✏️
         </button>
       ) : (
         <button
           onClick={() => updateFeedback(item._id)}
-          className="text-green-600 text-sm"
+          className="p-1 rounded-full bg-green-100 text-green-700 text-xs"
+          title="Save"
         >
           💾
         </button>
@@ -301,21 +366,22 @@ const updateFeedback = async (id) => {
 
       <button
         onClick={() => deleteFeedback(item._id)}
-        className="text-red-600 text-sm"
+        className="p-1 rounded-full bg-gray-200 text-gray-700 text-xs"
+        title="Delete"
       >
         🗑
       </button>
     </div>
-
   </div>
-</div>
-            
-          ))}
+))}
+
         </div>
 
       </div>
     </div>
+    </>
   );
 };
 
 export default Feedback;
+

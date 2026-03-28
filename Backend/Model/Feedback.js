@@ -18,6 +18,7 @@ const feedbackSchema = new mongoose.Schema(
     },
     citizenName: {
     type: String,
+    default: "Anonymous",
     },
 
    feedbackType: {

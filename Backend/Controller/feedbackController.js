@@ -28,24 +28,19 @@ const analyzeSentiment = async (text) => {
  */
 export const createFeedback = async (req, res) => {
   try {
-    const { comment, evidenceUrl } = req.body;
-
-    const sentimentData = await analyzeSentiment(comment);
+    const {
+      comment,
+      citizenName,
+      feedbackType,
+      district,
+    } = req.body;
 
     const feedback = await Feedback.create({
-      promiseId: req.params.promiseId,  // promiseId from URL
-      
-     citizenName,
-     feedbackType,
-     district,
-
-    // ✅ Allow anonymous citizen feedback
-    userId: req.user ? req.user.id : null,
-            // logged-in user
+      promiseId: req.params.promiseId,
       comment,
-      evidenceUrl,
-      sentiment: sentimentData.type,
-      sentimentScore: sentimentData.score,
+      citizenName,
+      feedbackType,
+      district,
     });
 
     res.status(201).json(feedback);
