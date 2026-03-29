@@ -154,7 +154,7 @@ const updateFeedback = async (id) => {
 
         {/* Header */}
         <div className="mb-6">
-          <h2 className="text-2xl font-semibold text-gray-900">
+          <h2 className="text-4xl font-semibold text-gray-900">
             Citizen Feedback
           </h2>
           <p className="text-sm text-gray-500 mt-1">
@@ -320,6 +320,9 @@ const updateFeedback = async (id) => {
       <p className="text-xs text-gray-500">
         District: {item.district || "Not specified"}
        
+      </p>
+      <p className="text-xs text-gray-500 mt-1">
+       Sentiment: {item.sentiment}
       </p>
 
       <p className="text-xs text-gray-400 mt-1">

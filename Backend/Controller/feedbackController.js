@@ -35,12 +35,17 @@ export const createFeedback = async (req, res) => {
       district,
     } = req.body;
 
+    // ✅ Third‑party Sentiment API
+    const sentimentResult = await analyzeSentiment(comment);
+
     const feedback = await Feedback.create({
       promiseId: req.params.promiseId,
       comment,
       citizenName,
       feedbackType,
       district,
+      sentiment: sentimentResult.type,
+      sentimentScore: sentimentResult.score,
     });
 
     res.status(201).json(feedback);
