@@ -98,18 +98,31 @@ class PromiseController {
         }
     }
 
-    // @desc    Update general promise details (Admin only)
+    // @desc    Update general promise details & Handle History Ledger (Admin only)
     // @route   PUT /api/promises/:id
     // @access  Private/Admin
     async updatePromise(req, res) {
         try {
-            const updatedPromise = await PromiseModel.findByIdAndUpdate(
-                req.params.id,
-                req.body,
-                { new: true, runValidators: true }
-            );
+            const promise = await PromiseModel.findById(req.params.id);
+            if (!promise) return res.status(404).json({ success: false, error: 'Promise not found' });
 
-            if (!updatedPromise) return res.status(404).json({ success: false, error: 'Promise not found' });
+            // 🛡️ HISTORY LEDGER LOGIC: If status is being updated, log it!
+            if (req.body.status && req.body.status !== promise.status) {
+                promise.history.push({
+                    oldStatus: promise.status,
+                    newStatus: req.body.status,
+                    reason: req.body.reason || 'Status updated by system administrator.',
+                    changedAt: new Date()
+                });
+            }
+
+            // Apply all updates from req.body to the promise object
+            Object.assign(promise, req.body);
+            await promise.save();
+
+            // Re-populate the politician details before sending back to frontend
+            const updatedPromise = await PromiseModel.findById(promise._id)
+                .populate('politicianId', 'name party profileImageUrl');
 
             res.status(200).json({ success: true, data: updatedPromise });
         } catch (error) {
@@ -117,7 +130,7 @@ class PromiseController {
         }
     }
 
-    // @desc    Update promise status & save to history log
+    // @desc    Update promise status & save to history log (Alternative specific route)
     // @route   PATCH /api/promises/:id/status
     // @access  Private/Admin or Auditor
     async updateStatus(req, res) {
@@ -131,7 +144,8 @@ class PromiseController {
             promise.history.push({ 
                 oldStatus: promise.status, 
                 newStatus: status, 
-                reason: reason || 'Status updated by auditor/admin' 
+                reason: reason || 'Status updated by auditor/admin',
+                changedAt: new Date()
             });
 
             // Update the main fields
@@ -171,7 +185,6 @@ class PromiseController {
             
             if (!promise) return res.status(404).json({ success: false, error: 'Promise not found' });
 
-            // 🛡️ NEW SAFETY CHECK: Ensure the linked politician actually exists!
             if (!promise.politicianId) {
                 return res.status(404).json({ success: false, error: 'The politician linked to this promise was deleted or does not exist.' });
             }
@@ -179,11 +192,12 @@ class PromiseController {
             // Create a smart search query
             const searchQuery = `${promise.politicianId.name} ${promise.title}`;
             
-            console.log("SEARCHING NEWS FOR:", searchQuery); // <--- ADD THIS LINE!
+            console.log("SEARCHING NEWS FOR:", searchQuery); 
+
             // Call the external News API
             const response = await axios.get(`https://newsapi.org/v2/everything`, {
                 params: {
-                    q: "Sri Lanka Economy", // <--- TEMPORARILY CHANGE THIS TO A HARDCODED STRING
+                    q: searchQuery, // 🛡️ FIXED: Uses real dynamic search query now!
                     sortBy: 'relevancy',
                     language: 'en',
                     apiKey: process.env.NEWS_API_KEY
@@ -217,6 +231,31 @@ class PromiseController {
             res.status(200).json({ success: true, data: { politicianId: req.params.politicianId, stats } });
         } catch (error) {
             res.status(500).json({ success: false, error: error.message });
+        }
+    }
+
+    // @desc    Handle Public Voting (Truthful / False)
+    // @route   POST /api/promises/:id/vote
+    // @access  Public
+    async votePromise(req, res) {
+        try {
+            const { voteType, action } = req.body; // voteType: 'up' or 'down', action: 'add' or 'remove'
+            const promise = await PromiseModel.findById(req.params.id);
+
+            if (!promise) return res.status(404).json({ success: false, error: 'Record not found.' });
+
+            if (voteType === 'up') {
+                if (action === 'add') promise.upvotes += 1;
+                else if (action === 'remove' && promise.upvotes > 0) promise.upvotes -= 1;
+            } else if (voteType === 'down') {
+                if (action === 'add') promise.downvotes += 1;
+                else if (action === 'remove' && promise.downvotes > 0) promise.downvotes -= 1;
+            }
+
+            await promise.save();
+            res.status(200).json({ success: true, data: { upvotes: promise.upvotes, downvotes: promise.downvotes } });
+        } catch (error) {
+            res.status(500).json({ success: false, error: 'Failed to register vote.' });
         }
     }
 }

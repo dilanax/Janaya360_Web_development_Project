@@ -11,6 +11,9 @@ import {
   ExternalLink, Home, Plus, Pencil, Trash2,
 } from 'lucide-react';
 
+// IMPORT YOUR PROMISES COMPONENT HERE
+import PromisesManagement from '../components/PromisesManagement.jsx';
+
 /* ── Janaya360 Color Tokens ───────────────────────────────────── */
 const C = {
   parliament: {
@@ -53,8 +56,8 @@ const C = {
 
 /* ── DATA ─────────────────────────────────────────────────────── */
 const STATS = [
-  { label:'Politicians Tracked', value:89,   suffix:'',  change:'+4 this month',   up:true,  bg: C.status.keptBg,  icon:Users,        iconColor: C.status.keptColor  },
-  { label:'Total Promises',      value:247,  suffix:'',  change:'+18 new',          up:true,  bg: C.civic[100],     icon:FileText,     iconColor: C.civic[600]        },
+  { label:'Politicians Tracked', value:89,   suffix:'',  change:'+4 this month',  up:true,  bg: C.status.keptBg,  icon:Users,        iconColor: C.status.keptColor  },
+  { label:'Total Promises',      value:247,  suffix:'',  change:'+18 new',        up:true,  bg: C.civic[100],     icon:FileText,     iconColor: C.civic[600]        },
   { label:'Citizen Reports',     value:3452, suffix:'',  change:'+12% vs last wk',  up:true,  bg: C.status.brokBg,  icon:MessageSquare,iconColor: C.status.brokColor  },
   { label:'Fulfilment Rate',     value:34,   suffix:'%', change:'-2% vs last mo',   up:false, bg: C.status.progBg,  icon:BarChart2,    iconColor: C.status.progColor  },
 ];
@@ -67,9 +70,9 @@ const PROMISE_STATUS = [
 ];
 
 const RECENT_PROMISES = [
-  { initials:'AK', bg: C.status.brokBg,  fg: C.status.brokText,  name:'Anura K. Dissanayake', party:'NPP', text:'Abolish executive presidency',       status:'Pending'      },
-  { initials:'SP', bg: C.status.keptBg,  fg: C.status.keptText,  name:'Sajith Premadasa',      party:'SJB', text:'Build 100,000 low-income homes',    status:'Broken'       },
-  { initials:'RW', bg: C.status.progBg,  fg: C.status.progText,  name:'Ranil Wickremesinghe',  party:'UNP', text:'Stabilise fuel supply in 3 months', status:'Kept'         },
+  { initials:'AK', bg: C.status.brokBg,  fg: C.status.brokText,  name:'Anura K. Dissanayake', party:'NPP', text:'Abolish executive presidency',       status:'Pending'       },
+  { initials:'SP', bg: C.status.keptBg,  fg: C.status.keptText,  name:'Sajith Premadasa',      party:'SJB', text:'Build 100,000 low-income homes',    status:'Broken'        },
+  { initials:'RW', bg: C.status.progBg,  fg: C.status.progText,  name:'Ranil Wickremesinghe',  party:'UNP', text:'Stabilise fuel supply in 3 months', status:'Kept'          },
   { initials:'AK', bg: C.status.brokBg,  fg: C.status.brokText,  name:'Anura K. Dissanayake', party:'NPP', text:'Recover stolen assets in year one',  status:'In Progress'  },
 ];
 
@@ -115,6 +118,9 @@ const NAV = [
   { label:'Politicians',   icon:Users,           path:'/politicians',     badge:'89'  },
   { label:'Promises',      icon:FileText,        path:'/promises',        badge:'247' },
   { label:'Feedback',      icon:MessageSquare,   path:'/admin-feedback',  badge:'12'  },
+  { label:'Politicians',   icon:Users,           path:'/admin-politicians',     badge:'89'  },
+  { label:'Promises',      icon:FileText,        path:'/admin-promises',        badge:'247' },
+  { label:'Feedback',      icon:MessageSquare,   path:'/feedback',        badge:'12'  },
   { label:'News',          icon:Newspaper,       path:'/admin-news',      badge:null  },
   { label:'Notifications', icon:Bell,            path:'/notifications',   badge:'5'   },
   { label:'Users',         icon:Users,           path:'/users',           badge:null  },
@@ -209,79 +215,51 @@ const AdminDashboard = () => {
   const [adminUser, setAdminUser] = useState(null);
   const [userSearchInput, setUserSearchInput] = useState('');
   const [activeUserSearch, setActiveUserSearch] = useState('');
+  
   const [userForm, setUserForm] = useState({
-    name: '',
-    email: '',
-    password: '',
-    phone: '',
-    district: '',
-    role: 'citizen',
-    status: 'active',
+    name: '', email: '', password: '', phone: '', district: '', role: 'citizen', status: 'active',
   });
   const [editingUserId, setEditingUserId] = useState(null);
   const [userActionError, setUserActionError] = useState('');
   const [userActionSuccess, setUserActionSuccess] = useState('');
   const [isSavingUser, setIsSavingUser] = useState(false);
   const [deletingUserId, setDeletingUserId] = useState('');
+  
   const [newsForm, setNewsForm] = useState({
-    title: '',
-    description: '',
-    source: '',
-    politician: '',
-    url: '',
-    image: '',
-    publishedAt: '',
+    title: '', description: '', source: '', politician: '', url: '', image: '', publishedAt: '',
   });
   const [editingNewsId, setEditingNewsId] = useState(null);
   const [newsActionError, setNewsActionError] = useState('');
   const [newsActionSuccess, setNewsActionSuccess] = useState('');
   const [isSavingNews, setIsSavingNews] = useState(false);
   const [deletingNewsId, setDeletingNewsId] = useState('');
+  
+  // ROUTING LOGIC
   const isUsersPage = location.pathname === '/users';
   const isNewsPage = location.pathname === '/admin-news';
   const isFeedbackPage = location.pathname === '/admin-feedback';
+  const isPromisesPage = location.pathname === '/admin-promises'; // ADDED PROMISES ROUTE CHECK
+
   const searchTerm = (activeUserSearch || userSearchInput).trim().toLowerCase();
   const displayedUsers = searchTerm
     ? users.filter((user) => (
-        [
-          user.name,
-          user.email,
-          user.phone,
-          user.district,
-          user.role,
-          user.status,
-        ]
+        [ user.name, user.email, user.phone, user.district, user.role, user.status ]
           .filter(Boolean)
           .some((value) => value.toLowerCase().includes(searchTerm))
       ))
     : users;
+
   const getAuthHeaders = () => ({
     Authorization: `Bearer ${JSON.parse(localStorage.getItem('userInfo') || '{}').token}`,
   });
 
   const resetUserForm = () => {
-    setUserForm({
-      name: '',
-      email: '',
-      password: '',
-      phone: '',
-      district: '',
-      role: 'citizen',
-      status: 'active',
-    });
+    setUserForm({ name: '', email: '', password: '', phone: '', district: '', role: 'citizen', status: 'active' });
     setEditingUserId(null);
   };
 
   const resetNewsForm = () => {
-    setNewsForm({
-      title: '',
-      description: '',
-      source: '',
-      politician: '',
-      url: '',
-      image: '',
-      publishedAt: '',
-    });
+    setNewsForm({ title: '', description: '', source: '', politician: '', url: '', image: '', publishedAt: '' });
     setEditingNewsId(null);
   };
 
@@ -294,9 +272,7 @@ const AdminDashboard = () => {
   };
 
   const fetchNews = async () => {
-    const response = await axios.get(`${API_URL}/api/news`, {
-      headers: getAuthHeaders(),
-    });
+    const response = await axios.get(`${API_URL}/api/news`, { headers: getAuthHeaders() });
     setNewsItems(Array.isArray(response.data) ? response.data : []);
   };
 
@@ -316,204 +292,90 @@ const AdminDashboard = () => {
   const handleUserFormChange = (field, value) => {
     setUserForm(prev => ({ ...prev, [field]: value }));
   };
+  const handleUserFormChange = (field, value) => { setUserForm(prev => ({ ...prev, [field]: value })); };
 
   const handleUserSearch = async (event) => {
     event.preventDefault();
-    setUserActionError('');
-    setUserActionSuccess('');
-    setActiveUserSearch(userSearchInput.trim());
-    setIsDataLoading(true);
-
-    try {
-      await fetchUsers(userSearchInput.trim());
-    } catch (error) {
-      setUserActionError(error.response?.data?.message || 'Failed to search users.');
-    } finally {
-      setIsDataLoading(false);
-    }
+    setUserActionError(''); setUserActionSuccess(''); setActiveUserSearch(userSearchInput.trim()); setIsDataLoading(true);
+    try { await fetchUsers(userSearchInput.trim()); } 
+    catch (error) { setUserActionError(error.response?.data?.message || 'Failed to search users.'); } 
+    finally { setIsDataLoading(false); }
   };
 
   const startEditUser = (user) => {
-    setEditingUserId(user._id);
-    setUserActionError('');
-    setUserActionSuccess('');
-    setUserForm({
-      name: user.name || '',
-      email: user.email || '',
-      password: '',
-      phone: user.phone || '',
-      district: user.district || '',
-      role: user.role || 'citizen',
-      status: user.status || 'active',
-    });
+    setEditingUserId(user._id); setUserActionError(''); setUserActionSuccess('');
+    setUserForm({ name: user.name || '', email: user.email || '', password: '', phone: user.phone || '', district: user.district || '', role: user.role || 'citizen', status: user.status || 'active' });
   };
 
   const handleSaveUser = async (event) => {
     event.preventDefault();
-    setIsSavingUser(true);
-    setUserActionError('');
-    setUserActionSuccess('');
-
+    setIsSavingUser(true); setUserActionError(''); setUserActionSuccess('');
     try {
       const normalizedEmail = userForm.email.trim().toLowerCase();
       const normalizedPhone = userForm.phone.trim();
       const duplicateUser = users.find((user) => (
-        user._id !== editingUserId && (
-          user.email?.trim().toLowerCase() === normalizedEmail ||
-          user.phone?.trim() === normalizedPhone
-        )
+        user._id !== editingUserId && ( user.email?.trim().toLowerCase() === normalizedEmail || user.phone?.trim() === normalizedPhone )
       ));
 
-      if (duplicateUser?.email?.trim().toLowerCase() === normalizedEmail) {
-        setUserActionError('Email is already in use.');
-        setIsSavingUser(false);
-        return;
-      }
+      if (duplicateUser?.email?.trim().toLowerCase() === normalizedEmail) { setUserActionError('Email is already in use.'); setIsSavingUser(false); return; }
+      if (duplicateUser?.phone?.trim() === normalizedPhone) { setUserActionError('Phone number is already in use.'); setIsSavingUser(false); return; }
 
-      if (duplicateUser?.phone?.trim() === normalizedPhone) {
-        setUserActionError('Phone number is already in use.');
-        setIsSavingUser(false);
-        return;
-      }
-
-      const payload = {
-        name: userForm.name,
-        email: normalizedEmail,
-        phone: normalizedPhone,
-        district: userForm.district,
-        role: userForm.role,
-        status: userForm.status,
-      };
-
-      if (userForm.password) {
-        payload.password = userForm.password;
-      }
+      const payload = { name: userForm.name, email: normalizedEmail, phone: normalizedPhone, district: userForm.district, role: userForm.role, status: userForm.status };
+      if (userForm.password) payload.password = userForm.password;
 
       if (editingUserId) {
-        await axios.put(`${API_URL}/api/users/${editingUserId}`, payload, {
-          headers: getAuthHeaders(),
-        });
+        await axios.put(`${API_URL}/api/users/${editingUserId}`, payload, { headers: getAuthHeaders() });
         setUserActionSuccess('User updated successfully.');
       } else {
-        await axios.post(`${API_URL}/api/users`, {
-          ...payload,
-          password: userForm.password,
-        }, {
-          headers: getAuthHeaders(),
-        });
+        await axios.post(`${API_URL}/api/users`, { ...payload, password: userForm.password }, { headers: getAuthHeaders() });
         setUserActionSuccess('New user account created successfully.');
       }
-
-      resetUserForm();
-      await fetchUsers(activeUserSearch);
-    } catch (error) {
-      setUserActionError(error.response?.data?.message || 'Failed to save user.');
-    } finally {
-      setIsSavingUser(false);
-    }
+      resetUserForm(); await fetchUsers(activeUserSearch);
+    } catch (error) { setUserActionError(error.response?.data?.message || 'Failed to save user.'); } 
+    finally { setIsSavingUser(false); }
   };
 
   const handleDeleteUser = async (userId) => {
-    const shouldDelete = window.confirm('Are you sure you want to delete this user account?');
-    if (!shouldDelete) {
-      return;
-    }
-
-    setDeletingUserId(userId);
-    setUserActionError('');
-    setUserActionSuccess('');
-
+    if (!window.confirm('Are you sure you want to delete this user account?')) return;
+    setDeletingUserId(userId); setUserActionError(''); setUserActionSuccess('');
     try {
-      await axios.delete(`${API_URL}/api/users/${userId}`, {
-        headers: getAuthHeaders(),
-      });
-      setUserActionSuccess('User deleted successfully.');
-      await fetchUsers(activeUserSearch);
-    } catch (error) {
-      setUserActionError(error.response?.data?.message || 'Failed to delete user.');
-    } finally {
-      setDeletingUserId('');
-    }
+      await axios.delete(`${API_URL}/api/users/${userId}`, { headers: getAuthHeaders() });
+      setUserActionSuccess('User deleted successfully.'); await fetchUsers(activeUserSearch);
+    } catch (error) { setUserActionError(error.response?.data?.message || 'Failed to delete user.'); } 
+    finally { setDeletingUserId(''); }
   };
 
-  const handleNewsFormChange = (field, value) => {
-    setNewsForm(prev => ({ ...prev, [field]: value }));
-  };
+  const handleNewsFormChange = (field, value) => { setNewsForm(prev => ({ ...prev, [field]: value })); };
 
   const startEditNews = (news) => {
-    setEditingNewsId(news._id);
-    setNewsActionError('');
-    setNewsActionSuccess('');
-    setNewsForm({
-      title: news.title || '',
-      description: news.description || '',
-      source: news.source || '',
-      politician: news.politician || '',
-      url: news.url || '',
-      image: news.image || '',
-      publishedAt: news.publishedAt ? new Date(news.publishedAt).toISOString().slice(0, 10) : '',
-    });
+    setEditingNewsId(news._id); setNewsActionError(''); setNewsActionSuccess('');
+    setNewsForm({ title: news.title || '', description: news.description || '', source: news.source || '', politician: news.politician || '', url: news.url || '', image: news.image || '', publishedAt: news.publishedAt ? new Date(news.publishedAt).toISOString().slice(0, 10) : '' });
   };
 
   const handleSaveNews = async (event) => {
-    event.preventDefault();
-    setIsSavingNews(true);
-    setNewsActionError('');
-    setNewsActionSuccess('');
-
+    event.preventDefault(); setIsSavingNews(true); setNewsActionError(''); setNewsActionSuccess('');
     try {
-      const payload = {
-        title: newsForm.title,
-        description: newsForm.description,
-        source: newsForm.source,
-        politician: newsForm.politician,
-        url: newsForm.url,
-        image: newsForm.image,
-        publishedAt: newsForm.publishedAt || null,
-      };
-
+      const payload = { title: newsForm.title, description: newsForm.description, source: newsForm.source, politician: newsForm.politician, url: newsForm.url, image: newsForm.image, publishedAt: newsForm.publishedAt || null };
       if (editingNewsId) {
-        await axios.put(`${API_URL}/api/news/update/${editingNewsId}`, payload, {
-          headers: getAuthHeaders(),
-        });
+        await axios.put(`${API_URL}/api/news/update/${editingNewsId}`, payload, { headers: getAuthHeaders() });
         setNewsActionSuccess('News updated successfully.');
       } else {
-        await axios.post(`${API_URL}/api/news`, payload, {
-          headers: getAuthHeaders(),
-        });
+        await axios.post(`${API_URL}/api/news`, payload, { headers: getAuthHeaders() });
         setNewsActionSuccess('News created successfully.');
       }
-
-      resetNewsForm();
-      await fetchNews();
-    } catch (error) {
-      setNewsActionError(error.response?.data?.message || 'Failed to save news.');
-    } finally {
-      setIsSavingNews(false);
-    }
+      resetNewsForm(); await fetchNews();
+    } catch (error) { setNewsActionError(error.response?.data?.message || 'Failed to save news.'); } 
+    finally { setIsSavingNews(false); }
   };
 
   const handleDeleteNews = async (newsId) => {
-    const shouldDelete = window.confirm('Are you sure you want to delete this news item?');
-    if (!shouldDelete) {
-      return;
-    }
-
-    setDeletingNewsId(newsId);
-    setNewsActionError('');
-    setNewsActionSuccess('');
-
+    if (!window.confirm('Are you sure you want to delete this news item?')) return;
+    setDeletingNewsId(newsId); setNewsActionError(''); setNewsActionSuccess('');
     try {
-      await axios.delete(`${API_URL}/api/news/link/${newsId}`, {
-        headers: getAuthHeaders(),
-      });
-      setNewsActionSuccess('News deleted successfully.');
-      await fetchNews();
-    } catch (error) {
-      setNewsActionError(error.response?.data?.message || 'Failed to delete news.');
-    } finally {
-      setDeletingNewsId('');
-    }
+      await axios.delete(`${API_URL}/api/news/link/${newsId}`, { headers: getAuthHeaders() });
+      setNewsActionSuccess('News deleted successfully.'); await fetchNews();
+    } catch (error) { setNewsActionError(error.response?.data?.message || 'Failed to delete news.'); } 
+    finally { setDeletingNewsId(''); }
   };
   const handleUpdateFeedback = async (feedbackId) => {
   try {
@@ -559,16 +421,7 @@ const AdminDashboard = () => {
           )}
         </div>
 
-        <div style={{
-          marginBottom: 14,
-          padding: '10px 12px',
-          borderRadius: 10,
-          background: C.parliament[50],
-          border: `1px solid ${C.parliament[200]}`,
-          color: C.parliament[800],
-          fontSize: 12,
-          lineHeight: 1.5,
-        }}>
+        <div style={{ marginBottom: 14, padding: '10px 12px', borderRadius: 10, background: C.parliament[50], border: `1px solid ${C.parliament[200]}`, color: C.parliament[800], fontSize: 12, lineHeight: 1.5 }}>
           Admin news is optional. The homepage latest-news section prefers the live third-party news feed, while news created here remains available for your managed news content and public news page.
         </div>
 
@@ -589,61 +442,26 @@ const AdminDashboard = () => {
       </form>
 
       {(dataError || newsActionError) && (
-        <div style={{
-          marginBottom: 16,
-          background: '#FEF2F2',
-          border: `1px solid ${C.status.brokColor}`,
-          color: C.status.brokText,
-          borderRadius: 14,
-          padding: '14px 16px',
-          fontSize: 14,
-          fontWeight: 600,
-        }}>
+        <div style={{ marginBottom: 16, background: '#FEF2F2', border: `1px solid ${C.status.brokColor}`, color: C.status.brokText, borderRadius: 14, padding: '14px 16px', fontSize: 14, fontWeight: 600 }}>
           {newsActionError || dataError}
         </div>
       )}
 
       {newsActionSuccess && (
-        <div style={{
-          marginBottom: 16,
-          background: C.status.keptBg,
-          border: `1px solid ${C.status.keptColor}`,
-          color: C.status.keptText,
-          borderRadius: 14,
-          padding: '14px 16px',
-          fontSize: 14,
-          fontWeight: 600,
-        }}>
+        <div style={{ marginBottom: 16, background: C.status.keptBg, border: `1px solid ${C.status.keptColor}`, color: C.status.keptText, borderRadius: 14, padding: '14px 16px', fontSize: 14, fontWeight: 600 }}>
           {newsActionSuccess}
         </div>
       )}
 
       <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
         {newsItems.map((news) => (
-          <div key={news._id} style={{
-            display:'grid',
-            gridTemplateColumns:'1.6fr 1fr 0.9fr 0.8fr',
-            gap:12,
-            alignItems:'center',
-            padding:'14px 16px',
-            borderRadius:12,
-            background:C.gray[50],
-            border:`1px solid ${C.gray[200]}`,
-          }}>
+          <div key={news._id} style={{ display:'grid', gridTemplateColumns:'1.6fr 1fr 0.9fr 0.8fr', gap:12, alignItems:'center', padding:'14px 16px', borderRadius:12, background:C.gray[50], border:`1px solid ${C.gray[200]}` }}>
             <div>
-              <div style={{ fontSize:13, fontWeight:700, color:C.gray[900] }}>
-                {news.title || 'Untitled news item'}
-              </div>
-              <div style={{ fontSize:11, color:C.gray[500], marginTop:4 }}>
-                {news.description || 'No description available'}
-              </div>
+              <div style={{ fontSize:13, fontWeight:700, color:C.gray[900] }}>{news.title || 'Untitled news item'}</div>
+              <div style={{ fontSize:11, color:C.gray[500], marginTop:4 }}>{news.description || 'No description available'}</div>
             </div>
-            <div style={{ fontSize:12, color:C.gray[700] }}>
-              {news.politician || news.source || 'Unknown source'}
-            </div>
-            <div style={{ fontSize:12, color:C.gray[700] }}>
-              {news.source || 'No source'}
-            </div>
+            <div style={{ fontSize:12, color:C.gray[700] }}>{news.politician || news.source || 'Unknown source'}</div>
+            <div style={{ fontSize:12, color:C.gray[700] }}>{news.source || 'No source'}</div>
             <div style={{ textAlign:'right', fontSize:11, color:C.gray[500] }}>
               {formatDate(news.publishedAt || news.createdAt)}
               <div style={{ marginTop:8, display:'flex', justifyContent:'flex-end', gap:8 }}>
@@ -657,7 +475,6 @@ const AdminDashboard = () => {
             </div>
           </div>
         ))}
-
         {!isDataLoading && newsItems.length === 0 && (
           <div style={{ fontSize:12, color:C.gray[500] }}>No news to display yet.</div>
         )}
@@ -682,16 +499,11 @@ const AdminDashboard = () => {
       <div style={{ display:'grid', gridTemplateColumns:'1.15fr 1.85fr', gap:16, marginBottom:20 }}>
         <form onSubmit={handleSaveUser} style={{ background:C.gray[50], border:`1px solid ${C.gray[200]}`, borderRadius:16, padding:'16px' }}>
           <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:14 }}>
-            <div style={{ fontSize:14, fontWeight:700, color:C.gray[900] }}>
-              {editingUserId ? 'Update User Account' : 'Create User Account'}
-            </div>
+            <div style={{ fontSize:14, fontWeight:700, color:C.gray[900] }}>{editingUserId ? 'Update User Account' : 'Create User Account'}</div>
             {editingUserId && (
-              <button type="button" onClick={resetUserForm} style={{ border:'none', background:'transparent', color:C.parliament[600], fontSize:12, fontWeight:700, cursor:'pointer' }}>
-                Cancel edit
-              </button>
+              <button type="button" onClick={resetUserForm} style={{ border:'none', background:'transparent', color:C.parliament[600], fontSize:12, fontWeight:700, cursor:'pointer' }}>Cancel edit</button>
             )}
           </div>
-
           <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12 }}>
             <input value={userForm.name} onChange={(e) => handleUserFormChange('name', e.target.value)} placeholder="Full name" style={{ padding:'11px 12px', borderRadius:10, border:`1px solid ${C.gray[300]}` }} />
             <input value={userForm.email} onChange={(e) => handleUserFormChange('email', e.target.value)} placeholder="Email address" style={{ padding:'11px 12px', borderRadius:10, border:`1px solid ${C.gray[300]}` }} />
@@ -702,18 +514,14 @@ const AdminDashboard = () => {
               {DISTRICTS.map((district) => <option key={district} value={district}>{district}</option>)}
             </select>
             <select value={userForm.role} onChange={(e) => handleUserFormChange('role', e.target.value)} style={{ padding:'11px 12px', borderRadius:10, border:`1px solid ${C.gray[300]}` }}>
-              <option value="citizen">Citizen</option>
-              <option value="admin">Admin</option>
+              <option value="citizen">Citizen</option><option value="admin">Admin</option>
             </select>
             <select value={userForm.status} onChange={(e) => handleUserFormChange('status', e.target.value)} style={{ padding:'11px 12px', borderRadius:10, border:`1px solid ${C.gray[300]}` }}>
-              <option value="active">Active</option>
-              <option value="suspended">Suspended</option>
+              <option value="active">Active</option><option value="suspended">Suspended</option>
             </select>
           </div>
-
           <button type="submit" disabled={isSavingUser} style={{ marginTop:14, border:'none', borderRadius:10, padding:'11px 14px', background:C.parliament[600], color:'#fff', fontWeight:700, cursor:'pointer', display:'inline-flex', alignItems:'center', gap:8 }}>
-            <Plus size={16} />
-            {isSavingUser ? 'Saving...' : editingUserId ? 'Update User' : 'Create User'}
+            <Plus size={16} />{isSavingUser ? 'Saving...' : editingUserId ? 'Update User' : 'Create User'}
           </button>
         </form>
 
@@ -721,107 +529,37 @@ const AdminDashboard = () => {
           <div style={{ fontSize:14, fontWeight:700, color:C.gray[900], marginBottom:12 }}>Search Users</div>
           <form onSubmit={handleUserSearch} style={{ display:'flex', gap:10, marginBottom:12 }}>
             <input value={userSearchInput} onChange={(e) => setUserSearchInput(e.target.value)} placeholder="Search by name, email, district, role..." style={{ flex:1, padding:'11px 12px', borderRadius:10, border:`1px solid ${C.gray[300]}` }} />
-            <button type="submit" style={{ border:'none', borderRadius:10, padding:'0 16px', background:C.gray[900], color:'#fff', fontWeight:700, cursor:'pointer' }}>
-              Search
-            </button>
+            <button type="submit" style={{ border:'none', borderRadius:10, padding:'0 16px', background:C.gray[900], color:'#fff', fontWeight:700, cursor:'pointer' }}>Search</button>
           </form>
-          <button type="button" onClick={async () => { setUserSearchInput(''); setActiveUserSearch(''); setIsDataLoading(true); try { await fetchUsers(''); } finally { setIsDataLoading(false); } }} style={{ border:'none', background:'transparent', color:C.parliament[600], fontWeight:700, cursor:'pointer', padding:0 }}>
-            Clear search
-          </button>
-          {activeUserSearch && (
-            <div style={{ marginTop:14, fontSize:12, color:C.gray[500] }}>
-              Current filter: <span style={{ fontWeight:700, color:C.gray[700] }}>{activeUserSearch}</span>
-            </div>
-          )}
+          <button type="button" onClick={async () => { setUserSearchInput(''); setActiveUserSearch(''); setIsDataLoading(true); try { await fetchUsers(''); } finally { setIsDataLoading(false); } }} style={{ border:'none', background:'transparent', color:C.parliament[600], fontWeight:700, cursor:'pointer', padding:0 }}>Clear search</button>
+          {activeUserSearch && (<div style={{ marginTop:14, fontSize:12, color:C.gray[500] }}>Current filter: <span style={{ fontWeight:700, color:C.gray[700] }}>{activeUserSearch}</span></div>)}
         </div>
       </div>
 
-      {(dataError || userActionError) && (
-        <div style={{
-          marginBottom: 16,
-          background: '#FEF2F2',
-          border: `1px solid ${C.status.brokColor}`,
-          color: C.status.brokText,
-          borderRadius: 14,
-          padding: '14px 16px',
-          fontSize: 14,
-          fontWeight: 600,
-        }}>
-          {userActionError || dataError}
-        </div>
-      )}
-
-      {userActionSuccess && (
-        <div style={{
-          marginBottom: 16,
-          background: C.status.keptBg,
-          border: `1px solid ${C.status.keptColor}`,
-          color: C.status.keptText,
-          borderRadius: 14,
-          padding: '14px 16px',
-          fontSize: 14,
-          fontWeight: 600,
-        }}>
-          {userActionSuccess}
-        </div>
-      )}
+      {(dataError || userActionError) && (<div style={{ marginBottom: 16, background: '#FEF2F2', border: `1px solid ${C.status.brokColor}`, color: C.status.brokText, borderRadius: 14, padding: '14px 16px', fontSize: 14, fontWeight: 600 }}>{userActionError || dataError}</div>)}
+      {userActionSuccess && (<div style={{ marginBottom: 16, background: C.status.keptBg, border: `1px solid ${C.status.keptColor}`, color: C.status.keptText, borderRadius: 14, padding: '14px 16px', fontSize: 14, fontWeight: 600 }}>{userActionSuccess}</div>)}
 
       <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
         {displayedUsers.map((user) => (
-          <div key={user._id} style={{
-            display:'grid',
-            gridTemplateColumns:'1.1fr 1.2fr 0.75fr 0.75fr 0.55fr 0.95fr',
-            gap:12,
-            alignItems:'center',
-            padding:'14px 16px',
-            borderRadius:12,
-            background:C.gray[50],
-            border:`1px solid ${C.gray[200]}`,
-          }}>
+          <div key={user._id} style={{ display:'grid', gridTemplateColumns:'1.1fr 1.2fr 0.75fr 0.75fr 0.55fr 0.95fr', gap:12, alignItems:'center', padding:'14px 16px', borderRadius:12, background:C.gray[50], border:`1px solid ${C.gray[200]}` }}>
             <div>
               <div style={{ fontSize:13, fontWeight:700, color:C.gray[900] }}>{user.name}</div>
               <div style={{ fontSize:10, color:C.gray[400] }}>{user._id}</div>
             </div>
-            <div style={{ fontSize:12, color:C.gray[700], whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>
-              {user.email}
-            </div>
-            <div style={{ fontSize:12, color:C.gray[700] }}>
-              {user.phone || 'No phone'}
-            </div>
-            <div style={{ fontSize:12, color:C.gray[700] }}>
-              {user.district || 'No district'}
-            </div>
-            <div style={{ fontSize:12, color:user.status === 'active' ? C.status.keptText : C.status.brokText, fontWeight:700 }}>
-              {user.status || 'active'}
-            </div>
+            <div style={{ fontSize:12, color:C.gray[700], whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>{user.email}</div>
+            <div style={{ fontSize:12, color:C.gray[700] }}>{user.phone || 'No phone'}</div>
+            <div style={{ fontSize:12, color:C.gray[700] }}>{user.district || 'No district'}</div>
+            <div style={{ fontSize:12, color:user.status === 'active' ? C.status.keptText : C.status.brokText, fontWeight:700 }}>{user.status || 'active'}</div>
             <div style={{ textAlign:'right' }}>
-              <span style={{
-                fontSize:10,
-                fontWeight:700,
-                padding:'4px 9px',
-                borderRadius:99,
-                background:user.role === 'admin' ? C.parliament[100] : C.gray[100],
-                color:user.role === 'admin' ? C.parliament[700] : C.gray[700],
-              }}>
-                {user.role}
-              </span>
+              <span style={{ fontSize:10, fontWeight:700, padding:'4px 9px', borderRadius:99, background:user.role === 'admin' ? C.parliament[100] : C.gray[100], color:user.role === 'admin' ? C.parliament[700] : C.gray[700] }}>{user.role}</span>
               <div style={{ marginTop:8, display:'flex', justifyContent:'flex-end', gap:8 }}>
-                <button type="button" onClick={() => startEditUser(user)} style={{ border:'none', background:'transparent', color:C.civic[600], cursor:'pointer' }}>
-                  <Pencil size={14} />
-                </button>
-                <button type="button" disabled={deletingUserId === user._id || adminUser?._id === user._id} onClick={() => handleDeleteUser(user._id)} style={{ border:'none', background:'transparent', color:C.status.brokColor, cursor:'pointer', opacity: adminUser?._id === user._id ? 0.45 : 1 }}>
-                  <Trash2 size={14} />
-                </button>
+                <button type="button" onClick={() => startEditUser(user)} style={{ border:'none', background:'transparent', color:C.civic[600], cursor:'pointer' }}><Pencil size={14} /></button>
+                <button type="button" disabled={deletingUserId === user._id || adminUser?._id === user._id} onClick={() => handleDeleteUser(user._id)} style={{ border:'none', background:'transparent', color:C.status.brokColor, cursor:'pointer', opacity: adminUser?._id === user._id ? 0.45 : 1 }}><Trash2 size={14} /></button>
               </div>
             </div>
           </div>
         ))}
-
-        {!isDataLoading && displayedUsers.length === 0 && (
-          <div style={{ fontSize:12, color:C.gray[500] }}>
-            {users.length === 0 ? 'No users to display yet.' : 'No users matched your search.'}
-          </div>
-        )}
+        {!isDataLoading && displayedUsers.length === 0 && (<div style={{ fontSize:12, color:C.gray[500] }}>{users.length === 0 ? 'No users to display yet.' : 'No users matched your search.'}</div>)}
       </div>
     </div>
   );
@@ -1038,18 +776,10 @@ const AdminDashboard = () => {
 
   useEffect(() => {
     const storedUser = localStorage.getItem('userInfo');
-
-    if (!storedUser) {
-      navigate('/login');
-      return;
-    }
-
+    if (!storedUser) { navigate('/login'); return; }
     const parsedUser = JSON.parse(storedUser);
     setAdminUser(parsedUser);
-    if (parsedUser.role !== 'admin') {
-      navigate('/');
-      return;
-    }
+    if (parsedUser.role !== 'admin') { navigate('/'); return; }
 
     const fetchDashboardData = async () => {
       setIsDataLoading(true);
@@ -1066,8 +796,11 @@ const AdminDashboard = () => {
       } finally {
         setIsDataLoading(false);
       }
+      setIsDataLoading(true); setDataError('');
+      try { await Promise.all([fetchUsers(activeUserSearch), fetchNews()]); } 
+      catch (error) { setDataError(error.response?.data?.message || 'Failed to load admin dashboard data.'); } 
+      finally { setIsDataLoading(false); }
     };
-
     fetchDashboardData();
   }, [API_URL, navigate, activeUserSearch]);
 
@@ -1081,52 +814,24 @@ const AdminDashboard = () => {
     <div style={{ display:'flex', height:'100vh', background: C.gray[50], fontFamily:"'DM Sans', sans-serif", overflow:'hidden' }}>
 
       {/* ── SIDEBAR ─────────────────────────────────────────── */}
-      <aside style={{
-        width: sidebarOpen ? 240 : 70, flexShrink:0,
-        background: C.sidebar,   // zinc-900 per Janaya360 spec
-        display:'flex', flexDirection:'column',
-        transition:'width 0.25s ease', overflow:'hidden',
-      }}>
-
-        {/* Logo */}
+      <aside style={{ width: sidebarOpen ? 240 : 70, flexShrink:0, background: C.sidebar, display:'flex', flexDirection:'column', transition:'width 0.25s ease', overflow:'hidden' }}>
         <div style={{ padding:'20px 18px 16px', borderBottom:`1px solid rgba(255,255,255,0.07)`, display:'flex', alignItems:'center', gap:10 }}>
-          <div style={{
-            width:34, height:34, borderRadius:10,
-            background:`linear-gradient(135deg, ${C.parliament[600]}, ${C.parliament[500]})`,
-            display:'flex', alignItems:'center', justifyContent:'center',
-            fontSize:14, fontWeight:800, color:'#fff', flexShrink:0,
-            boxShadow:`0 2px 8px rgba(234,88,12,0.4)`,
-          }}>J</div>
+          <div style={{ width:34, height:34, borderRadius:10, background:`linear-gradient(135deg, ${C.parliament[600]}, ${C.parliament[500]})`, display:'flex', alignItems:'center', justifyContent:'center', fontSize:14, fontWeight:800, color:'#fff', flexShrink:0, boxShadow:`0 2px 8px rgba(234,88,12,0.4)` }}>J</div>
           {sidebarOpen && (
             <div>
-              <div style={{ fontSize:15, fontWeight:700, color:'#fff', lineHeight:1.2 }}>
-                Janaya<span style={{ color: C.parliament[500] }}>360</span>
-              </div>
+              <div style={{ fontSize:15, fontWeight:700, color:'#fff', lineHeight:1.2 }}>Janaya<span style={{ color: C.parliament[500] }}>360</span></div>
               <div style={{ fontSize:10, color:'rgba(255,255,255,0.35)', letterSpacing:0.5 }}>Admin Panel</div>
             </div>
           )}
         </div>
 
-        {/* ── Go to Public Site button ── */}
         <div style={{ padding: sidebarOpen ? '12px 10px 4px' : '12px 6px 4px' }}>
           <Link to="/" style={{ textDecoration:'none' }}>
-            <div style={{
-              display:'flex', alignItems:'center', gap:8,
-              padding: sidebarOpen ? '9px 10px' : '9px 0',
-              justifyContent: !sidebarOpen ? 'center' : 'flex-start',
-              background:`rgba(234,88,12,0.15)`,
-              border:`1px solid rgba(234,88,12,0.3)`,
-              borderRadius:10, cursor:'pointer', transition:'background 0.15s',
-            }}
-              onMouseEnter={e => e.currentTarget.style.background = `rgba(234,88,12,0.25)`}
-              onMouseLeave={e => e.currentTarget.style.background = `rgba(234,88,12,0.15)`}
-            >
+            <div style={{ display:'flex', alignItems:'center', gap:8, padding: sidebarOpen ? '9px 10px' : '9px 0', justifyContent: !sidebarOpen ? 'center' : 'flex-start', background:`rgba(234,88,12,0.15)`, border:`1px solid rgba(234,88,12,0.3)`, borderRadius:10, cursor:'pointer', transition:'background 0.15s' }} onMouseEnter={e => e.currentTarget.style.background = `rgba(234,88,12,0.25)`} onMouseLeave={e => e.currentTarget.style.background = `rgba(234,88,12,0.15)`}>
               <Home size={14} color={C.parliament[500]} />
               {sidebarOpen && (
                 <>
-                  <span style={{ fontSize:12, fontWeight:600, color: C.parliament[400] || '#FB923C', flex:1 }}>
-                    Go to Public Site
-                  </span>
+                  <span style={{ fontSize:12, fontWeight:600, color: C.parliament[400] || '#FB923C', flex:1 }}>Go to Public Site</span>
                   <ExternalLink size={11} color="rgba(234,88,12,0.6)" />
                 </>
               )}
@@ -1134,54 +839,21 @@ const AdminDashboard = () => {
           </Link>
         </div>
 
-        {/* Nav */}
         <nav style={{ flex:1, padding:'8px 0', overflowY:'auto' }}>
-          {[
-            { section:'Main',    items: NAV.slice(0,4) },
-            { section:'Content', items: NAV.slice(4,6) },
-            { section:'System',  items: NAV.slice(6)   },
-          ].map(({ section, items }) => (
+          {[ { section:'Main', items: NAV.slice(0,4) }, { section:'Content', items: NAV.slice(4,6) }, { section:'System', items: NAV.slice(6) } ].map(({ section, items }) => (
             <div key={section}>
-              {sidebarOpen && (
-                <div style={{ padding:'8px 18px 4px', fontSize:9, fontWeight:700, color:'rgba(255,255,255,0.2)', letterSpacing:1.2, textTransform:'uppercase' }}>
-                  {section}
-                </div>
-              )}
+              {sidebarOpen && (<div style={{ padding:'8px 18px 4px', fontSize:9, fontWeight:700, color:'rgba(255,255,255,0.2)', letterSpacing:1.2, textTransform:'uppercase' }}>{section}</div>)}
               {items.map(item => {
                 const Icon   = item.icon;
-                const active = item.hash
-                  ? location.pathname === item.path && location.hash === item.hash
-                  : location.pathname === item.path;
+                const active = item.hash ? location.pathname === item.path && location.hash === item.hash : location.pathname === item.path;
                 return (
-                  <Link
-                    key={`${item.path}${item.hash || ''}`}
-                    to={item.hash ? `${item.path}${item.hash}` : item.path}
-                    style={{ textDecoration:'none' }}
-                  >
-                    <div style={{
-                      display:'flex', alignItems:'center', gap:10,
-                      padding: sidebarOpen ? '10px 18px' : '10px 0',
-                      justifyContent: !sidebarOpen ? 'center' : 'flex-start',
-                      margin:'1px 8px', borderRadius:10, cursor:'pointer',
-                      background: active ? `rgba(234,88,12,0.18)` : 'transparent',
-                      transition:'background 0.15s',
-                    }}
-                      onMouseEnter={e => !active && (e.currentTarget.style.background = 'rgba(255,255,255,0.05)')}
-                      onMouseLeave={e => !active && (e.currentTarget.style.background = 'transparent')}
-                    >
+                  <Link key={`${item.path}${item.hash || ''}`} to={item.hash ? `${item.path}${item.hash}` : item.path} style={{ textDecoration:'none' }}>
+                    <div style={{ display:'flex', alignItems:'center', gap:10, padding: sidebarOpen ? '10px 18px' : '10px 0', justifyContent: !sidebarOpen ? 'center' : 'flex-start', margin:'1px 8px', borderRadius:10, cursor:'pointer', background: active ? `rgba(234,88,12,0.18)` : 'transparent', transition:'background 0.15s' }} onMouseEnter={e => !active && (e.currentTarget.style.background = 'rgba(255,255,255,0.05)')} onMouseLeave={e => !active && (e.currentTarget.style.background = 'transparent')}>
                       <Icon size={16} color={active ? C.parliament[500] : 'rgba(255,255,255,0.4)'} />
                       {sidebarOpen && (
                         <>
-                          <span style={{ fontSize:13, fontWeight: active ? 600 : 400, color: active ? C.parliament[400] || '#FB923C' : 'rgba(255,255,255,0.55)', flex:1 }}>
-                            {item.label}
-                          </span>
-                          {item.badge && (
-                            <span style={{
-                              fontSize:10, fontWeight:700, padding:'1px 7px', borderRadius:99,
-                              background: active ? C.parliament[600] : 'rgba(234,88,12,0.25)',
-                              color: active ? '#fff' : C.parliament[500],
-                            }}>{item.badge}</span>
-                          )}
+                          <span style={{ fontSize:13, fontWeight: active ? 600 : 400, color: active ? C.parliament[400] || '#FB923C' : 'rgba(255,255,255,0.55)', flex:1 }}>{item.label}</span>
+                          {item.badge && (<span style={{ fontSize:10, fontWeight:700, padding:'1px 7px', borderRadius:99, background: active ? C.parliament[600] : 'rgba(234,88,12,0.25)', color: active ? '#fff' : C.parliament[500] }}>{item.badge}</span>)}
                         </>
                       )}
                     </div>
@@ -1192,34 +864,16 @@ const AdminDashboard = () => {
           ))}
         </nav>
 
-        {/* Bottom: user + logout */}
         <div style={{ padding:'12px 8px', borderTop:'1px solid rgba(255,255,255,0.07)' }}>
-          <div style={{
-            display:'flex', alignItems:'center', gap:10,
-            padding: sidebarOpen ? '10px 10px' : '10px 0',
-            borderRadius:10, cursor:'pointer',
-            justifyContent: !sidebarOpen ? 'center' : 'flex-start',
-          }}>
-            <div style={{
-              width:32, height:32, borderRadius:'50%',
-              background:`rgba(234,88,12,0.2)`,
-              display:'flex', alignItems:'center', justifyContent:'center',
-              fontSize:11, fontWeight:700, color: C.parliament[500], flexShrink:0,
-              border:`1px solid rgba(234,88,12,0.3)`,
-            }}>AD</div>
+          <div style={{ display:'flex', alignItems:'center', gap:10, padding: sidebarOpen ? '10px 10px' : '10px 0', borderRadius:10, cursor:'pointer', justifyContent: !sidebarOpen ? 'center' : 'flex-start' }}>
+            <div style={{ width:32, height:32, borderRadius:'50%', background:`rgba(234,88,12,0.2)`, display:'flex', alignItems:'center', justifyContent:'center', fontSize:11, fontWeight:700, color: C.parliament[500], flexShrink:0, border:`1px solid rgba(234,88,12,0.3)` }}>AD</div>
             {sidebarOpen && (
               <>
                 <div style={{ flex:1, minWidth:0 }}>
                   <div style={{ fontSize:12, fontWeight:600, color:'#fff' }}>Admin User</div>
                   <div style={{ fontSize:10, color:'rgba(255,255,255,0.35)' }}>Super Admin</div>
                 </div>
-                <button
-                  onClick={handleLogout}
-                  style={{ background:'none', border:'none', cursor:'pointer', padding:4, borderRadius:6, display:'flex', alignItems:'center' }}
-                  title="Logout"
-                  onMouseEnter={e => e.currentTarget.style.background = 'rgba(220,38,38,0.15)'}
-                  onMouseLeave={e => e.currentTarget.style.background = 'none'}
-                >
+                <button onClick={handleLogout} style={{ background:'none', border:'none', cursor:'pointer', padding:4, borderRadius:6, display:'flex', alignItems:'center' }} title="Logout" onMouseEnter={e => e.currentTarget.style.background = 'rgba(220,38,38,0.15)'} onMouseLeave={e => e.currentTarget.style.background = 'none'}>
                   <LogOut size={14} color="rgba(255,255,255,0.4)" />
                 </button>
               </>
@@ -1232,84 +886,46 @@ const AdminDashboard = () => {
       <div style={{ flex:1, display:'flex', flexDirection:'column', overflow:'hidden' }}>
 
         {/* Topbar */}
-        <header style={{
-          height:64, background:'#fff', borderBottom:`1px solid ${C.gray[200]}`,
-          display:'flex', alignItems:'center', justifyContent:'space-between',
-          padding:'0 28px', flexShrink:0,
-          boxShadow:`0 1px 0 ${C.gray[200]}`,
-        }}>
+        <header style={{ height:64, background:'#fff', borderBottom:`1px solid ${C.gray[200]}`, display:'flex', alignItems:'center', justifyContent:'space-between', padding:'0 28px', flexShrink:0, boxShadow:`0 1px 0 ${C.gray[200]}` }}>
           <div style={{ display:'flex', alignItems:'center', gap:16 }}>
-            {/* Hamburger */}
-            <button
-              onClick={() => setSidebarOpen(o => !o)}
-              style={{ background:'none', border:'none', cursor:'pointer', padding:4, borderRadius:6, display:'flex', alignItems:'center' }}
-            >
-              <div style={{ display:'flex', flexDirection:'column', gap:4 }}>
-                {[0,1,2].map(i => <div key={i} style={{ width:18, height:1.5, background: C.gray[500], borderRadius:2 }} />)}
-              </div>
+            <button onClick={() => setSidebarOpen(o => !o)} style={{ background:'none', border:'none', cursor:'pointer', padding:4, borderRadius:6, display:'flex', alignItems:'center' }}>
+              <div style={{ display:'flex', flexDirection:'column', gap:4 }}>{[0,1,2].map(i => <div key={i} style={{ width:18, height:1.5, background: C.gray[500], borderRadius:2 }} />)}</div>
             </button>
-          <div>
+            <div>
+              {/* --- DYNAMIC HEADER TITLE --- */}
               <div style={{ fontSize:16, fontWeight:700, color: C.gray[900] }}>
-                {isUsersPage ? 'User Management' : isNewsPage ? 'News Management' : 'Overview Dashboard'}
+                {isUsersPage ? 'User Management' : isNewsPage ? 'News Management' : isPromisesPage ? 'Promises Management' : 'Overview Dashboard'}
               </div>
               <div style={{ fontSize:11, color: C.gray[400] }}>
-                {isUsersPage ? 'All registered users from the database' : isNewsPage ? 'All news records from the database' : 'Welcome back, Admin'}
+                {isUsersPage ? 'All registered users from the database' : isNewsPage ? 'All news records from the database' : isPromisesPage ? 'Monitor and update political commitments' : 'Welcome back, Admin'}
               </div>
             </div>
           </div>
 
           <div style={{ display:'flex', alignItems:'center', gap:12 }}>
-            {/* Search */}
-            <div style={{
-              display:'flex', alignItems:'center', gap:8,
-              background: C.gray[50], border:`1px solid ${C.gray[200]}`, borderRadius:10,
-              padding:'8px 14px', minWidth:200,
-            }}>
+            <div style={{ display:'flex', alignItems:'center', gap:8, background: C.gray[50], border:`1px solid ${C.gray[200]}`, borderRadius:10, padding:'8px 14px', minWidth:200 }}>
               <Search size={13} color={C.gray[400]} />
               <span style={{ fontSize:13, color: C.gray[300] }}>Search anything...</span>
             </div>
-
-            {/* Go to site — topbar shortcut */}
             <Link to="/" style={{ textDecoration:'none' }}>
-              <div style={{
-                display:'flex', alignItems:'center', gap:6,
-                padding:'7px 12px', borderRadius:10,
-                background: C.parliament[50],
-                border:`1px solid ${C.parliament[200]}`,
-                cursor:'pointer', transition:'background 0.15s',
-              }}
-                onMouseEnter={e => e.currentTarget.style.background = C.parliament[100]}
-                onMouseLeave={e => e.currentTarget.style.background = C.parliament[50]}
-              >
+              <div style={{ display:'flex', alignItems:'center', gap:6, padding:'7px 12px', borderRadius:10, background: C.parliament[50], border:`1px solid ${C.parliament[200]}`, cursor:'pointer', transition:'background 0.15s' }} onMouseEnter={e => e.currentTarget.style.background = C.parliament[100]} onMouseLeave={e => e.currentTarget.style.background = C.parliament[50]}>
                 <Home size={13} color={C.parliament[600]} />
                 <span style={{ fontSize:12, fontWeight:600, color: C.parliament[600] }}>Public Site</span>
                 <ExternalLink size={11} color={C.parliament[500]} />
               </div>
             </Link>
-
-            {/* Bell */}
-            <div style={{
-              position:'relative', width:36, height:36,
-              background: C.gray[50], border:`1px solid ${C.gray[200]}`,
-              borderRadius:10, display:'flex', alignItems:'center', justifyContent:'center', cursor:'pointer',
-            }}>
+            <div style={{ position:'relative', width:36, height:36, background: C.gray[50], border:`1px solid ${C.gray[200]}`, borderRadius:10, display:'flex', alignItems:'center', justifyContent:'center', cursor:'pointer' }}>
               <Bell size={15} color={C.gray[500]} />
               <div style={{ position:'absolute', top:7, right:8, width:7, height:7, background: C.status.brokColor, borderRadius:'50%', border:'1.5px solid #fff' }} />
             </div>
-
-            {/* Avatar */}
-            <div style={{
-              width:36, height:36, borderRadius:'50%',
-              background: C.parliament[100],
-              display:'flex', alignItems:'center', justifyContent:'center',
-              fontSize:12, fontWeight:700, color: C.parliament[700], cursor:'pointer',
-              border:`2px solid ${C.parliament[200]}`,
-            }}>AD</div>
+            <div style={{ width:36, height:36, borderRadius:'50%', background: C.parliament[100], display:'flex', alignItems:'center', justifyContent:'center', fontSize:12, fontWeight:700, color: C.parliament[700], cursor:'pointer', border:`2px solid ${C.parliament[200]}` }}>AD</div>
           </div>
         </header>
 
         {/* Scrollable content */}
         <div style={{ flex:1, overflowY:'auto', padding:'24px 28px' }}>
+          
+          {/* --- DYNAMIC RENDERING BLOCK --- */}
           {isUsersPage ? (
             renderUsersTable()
            ) : isNewsPage ? (
@@ -1321,13 +937,18 @@ const AdminDashboard = () => {
 
 
           {/* Stat cards */}
+          ) : isNewsPage ? (
+            renderNewsTable()
+          ) : isPromisesPage ? (
+            <PromisesManagement /> // --- RENDERS YOUR SEPARATE COMPONENT HERE ---
+          ) : (
+          <>
+          {/* Overview Dashboard */}
           <div ref={ref} style={{ display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:16, marginBottom:24 }}>
             {STATS.map((s,i) => <StatCard key={i} stat={s} inView={inView} />)}
           </div>
 
-          {/* Row 2 */}
           <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:16, marginBottom:20 }}>
-
             {/* Promise status breakdown */}
             <div style={{ background:'#fff', borderRadius:16, padding:'20px', border:`1px solid ${C.gray[200]}` }}>
               <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:18 }}>
@@ -1343,10 +964,7 @@ const AdminDashboard = () => {
                     <div style={{ flex:1, height:8, background: C.gray[100], borderRadius:99, overflow:'hidden' }}>
                       <div style={{ width:`${s.pct}%`, height:'100%', background:s.color, borderRadius:99, transition:'width 1s ease' }} />
                     </div>
-                    <span style={{
-                      fontSize:11, fontWeight:600, padding:'2px 8px', borderRadius:99,
-                      background:s.bg, color:s.text, width:42, textAlign:'center', flexShrink:0,
-                    }}>{s.pct}%</span>
+                    <span style={{ fontSize:11, fontWeight:600, padding:'2px 8px', borderRadius:99, background:s.bg, color:s.text, width:42, textAlign:'center', flexShrink:0 }}>{s.pct}%</span>
                   </div>
                 ))}
               </div>
@@ -1376,19 +994,14 @@ const AdminDashboard = () => {
                       <div style={{ fontSize:12, fontWeight:600, color: C.gray[900], whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>{p.text}</div>
                       <div style={{ fontSize:10, color: C.gray[400] }}>{p.name} · {p.party}</div>
                     </div>
-                    <span style={{
-                      fontSize:10, fontWeight:600, padding:'3px 9px', borderRadius:99, flexShrink:0,
-                      background: statusCfg[p.status].bg, color: statusCfg[p.status].text,
-                    }}>{p.status}</span>
+                    <span style={{ fontSize:10, fontWeight:600, padding:'3px 9px', borderRadius:99, flexShrink:0, background: statusCfg[p.status].bg, color: statusCfg[p.status].text }}>{p.status}</span>
                   </div>
                 ))}
               </div>
             </div>
           </div>
 
-          {/* Row 3 */}
           <div style={{ display:'grid', gridTemplateColumns:'1.8fr 1fr', gap:16, marginBottom:20 }}>
-
             {/* Feedback table */}
             <div style={{ background:'#fff', borderRadius:16, padding:'20px', border:`1px solid ${C.gray[200]}` }}>
               <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:16 }}>
@@ -1411,12 +1024,7 @@ const AdminDashboard = () => {
                       <td style={{ padding:'10px 10px', fontWeight:600, color: C.gray[900] }}>{f.name}</td>
                       <td style={{ padding:'10px 10px', color: C.gray[500], maxWidth:140, whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>{f.promise}</td>
                       <td style={{ padding:'10px 10px' }}>
-                        <span style={{
-                          display:'inline-flex', alignItems:'center', gap:4,
-                          fontSize:10, fontWeight:600, padding:'2px 8px', borderRadius:99,
-                          background: f.vote ? C.status.keptBg  : C.status.brokBg,
-                          color:      f.vote ? C.status.keptText : C.status.brokText,
-                        }}>
+                        <span style={{ display:'inline-flex', alignItems:'center', gap:4, fontSize:10, fontWeight:600, padding:'2px 8px', borderRadius:99, background: f.vote ? C.status.keptBg  : C.status.brokBg, color:      f.vote ? C.status.keptText : C.status.brokText }}>
                           {f.vote ? <ThumbsUp size={10}/> : <ThumbsDown size={10}/>}
                           {f.vote ? 'Truthful' : 'False'}
                         </span>
@@ -1494,106 +1102,10 @@ const AdminDashboard = () => {
           </div>
 
           {dataError && (
-            <div style={{
-              marginTop: 20,
-              background: '#FEF2F2',
-              border: `1px solid ${C.status.brokColor}`,
-              color: C.status.brokText,
-              borderRadius: 16,
-              padding: '14px 16px',
-              fontSize: 14,
-              fontWeight: 600,
-            }}>
+            <div style={{ marginTop: 20, background: '#FEF2F2', border: `1px solid ${C.status.brokColor}`, color: C.status.brokText, borderRadius: 16, padding: '14px 16px', fontSize: 14, fontWeight: 600 }}>
               {dataError}
             </div>
           )}
-
-          <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:16, marginTop:20 }}>
-            <div id="user-management" style={{ background:'#fff', borderRadius:16, padding:'20px', border:`1px solid ${C.gray[200]}` }}>
-              <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:16 }}>
-                <div>
-                  <div style={{ fontSize:14, fontWeight:700, color: C.gray[900] }}>User Management</div>
-                  <div style={{ fontSize:11, color: C.gray[400], marginTop:4 }}>
-                    {isDataLoading ? 'Loading users...' : `${users.length} users found`}
-                  </div>
-                </div>
-                <Link to="/users" style={{ fontSize:12, color: C.parliament[600], textDecoration:'none', display:'flex', alignItems:'center', gap:2 }}>
-                  View all <ChevronRight size={12}/>
-                </Link>
-              </div>
-
-              <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
-                {users.slice(0, 6).map((user) => (
-                  <div key={user._id} style={{
-                    display:'flex',
-                    alignItems:'center',
-                    justifyContent:'space-between',
-                    gap:12,
-                    padding:'12px 14px',
-                    borderRadius:12,
-                    background:C.gray[50],
-                    border:`1px solid ${C.gray[200]}`,
-                  }}>
-                    <div style={{ minWidth:0 }}>
-                      <div style={{ fontSize:13, fontWeight:700, color:C.gray[900] }}>{user.name}</div>
-                      <div style={{ fontSize:11, color:C.gray[500], whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>
-                        {user.email}
-                      </div>
-                    </div>
-                    <div style={{ textAlign:'right', flexShrink:0 }}>
-                      <div style={{ fontSize:11, fontWeight:700, color:user.role === 'admin' ? C.parliament[700] : C.gray[700] }}>
-                        {user.role}
-                      </div>
-                      <div style={{ fontSize:10, color:C.gray[400] }}>
-                        {user.district || 'No district'}
-                      </div>
-                    </div>
-                  </div>
-                ))}
-
-                {!isDataLoading && users.length === 0 && (
-                  <div style={{ fontSize:12, color:C.gray[500] }}>No users to display yet.</div>
-                )}
-              </div>
-            </div>
-
-            <div id="news-management" style={{ background:'#fff', borderRadius:16, padding:'20px', border:`1px solid ${C.gray[200]}` }}>
-              <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:16 }}>
-                <div>
-                  <div style={{ fontSize:14, fontWeight:700, color: C.gray[900] }}>News Management</div>
-                  <div style={{ fontSize:11, color: C.gray[400], marginTop:4 }}>
-                    {isDataLoading ? 'Loading news...' : `${newsItems.length} news items found`}
-                  </div>
-                </div>
-              </div>
-
-              <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
-                {newsItems.slice(0, 6).map((news) => (
-                  <div key={news._id} style={{
-                    padding:'12px 14px',
-                    borderRadius:12,
-                    background:C.gray[50],
-                    border:`1px solid ${C.gray[200]}`,
-                  }}>
-                    <div style={{ fontSize:13, fontWeight:700, color:C.gray[900], marginBottom:4 }}>
-                      {news.title || 'Untitled news item'}
-                    </div>
-                    <div style={{ fontSize:11, color:C.gray[500], marginBottom:6 }}>
-                      {news.politician || news.source || 'News record'}
-                    </div>
-                    <div style={{ display:'flex', justifyContent:'space-between', gap:8, fontSize:10, color:C.gray[400] }}>
-                      <span>{news.source || 'Unknown source'}</span>
-                      <span>{formatDate(news.publishedAt || news.createdAt)}</span>
-                    </div>
-                  </div>
-                ))}
-
-                {!isDataLoading && newsItems.length === 0 && (
-                  <div style={{ fontSize:12, color:C.gray[500] }}>No news records to display yet.</div>
-                )}
-              </div>
-            </div>
-          </div>
           </>
           )}
 

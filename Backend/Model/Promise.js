@@ -30,6 +30,14 @@ const PromiseSchema = new mongoose.Schema({
         required: [true, 'Category is required'],
         enum: ['Economy', 'Education', 'Health', 'Infrastructure', 'Governance', 'Agriculture', 'Other'] 
     },
+    
+    // NEW: Added the District field for geo-filtering
+    district: { 
+        type: String, 
+        default: 'National',
+        trim: true
+    },
+
     status: { 
         type: String, 
         enum: ['Pending', 'In-Progress', 'Kept', 'Broken'], 
@@ -42,10 +50,17 @@ const PromiseSchema = new mongoose.Schema({
         default: null
     },
     evidenceNotes: { type: String, trim: true },
-    history: [PromiseHistorySchema] 
+    history: [PromiseHistorySchema],
+
+    // NEW: Tracking public community consensus
+    upvotes: { type: Number, default: 0 },
+    downvotes: { type: Number, default: 0 }
+
 }, { timestamps: true });
 
+// Excellent performance optimization!
 PromiseSchema.index({ politicianId: 1, status: 1 });
 PromiseSchema.index({ category: 1 });
+PromiseSchema.index({ district: 1 }); // Added index for fast district filtering
 
 export default mongoose.model('Promise', PromiseSchema);
