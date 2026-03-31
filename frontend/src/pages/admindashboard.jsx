@@ -115,6 +115,9 @@ const statusCfg = {
 /* ── NAV ITEMS ────────────────────────────────────────────────── */
 const NAV = [
   { label:'Dashboard',     icon:LayoutDashboard, path:'/admin-dashboard', badge:null  },
+  { label:'Politicians',   icon:Users,           path:'/politicians',     badge:'89'  },
+  { label:'Promises',      icon:FileText,        path:'/promises',        badge:'247' },
+  { label:'Feedback',      icon:MessageSquare,   path:'/admin-feedback',  badge:'12'  },
   { label:'Politicians',   icon:Users,           path:'/admin-politicians',     badge:'89'  },
   { label:'Promises',      icon:FileText,        path:'/admin-promises',        badge:'247' },
   { label:'Feedback',      icon:MessageSquare,   path:'/feedback',        badge:'12'  },
@@ -189,6 +192,7 @@ const StatCard = ({ stat, inView }) => {
    MAIN COMPONENT
 ═══════════════════════════════════════════════════════════════ */
 const AdminDashboard = () => {
+
   const location  = useLocation();
   const navigate  = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -196,6 +200,16 @@ const AdminDashboard = () => {
   const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
   const [users, setUsers] = useState([]);
   const [newsItems, setNewsItems] = useState([]);
+  const [feedbackItems, setFeedbackItems] = useState([]);
+  const [feedbackSearch, setFeedbackSearch] = useState('');
+  const [editingFeedbackId, setEditingFeedbackId] = useState(null);
+  const [feedbackForm, setFeedbackForm] = useState({
+     citizenName: "",
+     comment: "",
+     feedbackType: "",
+     district: "",
+     });
+
   const [dataError, setDataError] = useState('');
   const [isDataLoading, setIsDataLoading] = useState(true);
   const [adminUser, setAdminUser] = useState(null);
@@ -223,6 +237,7 @@ const AdminDashboard = () => {
   // ROUTING LOGIC
   const isUsersPage = location.pathname === '/users';
   const isNewsPage = location.pathname === '/admin-news';
+  const isFeedbackPage = location.pathname === '/admin-feedback';
   const isPromisesPage = location.pathname === '/admin-promises'; // ADDED PROMISES ROUTE CHECK
 
   const searchTerm = (activeUserSearch || userSearchInput).trim().toLowerCase();
@@ -278,7 +293,6 @@ const AdminDashboard = () => {
     setUserForm(prev => ({ ...prev, [field]: value }));
   };
   
-  const handleUserFormChange = (field, value) => { setUserForm(prev => ({ ...prev, [field]: value })); };
 
   const handleUserSearch = async (event) => {
     event.preventDefault();
@@ -363,6 +377,23 @@ const AdminDashboard = () => {
     } catch (error) { setNewsActionError(error.response?.data?.message || 'Failed to delete news.'); } 
     finally { setDeletingNewsId(''); }
   };
+  const handleUpdateFeedback = async (feedbackId) => {
+  try {
+    await axios.patch(
+      `${API_URL}/api/feedback/${feedbackId}`,
+      feedbackForm,
+      { headers: getAuthHeaders() }
+    );
+
+    setEditingFeedbackId(null); // exit edit mode
+    fetchFeedback();            // reload data
+  } catch (error) {
+    alert("Failed to update feedback");
+    console.error(error);
+  }
+};
+
+
 
   const renderNewsTable = () => (
     <div style={{ background:'#fff', borderRadius:16, padding:'20px', border:`1px solid ${C.gray[200]}` }}>
@@ -493,6 +524,7 @@ const AdminDashboard = () => {
             <Plus size={16} />{isSavingUser ? 'Saving...' : editingUserId ? 'Update User' : 'Create User'}
           </button>
         </form>
+        
 
         <div style={{ background:C.gray[50], border:`1px solid ${C.gray[200]}`, borderRadius:16, padding:'16px' }}>
           <div style={{ fontSize:14, fontWeight:700, color:C.gray[900], marginBottom:12 }}>Search Users</div>
@@ -533,6 +565,216 @@ const AdminDashboard = () => {
     </div>
   );
 
+  const renderFeedbackManagement = () => (
+  <div style={{ background:'#fff', borderRadius:16, padding:'20px', border:`1px solid ${C.gray[200]}` }}>
+    <div style={{ marginBottom:16 }}>
+      <div style={{ fontSize:14, fontWeight:700, color:C.gray[900] }}>Feedback Management</div>
+      <div style={{ fontSize:11, color:C.gray[400], marginTop:4 }}>
+        {feedbackItems.filter(item =>
+             item.comment?.toLowerCase().includes(feedbackSearch.toLowerCase())
+            ).length} feedback records found
+      </div>
+    </div>
+
+    <input
+      type="text"
+      placeholder="Search feedback by name, comment, type, or district..."
+      value={feedbackSearch}
+      onChange={(e) => setFeedbackSearch(e.target.value)}
+     style={{
+        width: '100%',
+        padding: '10px 12px',
+        borderRadius: 10,
+        border: `1px solid ${C.gray[300]}`,
+        marginBottom: 20,
+      fontSize: 12,
+    }}
+    />
+
+    <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
+      {feedbackItems
+      .filter(item => {
+      const term = feedbackSearch.toLowerCase();
+
+      return (
+      item.comment?.toLowerCase().includes(term) ||
+      item.citizenName?.toLowerCase().includes(term) ||
+      item.feedbackType?.toLowerCase().includes(term) ||
+      item.district?.toLowerCase().includes(term)
+    );
+   })
+    .map(item => (
+        <div key={item._id} style={{
+          padding:'14px 16px',
+          borderRadius:12,
+          background:C.gray[50],
+          border:`1px solid ${C.gray[200]}`,
+          display:'flex',
+          justifyContent:'space-between'
+        }}>
+          
+          {editingFeedbackId === item._id ? (
+         /* ✅ EDIT MODE */
+          <div
+            style={{
+            background: "#FFF7ED",          // ✅ light orange
+            border: "1px solid #FED7AA",    // ✅ orange border
+            borderRadius: 12,
+            padding: 16,
+            display: "flex",
+            flexDirection: "column",
+            gap: 10,
+            width: "100%",
+          }}
+          >
+            
+
+              {/* ✅ Citizen Name */}
+           <label style={{ fontSize: 15, fontWeight: 600 }}>
+           Citizen Name
+           </label>
+           <input
+           value={feedbackForm.citizenName}
+           onChange={(e) =>
+          setFeedbackForm({ ...feedbackForm, citizenName: e.target.value })
+          }
+          style={{ marginBottom: 10 }}
+        />
+
+           {/* ✅ Comment */}
+           <label style={{ fontSize: 15, fontWeight: 600 }}>
+          Comment
+         </label>
+         <textarea
+         value={feedbackForm.comment}
+        onChange={(e) =>
+        setFeedbackForm({ ...feedbackForm, comment: e.target.value })
+        }
+        rows={4}
+       style={{ marginBottom: 10 }}
+        />
+        <label style={{ fontSize: 15, fontWeight: 600 }}>
+        Feedback Type
+        </label>
+        <select
+        value={feedbackForm.feedbackType}
+       onChange={(e) =>
+        setFeedbackForm({ ...feedbackForm, feedbackType: e.target.value })
+       }
+      style={{ marginBottom: 10 }}
+     >
+         <option value="">Select Type</option>
+         <option>Opinion</option>
+        <option>Complaint</option>
+        <option>Suggestion</option>
+        <option>Evidence</option>
+      </select>
+       <label style={{ fontSize: 15, fontWeight: 600 }}>
+          District
+      </label>
+      <input
+       value={feedbackForm.district}
+       onChange={(e) =>
+       setFeedbackForm({ ...feedbackForm, district: e.target.value })
+      }
+        />
+      
+
+       <div
+           style={{
+           display: "flex",
+           justifyContent: "flex-end",
+          gap: 12,        // ✅ spacing between Cancel & Save
+          marginTop: 14,
+          }}
+         >
+  <button
+  onClick={() => setEditingFeedbackId(null)}
+  style={{
+    background: "#FFFFFF",          // ✅ white button
+    color: "#374151",               // dark gray text
+    border: "1.5px solid #D1D5DB",  // light gray border
+    padding: "6px 14px",
+    borderRadius: 8,
+    fontWeight: 600,
+    cursor: "pointer",
+  }}
+>
+  Cancel
+</button>
+
+  <button
+    onClick={() => handleUpdateFeedback(item._id)}
+    style={{
+      background: "#EA580C",
+      color: "#fff",
+      padding: "6px 18px",
+      borderRadius: 8,
+      border: "none",
+      fontWeight: 600,
+      cursor: "pointer",
+    }}
+  >
+    Save
+  </button>
+</div>
+
+  </div>
+) : (
+  /* ✅ NORMAL VIEW */
+  <div>
+    <div style={{ fontSize:13, fontWeight:700 }}>
+      {item.citizenName || "Anonymous"}
+    </div>
+    <div style={{ fontSize:12, color:C.gray[600], marginTop:4 }}>
+      {item.comment}
+    </div>
+    <div style={{ fontSize:11, color:C.gray[400], marginTop:6 }}>
+      {item.feedbackType} · {item.district} · 👍 {item.upvotes}
+    </div>
+  </div>
+)}
+          
+
+          <div style={{ display:'flex', gap:8 }}>
+            <button
+               onClick={() => {
+               setEditingFeedbackId(item._id);
+               setFeedbackForm({
+               citizenName: item.citizenName || "",
+               comment: item.comment || "",
+               feedbackType: item.feedbackType || "",
+               district: item.district || "",
+             });
+           }}
+         style={{ border: "none", background: "transparent", cursor: "pointer" }}
+         >
+         <Pencil size={14} />
+          </button>
+
+            <button
+              title="Delete"
+              style={{ border:'none', background:'transparent', cursor:'pointer', color:C.status.brokColor }}
+              onClick={async () => {
+                if (window.confirm('Delete this feedback?')) {
+                  await axios.delete(`${API_URL}/api/feedback/${item._id}`, {
+                    headers: getAuthHeaders(),
+                  });
+                  fetchFeedback();
+                }
+              }}
+            >
+              <Trash2 size={14} />
+            </button>
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+);
+
+
+
   useEffect(() => {
     const storedUser = localStorage.getItem('userInfo');
     if (!storedUser) { navigate('/login'); return; }
@@ -541,6 +783,20 @@ const AdminDashboard = () => {
     if (parsedUser.role !== 'admin') { navigate('/'); return; }
 
     const fetchDashboardData = async () => {
+      setIsDataLoading(true);
+      setDataError('');
+
+      try {
+        await Promise.all([
+          fetchUsers(activeUserSearch),
+          fetchNews(),
+          fetchFeedback(),   // ✅ ADD ONLY THIS LINE
+        ]);
+      } catch (error) {
+        setDataError(error.response?.data?.message || 'Failed to load admin dashboard data.');
+      } finally {
+        setIsDataLoading(false);
+      }
       setIsDataLoading(true); setDataError('');
       try { await Promise.all([fetchUsers(activeUserSearch), fetchNews()]); } 
       catch (error) { setDataError(error.response?.data?.message || 'Failed to load admin dashboard data.'); } 
@@ -701,14 +957,6 @@ const AdminDashboard = () => {
     {/* keep the rest of dashboard JSX BELOW as-is */}
   </>
 )}
-          {isUsersPage ? (
-            renderUsersTable()
-          ) : isNewsPage ? (
-            renderNewsTable()
-          ) : isPromisesPage ? (
-            <PromisesManagement /> // --- RENDERS YOUR SEPARATE COMPONENT HERE ---
-          ) : (
-          <>
           {/* Overview Dashboard */}
           <div ref={ref} style={{ display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:16, marginBottom:24 }}>
             {STATS.map((s,i) => <StatCard key={i} stat={s} inView={inView} />)}
