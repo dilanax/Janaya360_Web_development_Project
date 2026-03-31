@@ -288,11 +288,10 @@ const AdminDashboard = () => {
   }
 };
 
-
+  // ✅ ERROR FIX 1: Removed duplicate handleUserFormChange declaration
   const handleUserFormChange = (field, value) => {
     setUserForm(prev => ({ ...prev, [field]: value }));
   };
-  const handleUserFormChange = (field, value) => { setUserForm(prev => ({ ...prev, [field]: value })); };
 
   const handleUserSearch = async (event) => {
     event.preventDefault();
@@ -796,10 +795,7 @@ const AdminDashboard = () => {
       } finally {
         setIsDataLoading(false);
       }
-      setIsDataLoading(true); setDataError('');
-      try { await Promise.all([fetchUsers(activeUserSearch), fetchNews()]); } 
-      catch (error) { setDataError(error.response?.data?.message || 'Failed to load admin dashboard data.'); } 
-      finally { setIsDataLoading(false); }
+      // ✅ ERROR FIX 2: Removed duplicated fetch logic here
     };
     fetchDashboardData();
   }, [API_URL, navigate, activeUserSearch]);
@@ -925,188 +921,181 @@ const AdminDashboard = () => {
         {/* Scrollable content */}
         <div style={{ flex:1, overflowY:'auto', padding:'24px 28px' }}>
           
-          {/* --- DYNAMIC RENDERING BLOCK --- */}
+          {/* ✅ ERROR FIX 3: Fixed Dynamic Rendering Block Logic */}
           {isUsersPage ? (
             renderUsersTable()
-           ) : isNewsPage ? (
-           renderNewsTable()
-          ) : isFeedbackPage ? (
-          renderFeedbackManagement()
-          ) : (
-          <>
-
-
-          {/* Stat cards */}
           ) : isNewsPage ? (
             renderNewsTable()
+          ) : isFeedbackPage ? (
+            renderFeedbackManagement()
           ) : isPromisesPage ? (
             <PromisesManagement /> // --- RENDERS YOUR SEPARATE COMPONENT HERE ---
           ) : (
-          <>
-          {/* Overview Dashboard */}
-          <div ref={ref} style={{ display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:16, marginBottom:24 }}>
-            {STATS.map((s,i) => <StatCard key={i} stat={s} inView={inView} />)}
-          </div>
+            <>
+              {/* Overview Dashboard */}
+              <div ref={ref} style={{ display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:16, marginBottom:24 }}>
+                {STATS.map((s,i) => <StatCard key={i} stat={s} inView={inView} />)}
+              </div>
 
-          <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:16, marginBottom:20 }}>
-            {/* Promise status breakdown */}
-            <div style={{ background:'#fff', borderRadius:16, padding:'20px', border:`1px solid ${C.gray[200]}` }}>
-              <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:18 }}>
-                <div style={{ fontSize:14, fontWeight:700, color: C.gray[900] }}>Promise Status Breakdown</div>
-                <Link to="/promises" style={{ fontSize:12, color: C.parliament[600], textDecoration:'none', display:'flex', alignItems:'center', gap:2 }}>
-                  View all <ChevronRight size={12}/>
-                </Link>
-              </div>
-              <div style={{ display:'flex', flexDirection:'column', gap:12 }}>
-                {PROMISE_STATUS.map((s,i) => (
-                  <div key={i} style={{ display:'flex', alignItems:'center', gap:12 }}>
-                    <span style={{ fontSize:12, color: C.gray[500], width:72, textAlign:'right', flexShrink:0 }}>{s.label}</span>
-                    <div style={{ flex:1, height:8, background: C.gray[100], borderRadius:99, overflow:'hidden' }}>
-                      <div style={{ width:`${s.pct}%`, height:'100%', background:s.color, borderRadius:99, transition:'width 1s ease' }} />
-                    </div>
-                    <span style={{ fontSize:11, fontWeight:600, padding:'2px 8px', borderRadius:99, background:s.bg, color:s.text, width:42, textAlign:'center', flexShrink:0 }}>{s.pct}%</span>
-                  </div>
-                ))}
-              </div>
-              <div style={{ display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:8, marginTop:20 }}>
-                {PROMISE_STATUS.map((s,i) => (
-                  <div key={i} style={{ background:s.bg, borderRadius:10, padding:'10px 8px', textAlign:'center' }}>
-                    <div style={{ fontSize:18, fontWeight:700, color:s.text }}>{Math.round(247*s.pct/100)}</div>
-                    <div style={{ fontSize:10, color:s.text, opacity:0.75 }}>{s.label}</div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Recent promise updates */}
-            <div style={{ background:'#fff', borderRadius:16, padding:'20px', border:`1px solid ${C.gray[200]}` }}>
-              <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:16 }}>
-                <div style={{ fontSize:14, fontWeight:700, color: C.gray[900] }}>Recent Promise Updates</div>
-                <Link to="/promises" style={{ fontSize:12, color: C.parliament[600], textDecoration:'none', display:'flex', alignItems:'center', gap:2 }}>
-                  See all <ChevronRight size={12}/>
-                </Link>
-              </div>
-              <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
-                {RECENT_PROMISES.map((p,i) => (
-                  <div key={i} style={{ display:'flex', alignItems:'center', gap:10, padding:'10px 12px', background: C.gray[50], borderRadius:12 }}>
-                    <div style={{ width:32, height:32, borderRadius:'50%', background:p.bg, color:p.fg, display:'flex', alignItems:'center', justifyContent:'center', fontSize:10, fontWeight:700, flexShrink:0 }}>{p.initials}</div>
-                    <div style={{ flex:1, minWidth:0 }}>
-                      <div style={{ fontSize:12, fontWeight:600, color: C.gray[900], whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>{p.text}</div>
-                      <div style={{ fontSize:10, color: C.gray[400] }}>{p.name} · {p.party}</div>
-                    </div>
-                    <span style={{ fontSize:10, fontWeight:600, padding:'3px 9px', borderRadius:99, flexShrink:0, background: statusCfg[p.status].bg, color: statusCfg[p.status].text }}>{p.status}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          <div style={{ display:'grid', gridTemplateColumns:'1.8fr 1fr', gap:16, marginBottom:20 }}>
-            {/* Feedback table */}
-            <div style={{ background:'#fff', borderRadius:16, padding:'20px', border:`1px solid ${C.gray[200]}` }}>
-              <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:16 }}>
-                <div style={{ fontSize:14, fontWeight:700, color: C.gray[900] }}>Recent Citizen Feedback</div>
-                <Link to="/feedback" style={{ fontSize:12, color: C.parliament[600], textDecoration:'none', display:'flex', alignItems:'center', gap:2 }}>
-                  Manage <ChevronRight size={12}/>
-                </Link>
-              </div>
-              <table style={{ width:'100%', borderCollapse:'collapse', fontSize:12 }}>
-                <thead>
-                  <tr>
-                    {['Citizen','Promise','Vote','District','Time'].map(h => (
-                      <th key={h} style={{ padding:'8px 10px', textAlign:'left', fontSize:10, fontWeight:700, color: C.gray[400], borderBottom:`1px solid ${C.gray[100]}`, whiteSpace:'nowrap', textTransform:'uppercase', letterSpacing:0.5 }}>{h}</th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {FEEDBACK.map((f,i) => (
-                    <tr key={i} style={{ borderBottom: i < FEEDBACK.length-1 ? `1px solid ${C.gray[50]}` : 'none' }}>
-                      <td style={{ padding:'10px 10px', fontWeight:600, color: C.gray[900] }}>{f.name}</td>
-                      <td style={{ padding:'10px 10px', color: C.gray[500], maxWidth:140, whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>{f.promise}</td>
-                      <td style={{ padding:'10px 10px' }}>
-                        <span style={{ display:'inline-flex', alignItems:'center', gap:4, fontSize:10, fontWeight:600, padding:'2px 8px', borderRadius:99, background: f.vote ? C.status.keptBg  : C.status.brokBg, color:      f.vote ? C.status.keptText : C.status.brokText }}>
-                          {f.vote ? <ThumbsUp size={10}/> : <ThumbsDown size={10}/>}
-                          {f.vote ? 'Truthful' : 'False'}
-                        </span>
-                      </td>
-                      <td style={{ padding:'10px 10px' }}>
-                        <span style={{ display:'flex', alignItems:'center', gap:4, fontSize:11, color: C.gray[500] }}>
-                          <MapPin size={10} color={C.gray[400]}/>{f.district}
-                        </span>
-                      </td>
-                      <td style={{ padding:'10px 10px', fontSize:11, color: C.gray[400] }}>{f.time}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-
-            {/* Party donut */}
-            <div style={{ background:'#fff', borderRadius:16, padding:'20px', border:`1px solid ${C.gray[200]}` }}>
-              <div style={{ fontSize:14, fontWeight:700, color: C.gray[900], marginBottom:16 }}>Party Distribution</div>
-              <div style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:16 }}>
-                <DonutChart data={PARTIES} />
-                <div style={{ width:'100%', display:'flex', flexDirection:'column', gap:8 }}>
-                  {PARTIES.map((p,i) => (
-                    <div key={i} style={{ display:'flex', alignItems:'center', gap:8 }}>
-                      <div style={{ width:10, height:10, borderRadius:'50%', background:p.color, flexShrink:0 }} />
-                      <span style={{ fontSize:12, color: C.gray[500], flex:1 }}>{p.name}</span>
-                      <div style={{ flex:2, height:4, background: C.gray[100], borderRadius:99, overflow:'hidden' }}>
-                        <div style={{ width:`${p.pct}%`, height:'100%', background:p.color, borderRadius:99 }} />
-                      </div>
-                      <span style={{ fontSize:12, fontWeight:600, color: C.gray[900], width:30, textAlign:'right' }}>{p.pct}%</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Top Politicians */}
-          <div style={{ background:'#fff', borderRadius:16, padding:'20px', border:`1px solid ${C.gray[200]}` }}>
-            <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:18 }}>
-              <div style={{ fontSize:14, fontWeight:700, color: C.gray[900] }}>Top Politicians — Performance</div>
-              <Link to="/politicians" style={{ fontSize:12, color: C.parliament[600], textDecoration:'none', display:'flex', alignItems:'center', gap:2 }}>
-                View all <ChevronRight size={12}/>
-              </Link>
-            </div>
-            <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:16 }}>
-              {TOP_POLITICIANS.map((p,i) => (
-                <div key={i} style={{ padding:'16px', background: C.gray[50], borderRadius:14, border:`1px solid ${C.gray[200]}` }}>
-                  <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:12 }}>
-                    <div style={{ width:36, height:36, borderRadius:'50%', background:p.color, display:'flex', alignItems:'center', justifyContent:'center', fontSize:11, fontWeight:700, color:'#fff', flexShrink:0 }}>
-                      {p.name.split(' ').map(w=>w[0]).slice(0,2).join('')}
-                    </div>
-                    <div>
-                      <div style={{ fontSize:12, fontWeight:700, color: C.gray[900], lineHeight:1.3 }}>{p.name}</div>
-                      <span style={{ fontSize:10, fontWeight:700, padding:'1px 7px', borderRadius:99, background:p.color+'22', color:p.color }}>{p.party}</span>
-                    </div>
-                  </div>
-                  <div style={{ display:'flex', justifyContent:'space-between', fontSize:11, color: C.gray[500], marginBottom:6 }}>
-                    <span>Promise fulfilment</span>
-                    <span style={{ fontWeight:700, color:p.color }}>{p.rating}%</span>
-                  </div>
-                  <div style={{ height:6, background: C.gray[200], borderRadius:99, overflow:'hidden', marginBottom:10 }}>
-                    <div style={{ width:`${p.rating}%`, height:'100%', background:p.color, borderRadius:99, transition:'width 1.2s ease' }} />
-                  </div>
-                  <div style={{ display:'flex', justifyContent:'space-between', fontSize:11 }}>
-                    <span style={{ color: C.status.keptColor, display:'flex', alignItems:'center', gap:3 }}><CheckCircle size={10}/> {p.kept} kept</span>
-                    <span style={{ color: C.gray[400] }}>{p.total} total</span>
-                    <Link to={`/politicians/${p.name.toLowerCase().replace(/\s+/g,'-')}`} style={{ color: C.parliament[600], textDecoration:'none', display:'flex', alignItems:'center', gap:2 }}>
-                      View <ChevronRight size={10}/>
+              <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:16, marginBottom:20 }}>
+                {/* Promise status breakdown */}
+                <div style={{ background:'#fff', borderRadius:16, padding:'20px', border:`1px solid ${C.gray[200]}` }}>
+                  <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:18 }}>
+                    <div style={{ fontSize:14, fontWeight:700, color: C.gray[900] }}>Promise Status Breakdown</div>
+                    <Link to="/promises" style={{ fontSize:12, color: C.parliament[600], textDecoration:'none', display:'flex', alignItems:'center', gap:2 }}>
+                      View all <ChevronRight size={12}/>
                     </Link>
                   </div>
+                  <div style={{ display:'flex', flexDirection:'column', gap:12 }}>
+                    {PROMISE_STATUS.map((s,i) => (
+                      <div key={i} style={{ display:'flex', alignItems:'center', gap:12 }}>
+                        <span style={{ fontSize:12, color: C.gray[500], width:72, textAlign:'right', flexShrink:0 }}>{s.label}</span>
+                        <div style={{ flex:1, height:8, background: C.gray[100], borderRadius:99, overflow:'hidden' }}>
+                          <div style={{ width:`${s.pct}%`, height:'100%', background:s.color, borderRadius:99, transition:'width 1s ease' }} />
+                        </div>
+                        <span style={{ fontSize:11, fontWeight:600, padding:'2px 8px', borderRadius:99, background:s.bg, color:s.text, width:42, textAlign:'center', flexShrink:0 }}>{s.pct}%</span>
+                      </div>
+                    ))}
+                  </div>
+                  <div style={{ display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:8, marginTop:20 }}>
+                    {PROMISE_STATUS.map((s,i) => (
+                      <div key={i} style={{ background:s.bg, borderRadius:10, padding:'10px 8px', textAlign:'center' }}>
+                        <div style={{ fontSize:18, fontWeight:700, color:s.text }}>{Math.round(247*s.pct/100)}</div>
+                        <div style={{ fontSize:10, color:s.text, opacity:0.75 }}>{s.label}</div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-              ))}
-            </div>
-          </div>
 
-          {dataError && (
-            <div style={{ marginTop: 20, background: '#FEF2F2', border: `1px solid ${C.status.brokColor}`, color: C.status.brokText, borderRadius: 16, padding: '14px 16px', fontSize: 14, fontWeight: 600 }}>
-              {dataError}
-            </div>
-          )}
-          </>
+                {/* Recent promise updates */}
+                <div style={{ background:'#fff', borderRadius:16, padding:'20px', border:`1px solid ${C.gray[200]}` }}>
+                  <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:16 }}>
+                    <div style={{ fontSize:14, fontWeight:700, color: C.gray[900] }}>Recent Promise Updates</div>
+                    <Link to="/promises" style={{ fontSize:12, color: C.parliament[600], textDecoration:'none', display:'flex', alignItems:'center', gap:2 }}>
+                      See all <ChevronRight size={12}/>
+                    </Link>
+                  </div>
+                  <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
+                    {RECENT_PROMISES.map((p,i) => (
+                      <div key={i} style={{ display:'flex', alignItems:'center', gap:10, padding:'10px 12px', background: C.gray[50], borderRadius:12 }}>
+                        <div style={{ width:32, height:32, borderRadius:'50%', background:p.bg, color:p.fg, display:'flex', alignItems:'center', justifyContent:'center', fontSize:10, fontWeight:700, flexShrink:0 }}>{p.initials}</div>
+                        <div style={{ flex:1, minWidth:0 }}>
+                          <div style={{ fontSize:12, fontWeight:600, color: C.gray[900], whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>{p.text}</div>
+                          <div style={{ fontSize:10, color: C.gray[400] }}>{p.name} · {p.party}</div>
+                        </div>
+                        <span style={{ fontSize:10, fontWeight:600, padding:'3px 9px', borderRadius:99, flexShrink:0, background: statusCfg[p.status].bg, color: statusCfg[p.status].text }}>{p.status}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              <div style={{ display:'grid', gridTemplateColumns:'1.8fr 1fr', gap:16, marginBottom:20 }}>
+                {/* Feedback table */}
+                <div style={{ background:'#fff', borderRadius:16, padding:'20px', border:`1px solid ${C.gray[200]}` }}>
+                  <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:16 }}>
+                    <div style={{ fontSize:14, fontWeight:700, color: C.gray[900] }}>Recent Citizen Feedback</div>
+                    <Link to="/feedback" style={{ fontSize:12, color: C.parliament[600], textDecoration:'none', display:'flex', alignItems:'center', gap:2 }}>
+                      Manage <ChevronRight size={12}/>
+                    </Link>
+                  </div>
+                  <table style={{ width:'100%', borderCollapse:'collapse', fontSize:12 }}>
+                    <thead>
+                      <tr>
+                        {['Citizen','Promise','Vote','District','Time'].map(h => (
+                          <th key={h} style={{ padding:'8px 10px', textAlign:'left', fontSize:10, fontWeight:700, color: C.gray[400], borderBottom:`1px solid ${C.gray[100]}`, whiteSpace:'nowrap', textTransform:'uppercase', letterSpacing:0.5 }}>{h}</th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {FEEDBACK.map((f,i) => (
+                        <tr key={i} style={{ borderBottom: i < FEEDBACK.length-1 ? `1px solid ${C.gray[50]}` : 'none' }}>
+                          <td style={{ padding:'10px 10px', fontWeight:600, color: C.gray[900] }}>{f.name}</td>
+                          <td style={{ padding:'10px 10px', color: C.gray[500], maxWidth:140, whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>{f.promise}</td>
+                          <td style={{ padding:'10px 10px' }}>
+                            <span style={{ display:'inline-flex', alignItems:'center', gap:4, fontSize:10, fontWeight:600, padding:'2px 8px', borderRadius:99, background: f.vote ? C.status.keptBg  : C.status.brokBg, color:      f.vote ? C.status.keptText : C.status.brokText }}>
+                              {f.vote ? <ThumbsUp size={10}/> : <ThumbsDown size={10}/>}
+                              {f.vote ? 'Truthful' : 'False'}
+                            </span>
+                          </td>
+                          <td style={{ padding:'10px 10px' }}>
+                            <span style={{ display:'flex', alignItems:'center', gap:4, fontSize:11, color: C.gray[500] }}>
+                              <MapPin size={10} color={C.gray[400]}/>{f.district}
+                            </span>
+                          </td>
+                          <td style={{ padding:'10px 10px', fontSize:11, color: C.gray[400] }}>{f.time}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* Party donut */}
+                <div style={{ background:'#fff', borderRadius:16, padding:'20px', border:`1px solid ${C.gray[200]}` }}>
+                  <div style={{ fontSize:14, fontWeight:700, color: C.gray[900], marginBottom:16 }}>Party Distribution</div>
+                  <div style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:16 }}>
+                    <DonutChart data={PARTIES} />
+                    <div style={{ width:'100%', display:'flex', flexDirection:'column', gap:8 }}>
+                      {PARTIES.map((p,i) => (
+                        <div key={i} style={{ display:'flex', alignItems:'center', gap:8 }}>
+                          <div style={{ width:10, height:10, borderRadius:'50%', background:p.color, flexShrink:0 }} />
+                          <span style={{ fontSize:12, color: C.gray[500], flex:1 }}>{p.name}</span>
+                          <div style={{ flex:2, height:4, background: C.gray[100], borderRadius:99, overflow:'hidden' }}>
+                            <div style={{ width:`${p.pct}%`, height:'100%', background:p.color, borderRadius:99 }} />
+                          </div>
+                          <span style={{ fontSize:12, fontWeight:600, color: C.gray[900], width:30, textAlign:'right' }}>{p.pct}%</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Top Politicians */}
+              <div style={{ background:'#fff', borderRadius:16, padding:'20px', border:`1px solid ${C.gray[200]}` }}>
+                <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:18 }}>
+                  <div style={{ fontSize:14, fontWeight:700, color: C.gray[900] }}>Top Politicians — Performance</div>
+                  <Link to="/politicians" style={{ fontSize:12, color: C.parliament[600], textDecoration:'none', display:'flex', alignItems:'center', gap:2 }}>
+                    View all <ChevronRight size={12}/>
+                  </Link>
+                </div>
+                <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:16 }}>
+                  {TOP_POLITICIANS.map((p,i) => (
+                    <div key={i} style={{ padding:'16px', background: C.gray[50], borderRadius:14, border:`1px solid ${C.gray[200]}` }}>
+                      <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:12 }}>
+                        <div style={{ width:36, height:36, borderRadius:'50%', background:p.color, display:'flex', alignItems:'center', justifyContent:'center', fontSize:11, fontWeight:700, color:'#fff', flexShrink:0 }}>
+                          {p.name.split(' ').map(w=>w[0]).slice(0,2).join('')}
+                        </div>
+                        <div>
+                          <div style={{ fontSize:12, fontWeight:700, color: C.gray[900], lineHeight:1.3 }}>{p.name}</div>
+                          <span style={{ fontSize:10, fontWeight:700, padding:'1px 7px', borderRadius:99, background:p.color+'22', color:p.color }}>{p.party}</span>
+                        </div>
+                      </div>
+                      <div style={{ display:'flex', justifyContent:'space-between', fontSize:11, color: C.gray[500], marginBottom:6 }}>
+                        <span>Promise fulfilment</span>
+                        <span style={{ fontWeight:700, color:p.color }}>{p.rating}%</span>
+                      </div>
+                      <div style={{ height:6, background: C.gray[200], borderRadius:99, overflow:'hidden', marginBottom:10 }}>
+                        <div style={{ width:`${p.rating}%`, height:'100%', background:p.color, borderRadius:99, transition:'width 1.2s ease' }} />
+                      </div>
+                      <div style={{ display:'flex', justifyContent:'space-between', fontSize:11 }}>
+                        <span style={{ color: C.status.keptColor, display:'flex', alignItems:'center', gap:3 }}><CheckCircle size={10}/> {p.kept} kept</span>
+                        <span style={{ color: C.gray[400] }}>{p.total} total</span>
+                        <Link to={`/politicians/${p.name.toLowerCase().replace(/\s+/g,'-')}`} style={{ color: C.parliament[600], textDecoration:'none', display:'flex', alignItems:'center', gap:2 }}>
+                          View <ChevronRight size={10}/>
+                        </Link>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {dataError && (
+                <div style={{ marginTop: 20, background: '#FEF2F2', border: `1px solid ${C.status.brokColor}`, color: C.status.brokText, borderRadius: 16, padding: '14px 16px', fontSize: 14, fontWeight: 600 }}>
+                  {dataError}
+                </div>
+              )}
+            </>
           )}
 
         </div>
