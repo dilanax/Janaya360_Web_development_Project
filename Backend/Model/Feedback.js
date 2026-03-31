@@ -10,12 +10,24 @@ const feedbackSchema = new mongoose.Schema(
     userId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
-      required: true,
+      required: false, // ✅ allow anonymous citizens
     },
     comment: {
       type: String,
       required: true,
     },
+    citizenName: {
+    type: String,
+    default: "Anonymous",
+    },
+
+   feedbackType: {
+    type: String,
+   },
+
+  district: {
+  type: String,
+   },
     evidenceUrl: {
       type: String,
     },

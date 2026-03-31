@@ -186,6 +186,7 @@ const StatCard = ({ stat, inView }) => {
    MAIN COMPONENT
 ═══════════════════════════════════════════════════════════════ */
 const AdminDashboard = () => {
+
   const location  = useLocation();
   const navigate  = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(true);
