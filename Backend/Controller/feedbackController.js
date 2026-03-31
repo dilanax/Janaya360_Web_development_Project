@@ -2,6 +2,21 @@ import Feedback from "../Model/Feedback.js";
 import axios from "axios";
 import mongoose from "mongoose";
 
+const ALLOWED_FEEDBACK_TYPES = [
+  "Opinion",
+  "Complaint",
+  "Suggestion",
+  "Evidence"
+];
+
+const ALLOWED_DISTRICTS = [
+  "Colombo","Gampaha","Kalutara","Kandy","Matale","Nuwara Eliya",
+  "Galle","Matara","Hambantota","Jaffna","Kilinochchi","Mannar",
+  "Vavuniya","Mullaitivu","Batticaloa","Ampara","Trincomalee",
+  "Kurunegala","Puttalam","Anuradhapura","Polonnaruwa",
+  "Badulla","Monaragala","Ratnapura","Kegalle"
+];
+
 /**
  * Sentiment analysis using external API
  */
@@ -94,34 +109,107 @@ export const voteFeedback = async (req, res) => {
 /**
  * UPDATE FEEDBACK
  */
+
 export const updateFeedback = async (req, res) => {
   try {
     const { id } = req.params;
-    const { comment, evidenceUrl } = req.body;
+    const {
+      comment,
+      citizenName,
+      feedbackType,
+      district
+    } = req.body;
+
+    /* ───────── VALIDATION START ───────── */
+
+    // ✅ Comment validation
+    if (comment !== undefined) {
+      if (!comment.trim()) {
+        return res.status(400).json({
+          message: "Comment cannot be empty"
+        });
+      }
+
+      if (comment.length > 300) {
+        return res.status(400).json({
+          message: "Comment must be under 300 characters"
+        });
+      }
+    }
+
+    // ✅ Citizen name validation
+    if (
+      citizenName !== undefined &&
+      typeof citizenName !== "string"
+    ) {
+      return res.status(400).json({
+        message: "Citizen name must be a text value"
+      });
+    }
+
+    // ✅ Feedback type validation
+    if (
+      feedbackType !== undefined &&
+      !ALLOWED_FEEDBACK_TYPES.includes(feedbackType)
+    ) {
+      return res.status(400).json({
+        message: "Invalid feedback type"
+      });
+    }
+
+    // ✅ District validation
+    if (
+      district !== undefined &&
+      !ALLOWED_DISTRICTS.includes(district)
+    ) {
+      return res.status(400).json({
+        message: "Invalid district"
+      });
+    }
+
+    /* ───────── VALIDATION END ───────── */
+
+    // ✅ Recalculate sentiment only if comment changes
+    let sentimentData = {};
+    if (comment !== undefined) {
+      const sentimentResult = await analyzeSentiment(comment);
+      sentimentData = {
+        sentiment: sentimentResult.type,
+        sentimentScore: sentimentResult.score,
+      };
+    }
 
     const updatedFeedback = await Feedback.findByIdAndUpdate(
       id,
       {
         ...(comment !== undefined && { comment }),
-        ...(evidenceUrl !== undefined && { evidenceUrl }),
+        ...(citizenName !== undefined && { citizenName }),
+        ...(feedbackType !== undefined && { feedbackType }),
+        ...(district !== undefined && { district }),
+        ...sentimentData,
       },
       {
-        new: true,          // ✅ return updated doc
-        runValidators: true
+        new: true,
+        runValidators: true,
       }
     );
 
     if (!updatedFeedback) {
-      return res.status(404).json({ message: "Feedback not found" });
+      return res.status(404).json({
+        message: "Feedback not found"
+      });
     }
 
     res.status(200).json(updatedFeedback);
-  } catch (err) {
-    console.error("Update feedback error:", err);
-    res.status(500).json({ message: err.message });
+
+  } catch (error) {
+    console.error("Update Feedback Error:", error);
+    res.status(500).json({
+      message: error.message
+    });
   }
 };
-``
+
 /**
  * DELETE FEEDBACK
  */
