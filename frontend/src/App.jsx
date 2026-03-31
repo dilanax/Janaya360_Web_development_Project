@@ -12,6 +12,7 @@ import News from './components/News';
 import Notifications from './components/Notifications';
 import Login from './pages/Login';
 import Register from './pages/Register';
+import PromiseDetail from './pages/PromiseDetail';
 import Profile from './pages/Profile';
 import AdminDashboard from './pages/admindashboard';
 import './App.css';
@@ -39,6 +40,7 @@ const AppContent = () => {
           <Route path="/notifications" element={<Notifications />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/promise/:id" element={<PromiseDetail />} />
           <Route path="/profile" element={<Profile />} />
 
           {/* --- SECURE ADMIN ROUTES --- */}
