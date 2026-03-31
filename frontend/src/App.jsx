@@ -24,11 +24,12 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/politicians" element={<Politicians />} />
           <Route path="/promises" element={<Promises />} />
-          <Route path="/feedback" element={<Feedback />} />
+          <Route path="/feedback" element={<Feedback />} /> // ✅ Public
           <Route path="/news" element={<News />} />
           <Route path="/notifications" element={<Notifications />} />
           <Route path="/login" element={<Login />} />
           <Route path="/admin-dashboard" element={<AdminDashboard />} />
+          <Route path="/admin-feedback" element={<AdminDashboard />} /> // ✅ Admin
           <Route path="/admin-news" element={<AdminDashboard />} />
           <Route path="/users" element={<AdminDashboard />} />
           <Route path="/register" element={<Register />} />

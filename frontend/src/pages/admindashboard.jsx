@@ -114,7 +114,7 @@ const NAV = [
   { label:'Dashboard',     icon:LayoutDashboard, path:'/admin-dashboard', badge:null  },
   { label:'Politicians',   icon:Users,           path:'/politicians',     badge:'89'  },
   { label:'Promises',      icon:FileText,        path:'/promises',        badge:'247' },
-  { label:'Feedback',      icon:MessageSquare,   path:'/feedback',        badge:'12'  },
+  { label:'Feedback',      icon:MessageSquare,   path:'/admin-feedback',  badge:'12'  },
   { label:'News',          icon:Newspaper,       path:'/admin-news',      badge:null  },
   { label:'Notifications', icon:Bell,            path:'/notifications',   badge:'5'   },
   { label:'Users',         icon:Users,           path:'/users',           badge:null  },
@@ -194,6 +194,7 @@ const AdminDashboard = () => {
   const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
   const [users, setUsers] = useState([]);
   const [newsItems, setNewsItems] = useState([]);
+  const [feedbackItems, setFeedbackItems] = useState([]);
   const [dataError, setDataError] = useState('');
   const [isDataLoading, setIsDataLoading] = useState(true);
   const [adminUser, setAdminUser] = useState(null);
@@ -229,6 +230,7 @@ const AdminDashboard = () => {
   const [deletingNewsId, setDeletingNewsId] = useState('');
   const isUsersPage = location.pathname === '/users';
   const isNewsPage = location.pathname === '/admin-news';
+  const isFeedbackPage = location.pathname === '/admin-feedback';
   const searchTerm = (activeUserSearch || userSearchInput).trim().toLowerCase();
   const displayedUsers = searchTerm
     ? users.filter((user) => (
@@ -288,6 +290,19 @@ const AdminDashboard = () => {
     });
     setNewsItems(Array.isArray(response.data) ? response.data : []);
   };
+
+  const fetchFeedback = async () => {
+  try {
+    const res = await axios.get(
+      `${API_URL}/api/feedback/69a6af84dea6363b079b02ac`,
+      { headers: getAuthHeaders() }
+    );
+    setFeedbackItems(Array.isArray(res.data) ? res.data : []);
+  } catch (error) {
+    console.error('Failed to load feedback', error);
+  }
+};
+
 
   const handleUserFormChange = (field, value) => {
     setUserForm(prev => ({ ...prev, [field]: value }));
@@ -491,6 +506,28 @@ const AdminDashboard = () => {
       setDeletingNewsId('');
     }
   };
+  const handleEditFeedback = async (feedback) => {
+  const newComment = window.prompt(
+    "Edit feedback comment:",
+    feedback.comment
+  );
+
+  if (!newComment || newComment.trim() === feedback.comment) return;
+
+  try {
+    await axios.patch(
+      `${API_URL}/api/feedback/${feedback._id}`,
+      { comment: newComment },
+      { headers: getAuthHeaders() }
+    );
+
+    fetchFeedback(); // refresh list
+  } catch (error) {
+    alert("Failed to update feedback");
+    console.error(error);
+  }
+};
+
 
   const renderNewsTable = () => (
     <div style={{ background:'#fff', borderRadius:16, padding:'20px', border:`1px solid ${C.gray[200]}` }}>
@@ -785,6 +822,68 @@ const AdminDashboard = () => {
     </div>
   );
 
+  const renderFeedbackManagement = () => (
+  <div style={{ background:'#fff', borderRadius:16, padding:'20px', border:`1px solid ${C.gray[200]}` }}>
+    <div style={{ marginBottom:16 }}>
+      <div style={{ fontSize:14, fontWeight:700, color:C.gray[900] }}>Feedback Management</div>
+      <div style={{ fontSize:11, color:C.gray[400], marginTop:4 }}>
+        {feedbackItems.length} feedback records found
+      </div>
+    </div>
+
+    <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
+      {feedbackItems.map(item => (
+        <div key={item._id} style={{
+          padding:'14px 16px',
+          borderRadius:12,
+          background:C.gray[50],
+          border:`1px solid ${C.gray[200]}`,
+          display:'flex',
+          justifyContent:'space-between'
+        }}>
+          <div>
+            <div style={{ fontSize:13, fontWeight:700 }}>
+              {item.citizenName || 'Anonymous'}
+            </div>
+            <div style={{ fontSize:12, color:C.gray[600], marginTop:4 }}>
+              {item.comment}
+            </div>
+            <div style={{ fontSize:11, color:C.gray[400], marginTop:6 }}>
+              {item.feedbackType} · {item.district} · 👍 {item.upvotes} · 👎 {item.downvotes}
+            </div>
+          </div>
+
+          <div style={{ display:'flex', gap:8 }}>
+            <button
+             title="Edit"
+             style={{ border:'none', background:'transparent', cursor:'pointer' }}
+             onClick={() => handleEditFeedback(item)}
+            >
+            <Pencil size={14} />
+            </button>
+            <button
+              title="Delete"
+              style={{ border:'none', background:'transparent', cursor:'pointer', color:C.status.brokColor }}
+              onClick={async () => {
+                if (window.confirm('Delete this feedback?')) {
+                  await axios.delete(`${API_URL}/api/feedback/${item._id}`, {
+                    headers: getAuthHeaders(),
+                  });
+                  fetchFeedback();
+                }
+              }}
+            >
+              <Trash2 size={14} />
+            </button>
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+);
+
+
+
   useEffect(() => {
     const storedUser = localStorage.getItem('userInfo');
 
@@ -808,6 +907,7 @@ const AdminDashboard = () => {
         await Promise.all([
           fetchUsers(activeUserSearch),
           fetchNews(),
+          fetchFeedback(),   // ✅ ADD ONLY THIS LINE
         ]);
       } catch (error) {
         setDataError(error.response?.data?.message || 'Failed to load admin dashboard data.');
@@ -1060,10 +1160,13 @@ const AdminDashboard = () => {
         <div style={{ flex:1, overflowY:'auto', padding:'24px 28px' }}>
           {isUsersPage ? (
             renderUsersTable()
-          ) : isNewsPage ? (
-            renderNewsTable()
+           ) : isNewsPage ? (
+           renderNewsTable()
+          ) : isFeedbackPage ? (
+          renderFeedbackManagement()
           ) : (
           <>
+
 
           {/* Stat cards */}
           <div ref={ref} style={{ display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:16, marginBottom:24 }}>

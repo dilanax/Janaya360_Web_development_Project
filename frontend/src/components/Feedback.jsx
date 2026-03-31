@@ -9,8 +9,7 @@ const Feedback = ({ promiseId }) => {
   const [feedbackType, setFeedbackType] = useState("");
   const [district, setDistrict] = useState("");
   const [loading, setLoading] = useState(false);
-  const [editingId, setEditingId] = useState(null);
-  const [editText, setEditText] = useState("");
+  
   const [showToast, setShowToast] = useState(false);
 
 
@@ -77,35 +76,7 @@ const Feedback = ({ promiseId }) => {
     }
   };
 
-  const deleteFeedback = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this feedback?")) return;
-
-    try {
-      await axios.delete(`${API_URL}/api/feedback/${id}`);
-      getFeedback();
-    } catch (err) {
-      console.log(err);
-    }
-  };
-const updateFeedback = async (id) => {
-  try {
-    await axios.patch(`${API_URL}/api/feedback/${id}`, {
-      comment: editText,
-    });
-
-    // ✅ Update UI immediately
-    setFeedbackList((prev) =>
-      prev.map((item) =>
-        item._id === id ? { ...item, comment: editText } : item
-      )
-    );
-
-    setEditingId(null);
-    setEditText("");
-  } catch (err) {
-    console.log(err);
-  }
-};
+  
 
   const districts = [
   // Western Province
@@ -297,17 +268,10 @@ const updateFeedback = async (id) => {
   >
     {/* LEFT — FEEDBACK CONTENT */}
     <div className="flex-1 pr-4">
-      {editingId === item._id ? (
-        <textarea
-          className="w-full border p-2 rounded text-sm"
-          value={editText}
-          onChange={(e) => setEditText(e.target.value)}
-        />
-      ) : (
-        <p className="text-gray-800 text-sm font-medium">
-          {item.comment}
-        </p>
-      )}
+      <p className="text-gray-800 text-sm font-medium">
+      {item.comment}
+       </p>
+
 
       <p className="text-xs text-gray-500 mt-1">
         Name: {item.citizenName || "Anonymous"}
@@ -346,34 +310,8 @@ const updateFeedback = async (id) => {
         👎 {item.downvotes}
       </button>
 
-      {editingId !== item._id ? (
-        <button
-          onClick={() => {
-            setEditingId(item._id);
-            setEditText(item.comment);
-          }}
-          className="p-1 rounded-full bg-orange-100 text-orange-700 text-xs"
-          title="Edit"
-        >
-          ✏️
-        </button>
-      ) : (
-        <button
-          onClick={() => updateFeedback(item._id)}
-          className="p-1 rounded-full bg-green-100 text-green-700 text-xs"
-          title="Save"
-        >
-          💾
-        </button>
-      )}
 
-      <button
-        onClick={() => deleteFeedback(item._id)}
-        className="p-1 rounded-full bg-gray-200 text-gray-700 text-xs"
-        title="Delete"
-      >
-        🗑
-      </button>
+     
     </div>
   </div>
 ))}
@@ -387,4 +325,3 @@ const updateFeedback = async (id) => {
 };
 
 export default Feedback;
-
