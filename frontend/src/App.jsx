@@ -12,7 +12,7 @@ import News from './components/News';
 import Notifications from './components/Notifications';
 import Login from './pages/Login';
 import Register from './pages/Register';
-import PromiseDetail from './pages/PromiseDetail';
+import PromiseDetail from './components/PromiseDetail';
 import Profile from './pages/Profile';
 import AdminDashboard from './pages/admindashboard';
 import './App.css';
