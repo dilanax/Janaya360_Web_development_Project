@@ -1,5 +1,34 @@
 import Politician from "../Model/Politician.js";
 
+const normalizePoliticianName = (name = "") => {
+  return String(name)
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, " ")
+    .replace(/rajapaksha/g, "rajapaksa")
+    .replace(/wickremeslinghe/g, "wickremesinghe")
+    .replace(/wickremaasinghe/g, "wickremesinghe");
+};
+
+const hasUsableImage = (value = "") => {
+  if (!value || typeof value !== "string") return false;
+  if (value.includes("example.com")) return false;
+  return /^https?:\/\//i.test(value);
+};
+
+const politicianQualityScore = (politician) => {
+  let score = 0;
+
+  if (politician?.name) score += 4;
+  if (politician?.district) score += 2;
+  if (politician?.position) score += 2;
+  if (politician?.bio) score += 3;
+  if (hasUsableImage(politician?.profileImageUrl)) score += 4;
+  if (politician?.updatedAt) score += 1;
+
+  return score;
+};
+
 /* ================= CREATE ================= */
 // Admin Only
 export const createPolitician = async (req, res) => {
@@ -24,8 +53,33 @@ export const createPolitician = async (req, res) => {
 /* ================= READ ALL ================= */
 export const getAllPoliticians = async (req, res) => {
   try {
-    const politicians = await Politician.find();
-    res.json(politicians);
+    const politicians = await Politician.find().sort({ updatedAt: -1, createdAt: -1 });
+
+    const uniquePoliticians = [];
+    const seenByCanonicalName = new Map();
+
+    for (const politician of politicians) {
+      const canonicalName = normalizePoliticianName(politician.name);
+      const existingIndex = seenByCanonicalName.get(canonicalName);
+
+      if (existingIndex === undefined) {
+        seenByCanonicalName.set(canonicalName, uniquePoliticians.length);
+        uniquePoliticians.push(politician);
+        continue;
+      }
+
+      const currentBest = uniquePoliticians[existingIndex];
+      const nextScore = politicianQualityScore(politician);
+      const currentScore = politicianQualityScore(currentBest);
+
+      if (nextScore > currentScore) {
+        uniquePoliticians[existingIndex] = politician;
+      }
+    }
+
+    uniquePoliticians.sort((left, right) => left.name.localeCompare(right.name));
+
+    res.json(uniquePoliticians);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
