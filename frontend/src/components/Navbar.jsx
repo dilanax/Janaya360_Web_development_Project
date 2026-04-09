@@ -26,6 +26,12 @@ const C = {
   gray900:    '#111827',
   red:        '#DC2626',
   redBg:      '#FEF2F2',
+  campusNavy: '#2F4B72',
+  campusNavySoft: '#EAF0F6',
+  campusGold: '#C98900',
+  campusGoldSoft: '#FFF3CC',
+  campusPanel: '#F5F7FA',
+  campusBorder: '#D5DCE6',
 };
 
 /* ─── SVG icon components for nav links ───────────────────────────────── */
@@ -153,9 +159,9 @@ const LogoutModal = ({ userName, onConfirm, onCancel }) => (
 
 /* ─── Shared helpers ──────────────────────────────────────────────────── */
 const NOTIF_TYPE_META = {
-  general:          { bg: '#EFF6FF', color: '#2563EB', dot: '#2563EB', label: 'General',          icon: (c) => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg> },
-  complaint_update: { bg: '#FFF7ED', color: '#EA580C', dot: '#EA580C', label: 'Complaint Update', icon: (c) => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> },
-  emergency_alert:  { bg: '#FEF2F2', color: '#DC2626', dot: '#DC2626', label: 'Emergency Alert',  icon: (c) => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> },
+  general:          { bg: '#EDF2F8', color: '#2F4B72', dot: '#2F4B72', label: 'General',          icon: (c) => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg> },
+  complaint_update: { bg: '#FFF3CC', color: '#9A6700', dot: '#C98900', label: 'Complaint Update', icon: (c) => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> },
+  emergency_alert:  { bg: '#FEF2F2', color: '#B42318', dot: '#B42318', label: 'Emergency Alert',  icon: (c) => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> },
 };
 const notifTimeAgo = (date) => {
   const s = Math.floor((Date.now() - new Date(date)) / 1000);
@@ -231,31 +237,31 @@ const NotificationDetailModal = ({ notification, onClose, onMarkRead }) => {
 };
 
 /* ─── Notification dropdown panel ─────────────────────────────────────── */
-const NotificationDropdown = ({ notifications, onMarkRead, onMarkAllRead, onView, onClose, dropdownRef }) => {
+const NotificationDropdown = ({ notifications, onMarkRead, onMarkAllRead, onView, onClose, dropdownRef, selectedNotificationId }) => {
   const unreadCount = notifications.filter(n => !(n.isRead || n.status === 'read')).length;
 
   return (
     <div ref={dropdownRef} style={{
       position: 'absolute', top: 'calc(100% + 10px)', right: -8, zIndex: 200,
       width: 400, maxHeight: 510,
-      background: C.white, borderRadius: 18,
-      border: `1px solid ${C.gray200}`,
-      boxShadow: '0 24px 80px rgba(0,0,0,0.16), 0 8px 24px rgba(0,0,0,0.08)',
+      background: C.campusPanel, borderRadius: 16,
+      border: `1px solid ${C.campusBorder}`,
+      boxShadow: '0 16px 36px rgba(26,37,51,0.18), 0 4px 12px rgba(26,37,51,0.10)',
       animation: 'notifDropIn 0.22s cubic-bezier(0.16,1,0.3,1)',
       overflow: 'hidden',
     }}>
       <style>{`
         @keyframes notifDropIn{from{opacity:0;transform:translateY(-10px) scale(0.96)}to{opacity:1;transform:translateY(0) scale(1)}}
         .pw-notif-item{transition:all 0.18s ease !important}
-        .pw-notif-item:hover{background:#F8F9FB !important}
+        .pw-notif-item:hover{background:${C.campusNavySoft} !important}
         .pw-notif-item:hover .pw-notif-actions{opacity:1 !important;transform:translateY(0) !important}
         .pw-notif-item:active{transform:scale(0.995)}
         .pw-markread-btn{transition:all 0.18s ease !important}
-        .pw-markread-btn:hover{background:${C.orangeBg} !important;color:${C.orange} !important;border-color:${C.orange} !important}
+        .pw-markread-btn:hover{background:${C.campusNavySoft} !important;color:${C.campusNavy} !important;border-color:${C.campusNavy} !important}
         .pw-markall-btn{transition:all 0.15s ease !important}
-        .pw-markall-btn:hover{background:${C.orangeBg} !important}
+        .pw-markall-btn:hover{background:${C.campusNavySoft} !important}
         .pw-viewall-link{transition:all 0.15s ease !important}
-        .pw-viewall-link:hover{background:${C.orangeBg} !important;letter-spacing:0.2px !important}
+        .pw-viewall-link:hover{background:${C.campusNavySoft} !important;letter-spacing:0.2px !important}
         .pw-notif-scroll::-webkit-scrollbar{width:4px}
         .pw-notif-scroll::-webkit-scrollbar-thumb{background:${C.gray200};border-radius:4px}
         .pw-notif-scroll::-webkit-scrollbar-thumb:hover{background:${C.gray500}}
@@ -264,8 +270,8 @@ const NotificationDropdown = ({ notifications, onMarkRead, onMarkAllRead, onView
       {/* Header */}
       <div style={{ padding: '18px 20px 14px', borderBottom: `1px solid ${C.gray100}`, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <div style={{ width: 30, height: 30, borderRadius: 9, background: C.orangeBg, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            {NavIcons.Notifications(C.orange)}
+          <div style={{ width: 30, height: 30, borderRadius: 9, background: C.campusNavySoft, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            {NavIcons.Notifications(C.campusNavy)}
           </div>
           <div>
             <span style={{ fontSize: 15, fontWeight: 700, color: C.gray900, display: 'block', lineHeight: 1 }}>Notifications</span>
@@ -277,7 +283,7 @@ const NotificationDropdown = ({ notifications, onMarkRead, onMarkAllRead, onView
         {unreadCount > 0 && (
           <button onClick={onMarkAllRead} className="pw-markall-btn" style={{
             display: 'inline-flex', alignItems: 'center', gap: 5,
-            fontSize: 12, fontWeight: 600, color: C.orange,
+            fontSize: 12, fontWeight: 600, color: C.campusNavy,
             background: 'none', border: 'none', cursor: 'pointer',
             padding: '6px 12px', borderRadius: 8,
           }}>
@@ -301,6 +307,8 @@ const NotificationDropdown = ({ notifications, onMarkRead, onMarkAllRead, onView
           notifications.slice(0, 20).map((notif, idx) => {
             const isUnread = !(notif.isRead || notif.status === 'read');
             const tc = NOTIF_TYPE_META[notif.type] || NOTIF_TYPE_META.general;
+            const notifKey = notif.notificationId || notif._id || notif.id;
+            const isSelected = selectedNotificationId && selectedNotificationId === notifKey;
             return (
               <div
                 key={notif.id || notif._id || notif.notificationId}
@@ -308,9 +316,10 @@ const NotificationDropdown = ({ notifications, onMarkRead, onMarkAllRead, onView
                 style={{
                   padding: '14px 20px',
                   borderBottom: idx < 19 && idx < notifications.length - 1 ? `1px solid ${C.gray100}` : 'none',
-                  background: isUnread ? '#FFFBF5' : 'transparent',
+                  background: isSelected ? '#F5D37A' : isUnread ? '#FFF8E6' : 'transparent',
                   cursor: 'pointer',
                   position: 'relative',
+                  boxShadow: isSelected ? 'inset 3px 0 0 #9A6700' : 'none',
                 }}
                 onClick={() => onView(notif)}
               >
@@ -340,16 +349,16 @@ const NotificationDropdown = ({ notifications, onMarkRead, onMarkAllRead, onView
                     <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 8, marginBottom: 3 }}>
                       <span style={{
                         fontSize: 13, fontWeight: isUnread ? 700 : 500,
-                        color: isUnread ? C.gray900 : C.gray700,
+                        color: isSelected ? '#1F2937' : (isUnread ? C.gray900 : C.gray700),
                         overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
                         flex: 1,
                       }}>{notif.title}</span>
-                      <span style={{ fontSize: 11, color: C.gray500, flexShrink: 0, marginTop: 1 }}>{notifTimeAgo(notif.createdAt)}</span>
+                      <span style={{ fontSize: 11, color: isSelected ? '#374151' : C.gray500, flexShrink: 0, marginTop: 1 }}>{notifTimeAgo(notif.createdAt)}</span>
                     </div>
 
                     {/* Body preview */}
                     <p style={{
-                      fontSize: 12, color: C.gray500, margin: '0 0 8px',
+                      fontSize: 12, color: isSelected ? '#374151' : C.gray500, margin: '0 0 8px',
                       overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
                       lineHeight: 1.4,
                     }}>{notif.body || notif.message}</p>
@@ -400,7 +409,7 @@ const NotificationDropdown = ({ notifications, onMarkRead, onMarkAllRead, onView
           <Link to="/notifications" onClick={onClose} className="pw-viewall-link" style={{
             display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
             padding: '13px 20px',
-            fontSize: 13, fontWeight: 700, color: C.orange,
+            fontSize: 13, fontWeight: 700, color: C.campusNavy,
             textDecoration: 'none', borderRadius: '0 0 18px 18px',
           }}>
             View all notifications
@@ -430,6 +439,7 @@ const Navbar = () => {
   const [unreadCount, setUnreadCount] = useState(0);
   const [notifOpen, setNotifOpen] = useState(false);
   const [selectedNotif, setSelectedNotif] = useState(null);
+  const [selectedNotifId, setSelectedNotifId] = useState(null);
   const notifRef = useRef(null);
   const bellRef = useRef(null);
 
@@ -445,12 +455,31 @@ const Navbar = () => {
     const token = getToken();
     if (!token) return;
     try {
-      const [notifRes, statsRes] = await Promise.all([
+      const [notifRes, statsRes] = await Promise.allSettled([
         axios.get(`${API_URL}/api/notifications/my`, { headers: { Authorization: `Bearer ${token}` } }),
         axios.get(`${API_URL}/api/notifications/stats`, { headers: { Authorization: `Bearer ${token}` } }),
       ]);
-      setNotifications(Array.isArray(notifRes.data) ? notifRes.data : []);
-      setUnreadCount(statsRes.data?.unread ?? 0);
+
+      const notificationList =
+        notifRes.status === 'fulfilled' && Array.isArray(notifRes.value?.data)
+          ? notifRes.value.data
+          : [];
+
+      const unreadFromList = notificationList.filter(
+        (n) => !(n.isRead || n.status === 'read')
+      ).length;
+
+      const unreadFromStats =
+        statsRes.status === 'fulfilled' ? statsRes.value?.data?.unread : undefined;
+
+      setNotifications(notificationList);
+      setUnreadCount(Number.isFinite(unreadFromStats) ? unreadFromStats : unreadFromList);
+
+      try {
+        localStorage.setItem('cachedNotifications', JSON.stringify(notificationList));
+      } catch {
+        // Ignore localStorage failures.
+      }
     } catch { /* silent */ }
   }, [getToken]);
 
@@ -500,6 +529,7 @@ const Navbar = () => {
 
   /* View notification detail */
   const handleViewNotif = (notif) => {
+    setSelectedNotifId(notif.notificationId || notif._id || notif.id || null);
     setSelectedNotif(notif);
     setNotifOpen(false);
     // Auto mark as read when viewing
@@ -709,6 +739,7 @@ const Navbar = () => {
                         onView={handleViewNotif}
                         onClose={() => setNotifOpen(false)}
                         dropdownRef={notifRef}
+                        selectedNotificationId={selectedNotifId}
                       />
                     )}
                   </div>
@@ -869,6 +900,7 @@ const Navbar = () => {
                             onView={handleViewNotif}
                             onClose={() => setNotifOpen(false)}
                             dropdownRef={notifRef}
+                            selectedNotificationId={selectedNotifId}
                           />
                         )}
                       </div>

@@ -94,10 +94,32 @@ export async function createNotification(req, res) {
 
     await notification.save();
 
+    // Distribute notification to recipients at creation time so users can see it immediately.
+    let recipientUsers = [];
+    if (Array.isArray(recipients) && recipients.length > 0) {
+      const validRecipientIds = recipients.filter((id) => isValidObjectId(id));
+      recipientUsers = await User.find({ _id: { $in: validRecipientIds } }).select('_id');
+    } else {
+      recipientUsers = await User.find().select('_id');
+    }
+
+    if (recipientUsers.length > 0) {
+      const userNotificationOps = recipientUsers.map((recipient) => ({
+        updateOne: {
+          filter: { NIC: notification._id, user_id: recipient._id },
+          update: { $setOnInsert: { NIC: notification._id, user_id: recipient._id, readStatus: false } },
+          upsert: true
+        }
+      }));
+
+      await UserNotification.bulkWrite(userNotificationOps, { ordered: false });
+    }
+
     res.status(201).json({
       message: 'Notification created successfully',
       notificationId: notification._id,
-      notification: notification
+      notification: notification,
+      recipientCount: recipientUsers.length
     });
 
   } catch (error) {
@@ -163,14 +185,19 @@ export async function sendNotification(req, res) {
     // Send notifications based on user type and notification type
     for (const recipient of recipients) {
       try {
-        // Create UserNotification record
-        const userNotif = new UserNotification({
-          NIC: notification._id,
-          user_id: recipient._id,
-          readStatus: false,
-          readAt: null
-        });
-        await userNotif.save();
+        // Upsert to avoid duplicate inbox records when create + send are both called.
+        await UserNotification.updateOne(
+          { NIC: notification._id, user_id: recipient._id },
+          {
+            $setOnInsert: {
+              NIC: notification._id,
+              user_id: recipient._id,
+              readStatus: false,
+              readAt: null
+            }
+          },
+          { upsert: true }
+        );
         sentRecords.push(recipient._id);
 
         // Send different notifications based on user role and notification type
@@ -193,8 +220,8 @@ export async function sendNotification(req, res) {
       }
     }
 
-    // Update notification status
-    notification.status = 'read'; // Changed from sent to read
+    // Keep base notification unread for recipients until each user marks it read.
+    notification.status = 'unread';
     await notification.save();
 
     res.status(200).json({
@@ -484,7 +511,7 @@ export async function getMyNotifications(req, res) {
     }
 
     // For regular users, get their personal notifications
-    const rows = await UserNotification.aggregate([
+    let rows = await UserNotification.aggregate([
       { $match: { user_id: userId } },
       {
         $lookup: {
@@ -511,14 +538,66 @@ export async function getMyNotifications(req, res) {
       { $sort: { createdAt: -1 } }
     ]);
 
+    // Backfill legacy/global notifications for users that don't yet have link rows.
+    if (rows.length === 0) {
+      const globalNotifications = await Notification.find({ status: { $ne: 'archived' } })
+        .sort({ createdAt: -1 })
+        .lean();
+
+      if (globalNotifications.length > 0) {
+        try {
+          const backfillOps = globalNotifications.map((notif) => ({
+            updateOne: {
+              filter: { NIC: notif._id, user_id: userId },
+              update: { $setOnInsert: { NIC: notif._id, user_id: userId, readStatus: false } },
+              upsert: true
+            }
+          }));
+
+          await UserNotification.bulkWrite(backfillOps, { ordered: false });
+
+          rows = await UserNotification.aggregate([
+            { $match: { user_id: userId } },
+            {
+              $lookup: {
+                from: 'notifications',
+                localField: 'NIC',
+                foreignField: '_id',
+                as: 'notification'
+              }
+            },
+            { $unwind: '$notification' },
+            {
+              $project: {
+                _id: 1,
+                readStatus: 1,
+                createdAt: 1,
+                'notification._id': 1,
+                'notification.title': 1,
+                'notification.body': 1,
+                'notification.type': 1,
+                'notification.status': 1,
+                'notification.sendDate': 1
+              }
+            },
+            { $sort: { createdAt: -1 } }
+          ]);
+        } catch (backfillError) {
+          console.warn('getMyNotifications backfill warning:', backfillError.message);
+        }
+      }
+    }
+
     const data = rows.map(r => ({
-      id: r._id,               
+      _id: r.notification._id,
+      id: r._id,
+      userNotificationId: r._id,
       notificationId: r.notification._id,
       title: r.notification.title,
       body: r.notification.body,
       message: r.notification.body,
       type: r.notification.type,
-      status: r.notification.status,
+      status: r.readStatus ? 'read' : 'unread',
       createdAt: r.notification.sendDate || r.createdAt,
       isRead: r.readStatus
     }));
@@ -576,12 +655,14 @@ export async function getNotificationsByType(req, res) {
     ]);
 
     const data = rows.map(r => ({
-      id: r._id,               
+      _id: r.notification._id,
+      id: r._id,
+      userNotificationId: r._id,
       notificationId: r.notification._id,
       title: r.notification.title,
       body: r.notification.body,
       type: r.notification.type,
-      status: r.notification.status,
+      status: r.readStatus ? 'read' : 'unread',
       createdAt: r.notification.sendDate || r.createdAt,
       isRead: r.readStatus
     }));
@@ -1039,49 +1120,47 @@ export async function getNotificationStats(req, res) {
     const unreadCount = await UserNotification.countDocuments({ user_id: userId, readStatus: false });
     const readCount = await UserNotification.countDocuments({ user_id: userId, readStatus: true });
 
-    const typeStats = await Notification.aggregate([
-      {
-        $lookup: {
-          from: 'usernotifications',
-          localField: '_id',
-          foreignField: 'NIC',
-          as: 'userNotifications'
-        }
-      },
-      {
-        $match: {
-          'userNotifications.user_id': userId
-        }
-      },
-      {
-        $group: {
-          _id: '$type',
-          count: { $sum: 1 }
-        }
-      }
-    ]);
+    let typeStats = [];
+    let statusStats = [];
 
-    const statusStats = await Notification.aggregate([
-      {
-        $lookup: {
-          from: 'usernotifications',
-          localField: '_id',
-          foreignField: 'NIC',
-          as: 'userNotifications'
+    try {
+      typeStats = await UserNotification.aggregate([
+        { $match: { user_id: userId } },
+        {
+          $lookup: {
+            from: 'notifications',
+            localField: 'NIC',
+            foreignField: '_id',
+            as: 'notification'
+          }
+        },
+        { $unwind: '$notification' },
+        {
+          $group: {
+            _id: '$notification.type',
+            count: { $sum: 1 }
+          }
         }
-      },
-      {
-        $match: {
-          'userNotifications.user_id': userId
+      ]);
+    } catch (aggregateError) {
+      console.warn('getNotificationStats type aggregation failed:', aggregateError.message);
+    }
+
+    try {
+      statusStats = await UserNotification.aggregate([
+        { $match: { user_id: userId } },
+        {
+          $group: {
+            _id: {
+              $cond: [{ $eq: ['$readStatus', true] }, 'read', 'unread']
+            },
+            count: { $sum: 1 }
+          }
         }
-      },
-      {
-        $group: {
-          _id: '$status',
-          count: { $sum: 1 }
-        }
-      }
-    ]);
+      ]);
+    } catch (aggregateError) {
+      console.warn('getNotificationStats status aggregation failed:', aggregateError.message);
+    }
 
     res.json({
       total: totalCount,

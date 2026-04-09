@@ -14,8 +14,8 @@ import {
 } from '@heroicons/react/24/outline';
 
 const C = {
-  parliament: { 50: '#FFF7ED', 100: '#FFEDD5', 200: '#FED7AA', 500: '#F97316', 600: '#EA580C', 700: '#C2410C' },
-  civic: { 50: '#EFF6FF', 100: '#DBEAFE', 600: '#2563EB', 700: '#1D4ED8' },
+  parliament: { 50: '#FFF9EB', 100: '#FFF1CC', 200: '#FDD872', 500: '#F2B705', 600: '#C98900', 700: '#8A5A00' },
+  civic: { 50: '#EDF2F8', 100: '#DCE6F2', 600: '#2F4B72', 700: '#243A59' },
   gray: { 50: '#F9FAFB', 100: '#F3F4F6', 200: '#E5E7EB', 300: '#D1D5DB', 400: '#9CA3AF', 500: '#6B7280', 700: '#374151', 900: '#111827' },
   maroon: { 600: '#7B0000' },
 };
@@ -30,8 +30,8 @@ const TYPE_META = {
   complaint_update: {
     label: 'Complaint Update',
     icon: ChatBubbleBottomCenterTextIcon,
-    bg: '#F0FDF4',
-    text: '#166534',
+    bg: '#FFF3CC',
+    text: '#9A6700',
   },
   emergency_alert: {
     label: 'Emergency Alert',
@@ -75,6 +75,16 @@ const validateField = (name, value) => {
 const Notifications = () => {
   const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
+  const getCachedNotifications = () => {
+    try {
+      const raw = localStorage.getItem('cachedNotifications');
+      const parsed = raw ? JSON.parse(raw) : [];
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [];
+    }
+  };
+
   const [notifications, setNotifications] = useState([]);
   const [stats, setStats] = useState({ total: 0, unread: 0, read: 0 });
   const [loading, setLoading] = useState(true);
@@ -83,6 +93,7 @@ const Notifications = () => {
   const [activeType, setActiveType] = useState('all');
   const [activeReadFilter, setActiveReadFilter] = useState('all');
   const [search, setSearch] = useState('');
+  const [selectedNotificationId, setSelectedNotificationId] = useState(null);
   const [editingId, setEditingId] = useState(null);
   const [showEditModal, setShowEditModal] = useState(false);
   const [deleteConfirmId, setDeleteConfirmId] = useState(null);
@@ -110,10 +121,17 @@ const Notifications = () => {
     }
   }, []);
 
+  const getToken = useCallback(() => {
+    try {
+      const info = JSON.parse(localStorage.getItem('userInfo'));
+      return info?.token || localStorage.getItem('token') || localStorage.getItem('authToken');
+    } catch {
+      return localStorage.getItem('token') || localStorage.getItem('authToken');
+    }
+  }, []);
+
   // Get token from multiple possible locations
-  const token = useMemo(() => {
-    return userInfo?.token || localStorage.getItem('token') || localStorage.getItem('authToken');
-  }, [userInfo]);
+  const token = useMemo(() => getToken(), [getToken]);
 
   const isAdmin = userInfo?.role === 'admin';
 
@@ -126,7 +144,7 @@ const Notifications = () => {
       // Add token to every request
       instance.interceptors.request.use(
         (config) => {
-          const currentToken = localStorage.getItem('token') || token;
+          const currentToken = getToken();
           if (currentToken) {
             config.headers.Authorization = `Bearer ${currentToken}`;
           }
@@ -137,13 +155,15 @@ const Notifications = () => {
 
       return instance;
     },
-    [API_URL, token]
+    [API_URL, getToken]
   );
 
   const initialLoadDone = React.useRef(false);
 
   const loadNotifications = useCallback(async () => {
-    if (!token) {
+    const currentToken = getToken();
+
+    if (!currentToken) {
       setLoading(false);
       toast.error('Please login to view notifications');
       return;
@@ -156,22 +176,49 @@ const Notifications = () => {
       // For non-admin users, use /my endpoint
       if (!isAdmin) {
         try {
-          const [listRes, statsRes] = await Promise.all([
-            api.get('/my').catch(() => ({ data: [] })),
-            api.get('/stats').catch(() => ({ data: { total: 0, unread: 0, read: 0 } }))
+          const [listRes, statsRes] = await Promise.allSettled([
+            api.get('/my'),
+            api.get('/stats')
           ]);
 
-          const list = Array.isArray(listRes.data) ? listRes.data : [];
-          setNotifications(list);
+          const list =
+            listRes.status === 'fulfilled' && Array.isArray(listRes.value?.data)
+              ? listRes.value.data
+              : [];
+
+          const unreadFromList = list.filter(n => n.status === 'unread').length;
+          const readFromList = list.filter(n => n.status === 'read').length;
+          const statsData = statsRes.status === 'fulfilled' ? statsRes.value?.data : null;
+
+          const resolvedList = list.length > 0 ? list : getCachedNotifications();
+          const resolvedUnread = resolvedList.filter(n => n.status === 'unread').length;
+          const resolvedRead = resolvedList.filter(n => n.status === 'read').length;
+
+          setNotifications(resolvedList);
+
+          if (resolvedList.length > 0) {
+            try {
+              localStorage.setItem('cachedNotifications', JSON.stringify(resolvedList));
+            } catch {
+              // Ignore localStorage failures.
+            }
+          }
+
           setStats({
-            total: statsRes.data?.total || list.length,
-            unread: statsRes.data?.unread || list.filter(n => n.status === 'unread').length,
-            read: statsRes.data?.read || list.filter(n => n.status === 'read').length,
+            total: statsData?.total ?? resolvedList.length,
+            unread: statsData?.unread ?? resolvedUnread,
+            read: statsData?.read ?? resolvedRead,
           });
         } catch (error) {
           console.error('Error loading user notifications:', error);
           if (!initialLoadDone.current) toast.error('Failed to load notifications');
-          setNotifications([]);
+          const fallbackList = getCachedNotifications();
+          setNotifications(fallbackList);
+          setStats({
+            total: fallbackList.length,
+            unread: fallbackList.filter(n => n.status === 'unread').length,
+            read: fallbackList.filter(n => n.status === 'read').length,
+          });
         }
       } else {
         // For admin users, fetch all notifications
@@ -198,7 +245,7 @@ const Notifications = () => {
       setLoading(false);
       initialLoadDone.current = true;
     }
-  }, [api, token, isAdmin]);
+  }, [api, getToken, isAdmin]);
 
   useEffect(() => {
     loadNotifications();
@@ -673,8 +720,8 @@ const Notifications = () => {
                         key={item._id}
                         className="rounded-xl border p-4"
                         style={{
-                          borderColor: item.status === 'read' ? C.gray[200] : C.parliament[200],
-                          background: item.status === 'read' ? '#fff' : C.parliament[50],
+                          borderColor: item.status === 'read' ? C.gray[200] : C.civic[100],
+                          background: item.status === 'read' ? '#fff' : '#F8FAFC',
                         }}
                       >
                         <div className="flex items-start justify-between gap-3">
@@ -695,9 +742,9 @@ const Notifications = () => {
                             <div
                               className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold"
                               style={{
-                                background: item.status === 'read' ? '#F0FDF4' : '#FEF2F2',
-                                color: item.status === 'read' ? '#166534' : '#B91C1C',
-                                border: `1px solid ${item.status === 'read' ? '#DCFCE7' : '#FEE2E2'}`,
+                                background: item.status === 'read' ? '#F0FDF4' : '#EEF2FF',
+                                color: item.status === 'read' ? '#166534' : '#1E40AF',
+                                border: `1px solid ${item.status === 'read' ? '#DCFCE7' : '#DBEAFE'}`,
                               }}
                             >
                               {item.status === 'read' ? 'Read' : 'Unread'}
@@ -828,13 +875,27 @@ const Notifications = () => {
             filteredNotifications.map((item) => {
               const meta = TYPE_META[item.type] || TYPE_META.general;
               const Icon = meta.icon;
+              const itemId = item._id || item.notificationId || item.id;
+              const isSelected = selectedNotificationId === itemId;
               return (
                 <div
-                  key={item._id}
+                  key={item._id || item.notificationId || item.id}
                   className="rounded-2xl border p-5"
+                  onClick={() => setSelectedNotificationId(itemId)}
                   style={{
-                    borderColor: item.status === 'read' ? C.gray[200] : C.parliament[200],
-                    background: item.status === 'read' ? '#fff' : C.parliament[50],
+                    borderColor: isSelected
+                      ? C.parliament[600]
+                      : item.status === 'read'
+                        ? C.gray[200]
+                        : C.parliament[200],
+                    background: isSelected
+                      ? '#FFF3CC'
+                      : item.status === 'read'
+                        ? '#fff'
+                        : '#FFFBF0',
+                    boxShadow: isSelected ? '0 0 0 1px #FDD872, 0 10px 24px rgba(201,137,0,0.14)' : 'none',
+                    transition: 'all 0.18s ease',
+                    cursor: 'pointer',
                   }}
                 >
                   <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
@@ -844,7 +905,7 @@ const Notifications = () => {
                           <Icon className="h-3.5 w-3.5" />
                           {meta.label}
                         </span>
-                        <span className="text-xs font-medium px-2 py-1 rounded-full border" style={{ borderColor: C.gray[300], color: item.status === 'read' ? '#166534' : C.maroon[600], background: item.status === 'read' ? '#F0FDF4' : '#FEF2F2' }}>
+                        <span className="text-xs font-medium px-2 py-1 rounded-full border" style={{ borderColor: C.gray[300], color: item.status === 'read' ? '#166534' : '#8A5A00', background: item.status === 'read' ? '#F0FDF4' : '#FFF1CC' }}>
                           {item.status === 'read' ? 'Read' : 'Unread'}
                         </span>
                       </div>
@@ -855,7 +916,10 @@ const Notifications = () => {
 
                     {item.status !== 'read' && (
                       <button
-                        onClick={() => markOneAsRead(item._id)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          markOneAsRead(item._id || item.notificationId || item.id);
+                        }}
                         disabled={actionLoading}
                         className="inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-sm font-semibold text-white disabled:opacity-50"
                         style={{ background: `linear-gradient(135deg, ${C.civic[600]}, ${C.civic[700]})` }}

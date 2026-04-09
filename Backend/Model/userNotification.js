@@ -24,6 +24,10 @@ const userNotificationSchema = new mongoose.Schema(
         },
         { timestamps: true }
     );
+
+    // Prevent duplicate notification links for the same user.
+    userNotificationSchema.index({ NIC: 1, user_id: 1 }, { unique: true });
+
     const UserNotification = mongoose.model('UserNotification', userNotificationSchema);
     export default UserNotification;
     
