@@ -1,13 +1,16 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { MessageCircle, X, Send, Bot, User, Minimize2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import axios from 'axios';
 
 const ChatBot = () => {
+  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState([
     { id: 1, text: "Hi! I'm the Janaya360 Assistant. Ask me about political promises or tracking progress!", sender: 'bot' }
   ]);
   const [inputValue, setInputValue] = useState('');
+  const [isReplying, setIsReplying] = useState(false);
   const scrollRef = useRef(null);
 
   // Auto-scroll to bottom of chat
@@ -17,23 +20,72 @@ const ChatBot = () => {
     }
   }, [messages, isOpen]);
 
-  const handleSendMessage = (e) => {
-    e.preventDefault();
-    if (!inputValue.trim()) return;
+  const buildReply = async (question) => {
+    const q = question.toLowerCase();
 
-    const userMsg = { id: Date.now(), text: inputValue, sender: 'user' };
+    if (q.includes('help') || q.includes('what can you do')) {
+      return 'I can help with promises, politicians, news, feedback, and notifications. Try: "top promises", "politician list", or "latest news".';
+    }
+
+    if (q.includes('promise')) {
+      const res = await axios.get(`${API_URL}/api/promises`);
+      const promises = Array.isArray(res.data?.data) ? res.data.data : Array.isArray(res.data) ? res.data : [];
+      if (promises.length === 0) return 'No promises found right now.';
+      const preview = promises.slice(0, 3).map((p) => `• ${p.title} (${p.status || 'Pending'})`).join('\n');
+      return `Found ${promises.length} promises.\n${preview}`;
+    }
+
+    if (q.includes('politician') || q.includes('leader')) {
+      const res = await axios.get(`${API_URL}/api/politicians`);
+      const politicians = Array.isArray(res.data) ? res.data : [];
+      if (politicians.length === 0) return 'No politicians found right now.';
+      const preview = politicians.slice(0, 4).map((p) => `• ${p.name}${p.party ? ` (${p.party})` : ''}`).join('\n');
+      return `Tracked politicians: ${politicians.length}\n${preview}`;
+    }
+
+    if (q.includes('news') || q.includes('latest')) {
+      const res = await axios.get(`${API_URL}/api/news/public`);
+      const news = Array.isArray(res.data) ? res.data : [];
+      if (news.length === 0) return 'No news items available at the moment.';
+      const preview = news.slice(0, 3).map((n) => `• ${n.title || 'Untitled news'}`).join('\n');
+      return `Latest news:\n${preview}`;
+    }
+
+    if (q.includes('feedback')) {
+      return 'You can submit feedback from the Feedback page. Admin can review and manage all feedback from Admin Dashboard > Feedback.';
+    }
+
+    if (q.includes('notification')) {
+      return 'Notifications are available from the bell icon. Admin can create, update, and delete notifications in Admin Dashboard > Notifications.';
+    }
+
+    return 'I can answer about promises, politicians, news, feedback, and notifications. Try asking: "show promises" or "latest news".';
+  };
+
+  const handleSendMessage = async (e) => {
+    e.preventDefault();
+    if (!inputValue.trim() || isReplying) return;
+
+    const question = inputValue.trim();
+    const userMsg = { id: Date.now(), text: question, sender: 'user' };
     setMessages(prev => [...prev, userMsg]);
     setInputValue('');
 
-    // Mock AI Response - Replace this with your API call later
-    setTimeout(() => {
-      const botMsg = { 
-        id: Date.now() + 1, 
-        text: "I'm currently in 'Demo Mode'. Soon I'll be able to query our database to tell you exactly which promises are kept!", 
-        sender: 'bot' 
+    setIsReplying(true);
+    try {
+      const reply = await buildReply(question);
+      const botMsg = { id: Date.now() + 1, text: reply, sender: 'bot' };
+      setMessages(prev => [...prev, botMsg]);
+    } catch {
+      const botMsg = {
+        id: Date.now() + 1,
+        text: 'I could not fetch live data right now. Please try again in a moment.',
+        sender: 'bot'
       };
       setMessages(prev => [...prev, botMsg]);
-    }, 1000);
+    } finally {
+      setIsReplying(false);
+    }
   };
 
   return (
@@ -85,7 +137,7 @@ const ChatBot = () => {
                 placeholder="Ask me a question..."
                 style={{ flex: 1, border: 'none', background: '#F1F5F9', padding: '10px 15px', borderRadius: '12px', fontSize: '13px', outline: 'none' }}
               />
-              <button type="submit" style={{ background: '#EA580C', color: '#fff', border: 'none', width: '38px', height: '38px', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}><Send size={16} /></button>
+              <button type="submit" disabled={isReplying} style={{ background: '#EA580C', color: '#fff', border: 'none', width: '38px', height: '38px', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: isReplying ? 'not-allowed' : 'pointer', opacity: isReplying ? 0.6 : 1 }}><Send size={16} /></button>
             </form>
           </motion.div>
         )}

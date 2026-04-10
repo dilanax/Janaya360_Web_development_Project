@@ -10,6 +10,10 @@ import {
   CheckCircle, MapPin, BarChart2, ThumbsUp, ThumbsDown,
   ExternalLink, Home, Plus, Pencil, Trash2,
 } from 'lucide-react';
+import PromisesManagement from '../components/PromisesManagement';
+import Notifications from '../components/Notifications';
+import AdminPoliticiansManagement from '../components/AdminPoliticiansManagement';
+import AdminFeedbackManagement from '../components/AdminFeedbackManagement';
 
 /* ── Janaya360 Color Tokens ───────────────────────────────────── */
 const C = {
@@ -112,14 +116,11 @@ const statusCfg = {
 /* ── NAV ITEMS ────────────────────────────────────────────────── */
 const NAV = [
   { label:'Dashboard',     icon:LayoutDashboard, path:'/admin-dashboard', badge:null  },
-  { label:'Politicians',   icon:Users,           path:'/politicians',     badge:'89'  },
-  { label:'Promises',      icon:FileText,        path:'/promises',        badge:'247' },
+  { label:'Politicians',   icon:Users,           path:'/admin-politicians', badge:'89'  },
+  { label:'Promises',      icon:FileText,        path:'/admin-promises',    badge:'247' },
   { label:'Feedback',      icon:MessageSquare,   path:'/admin-feedback',  badge:'12'  },
-  { label:'Politicians',   icon:Users,           path:'/admin-politicians',     badge:'89'  },
-  { label:'Promises',      icon:FileText,        path:'/admin-promises',        badge:'247' },
-  { label:'Feedback',      icon:MessageSquare,   path:'/feedback',        badge:'12'  },
   { label:'News',          icon:Newspaper,       path:'/admin-news',      badge:null  },
-  { label:'Notifications', icon:BellRing,        path:'/notifications',   badge:'5'   },
+  { label:'Notifications', icon:BellRing,        path:'/admin-notifications',   badge:'5'   },
   { label:'Users',         icon:Users,           path:'/users',           badge:null  },
   { label:'Settings',      icon:Settings,        path:'/settings',        badge:null  },
 ];
@@ -234,6 +235,10 @@ const AdminDashboard = () => {
   // ROUTING LOGIC
   const isUsersPage = location.pathname === '/users';
   const isNewsPage = location.pathname === '/admin-news';
+  const isNotificationsPage = location.pathname === '/admin-notifications';
+  const isFeedbackPage = location.pathname === '/admin-feedback';
+  const isPromisesPage = location.pathname === '/admin-promises';
+  const isPoliticiansPage = location.pathname === '/admin-politicians';
   const searchTerm = (activeUserSearch || userSearchInput).trim().toLowerCase();
   const displayedUsers = searchTerm
     ? users.filter((user) => (
@@ -889,10 +894,34 @@ const AdminDashboard = () => {
             <div>
               {/* --- DYNAMIC HEADER TITLE --- */}
               <div style={{ fontSize:16, fontWeight:700, color: C.gray[900] }}>
-                {isUsersPage ? 'User Management' : isNewsPage ? 'News Management' : 'Overview Dashboard'}
+                {isUsersPage
+                  ? 'User Management'
+                  : isNewsPage
+                    ? 'News Management'
+                    : isNotificationsPage
+                      ? 'Notifications Management'
+                    : isFeedbackPage
+                      ? 'Feedback Management'
+                      : isPromisesPage
+                        ? 'Promises Management'
+                        : isPoliticiansPage
+                          ? 'Politicians Management'
+                          : 'Overview Dashboard'}
               </div>
               <div style={{ fontSize:11, color: C.gray[400] }}>
-                {isUsersPage ? 'All registered users from the database' : isNewsPage ? 'All news records from the database' : 'Welcome back, Admin'}
+                {isUsersPage
+                  ? 'All registered users from the database'
+                  : isNewsPage
+                    ? 'All news records from the database'
+                    : isNotificationsPage
+                      ? 'Manage notifications in admin view'
+                    : isFeedbackPage
+                      ? 'Manage citizen feedback without leaving admin dashboard'
+                      : isPromisesPage
+                        ? 'Manage promises in admin view'
+                        : isPoliticiansPage
+                          ? 'Manage politicians in admin view'
+                          : 'Welcome back, Admin'}
               </div>
             </div>
           </div>
@@ -923,6 +952,14 @@ const AdminDashboard = () => {
             renderUsersTable()
           ) : isNewsPage ? (
             renderNewsTable()
+          ) : isNotificationsPage ? (
+            <Notifications embedded />
+          ) : isFeedbackPage ? (
+            <AdminFeedbackManagement />
+          ) : isPromisesPage ? (
+            <PromisesManagement />
+          ) : isPoliticiansPage ? (
+            <AdminPoliticiansManagement />
           ) : (
           <>
 
@@ -1089,8 +1126,8 @@ const AdminDashboard = () => {
               {dataError}
             </div>
           )}
-          
-          
+          </>
+          )}
 
         </div>
       </div>

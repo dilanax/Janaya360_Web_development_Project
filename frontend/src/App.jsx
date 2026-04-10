@@ -18,68 +18,28 @@ import Profile from './pages/Profile';
 import AdminDashboard from './pages/admindashboard';
 import './App.css';
 
-// We create a wrapper component so we can use the useLocation hook
-const AppContent = () => {
-  const location = useLocation();
-  
-  // Logic to detect if we are in the Admin section
-  const isAdminRoute = 
-    location.pathname.startsWith('/admin-') || 
-    location.pathname.startsWith('/admin') || 
-    location.pathname === '/users';
-
-  return (
-    <div className="min-h-screen flex flex-col">
-      {/* 1. Navbar: Hidden on Admin pages */}
-      {!isAdminRoute && <Navbar />}
-      
-      <div className="flex-1">
-        <Routes>
-          {/* --- PUBLIC ROUTES --- */}
-          <Route path="/" element={<Home />} />
-          <Route path="/politicians" element={<Politicians />} />
-          <Route path="/promises" element={<Promises />} />
-          <Route path="/feedback" element={<Feedback />} /> // ✅ Public
-          <Route path="/news" element={<News />} />
-          <Route path="/notifications" element={<Notifications />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="/promise/:id" element={<PromiseDetail />} />
-          <Route path="/profile" element={<Profile />} />
-
-          {/* --- SECURE ADMIN ROUTES --- */}
-          <Route path="/admin-dashboard" element={<AdminDashboard />} />
-          <Route path="/admin-promises" element={<AdminDashboard />} />
-          <Route path="/admin-news" element={<AdminDashboard />} />
-          <Route path="/users" element={<AdminDashboard />} />
-          <Route path="/admin-politicians" element={<AdminDashboard />} />
-          <Route path="/admin-feedback" element={<AdminDashboard />} />
-        </Routes>
-      </div>
-
-      {/* 2. ChatBot FAB: Only show on Public pages for a clean Admin UX */}
-      {!isAdminRoute && <ChatBot />}
-      
-      {/* 3. Global Toaster for notifications */}
-      <Toaster position="top-right" />
-    </div>
-  );
-};
-function NotificationsRoute() {
+const NotificationsRoute = () => {
   try {
     const storedUser = JSON.parse(localStorage.getItem('userInfo') || 'null');
     return storedUser?.role === 'admin' ? <AdminDashboard /> : <Notifications />;
   } catch {
     return <Notifications />;
   }
-}
+};
 
+const AppContent = () => {
+  const location = useLocation();
 
-function App() {
+  const isAdminRoute = 
+    location.pathname.startsWith('/admin-') || 
+    location.pathname.startsWith('/admin') ||
+    location.pathname === '/users';
+
   return (
-    <Router>
-      <div className="min-h-screen">
-        <Navbar />
+    <div className="min-h-screen flex flex-col">
+      {!isAdminRoute && <Navbar />}
+
+      <div className="flex-1">
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/politicians" element={<Politicians />} />
@@ -88,14 +48,31 @@ function App() {
           <Route path="/news" element={<News />} />
           <Route path="/notifications" element={<NotificationsRoute />} />
           <Route path="/login" element={<Login />} />
-          <Route path="/admin-dashboard" element={<AdminDashboard />} />
-          <Route path="/admin-news" element={<AdminDashboard />} />
-          <Route path="/users" element={<AdminDashboard />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/promise/:id" element={<PromiseDetail />} />
           <Route path="/profile" element={<Profile />} />
+
+          <Route path="/admin-dashboard" element={<AdminDashboard />} />
+          <Route path="/admin-promises" element={<AdminDashboard />} />
+          <Route path="/admin-news" element={<AdminDashboard />} />
+          <Route path="/admin-politicians" element={<AdminDashboard />} />
+          <Route path="/admin-feedback" element={<AdminDashboard />} />
+          <Route path="/admin-notifications" element={<AdminDashboard />} />
+          <Route path="/users" element={<AdminDashboard />} />
         </Routes>
-        <Toaster position="top-right" />
       </div>
+
+      {!isAdminRoute && <ChatBot />}
+
+      <Toaster position="top-right" />
+    </div>
+  );
+};
+
+function App() {
+  return (
+    <Router>
+      <AppContent />
     </Router>
   );
 }
