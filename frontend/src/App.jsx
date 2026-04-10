@@ -65,11 +65,37 @@ const AppContent = () => {
     </div>
   );
 };
+function NotificationsRoute() {
+  try {
+    const storedUser = JSON.parse(localStorage.getItem('userInfo') || 'null');
+    return storedUser?.role === 'admin' ? <AdminDashboard /> : <Notifications />;
+  } catch {
+    return <Notifications />;
+  }
+}
+
 
 function App() {
   return (
     <Router>
-      <AppContent />
+      <div className="min-h-screen">
+        <Navbar />
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/politicians" element={<Politicians />} />
+          <Route path="/promises" element={<Promises />} />
+          <Route path="/feedback" element={<Feedback />} />
+          <Route path="/news" element={<News />} />
+          <Route path="/notifications" element={<NotificationsRoute />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/admin-dashboard" element={<AdminDashboard />} />
+          <Route path="/admin-news" element={<AdminDashboard />} />
+          <Route path="/users" element={<AdminDashboard />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/profile" element={<Profile />} />
+        </Routes>
+        <Toaster position="top-right" />
+      </div>
     </Router>
   );
 }

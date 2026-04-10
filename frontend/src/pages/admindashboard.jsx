@@ -11,9 +11,6 @@ import {
   ExternalLink, Home, Plus, Pencil, Trash2,
 } from 'lucide-react';
 
-// IMPORT YOUR PROMISES COMPONENT HERE
-import PromisesManagement from '../components/PromisesManagement.jsx';
-
 /* ── Janaya360 Color Tokens ───────────────────────────────────── */
 const C = {
   parliament: {
@@ -237,9 +234,6 @@ const AdminDashboard = () => {
   // ROUTING LOGIC
   const isUsersPage = location.pathname === '/users';
   const isNewsPage = location.pathname === '/admin-news';
-  const isFeedbackPage = location.pathname === '/admin-feedback';
-  const isPromisesPage = location.pathname === '/admin-promises'; // ADDED PROMISES ROUTE CHECK
-
   const searchTerm = (activeUserSearch || userSearchInput).trim().toLowerCase();
   const displayedUsers = searchTerm
     ? users.filter((user) => (
@@ -895,10 +889,10 @@ const AdminDashboard = () => {
             <div>
               {/* --- DYNAMIC HEADER TITLE --- */}
               <div style={{ fontSize:16, fontWeight:700, color: C.gray[900] }}>
-                {isUsersPage ? 'User Management' : isNewsPage ? 'News Management' : isPromisesPage ? 'Promises Management' : 'Overview Dashboard'}
+                {isUsersPage ? 'User Management' : isNewsPage ? 'News Management' : 'Overview Dashboard'}
               </div>
               <div style={{ fontSize:11, color: C.gray[400] }}>
-                {isUsersPage ? 'All registered users from the database' : isNewsPage ? 'All news records from the database' : isPromisesPage ? 'Monitor and update political commitments' : 'Welcome back, Admin'}
+                {isUsersPage ? 'All registered users from the database' : isNewsPage ? 'All news records from the database' : 'Welcome back, Admin'}
               </div>
             </div>
           </div>
@@ -925,39 +919,14 @@ const AdminDashboard = () => {
 
         {/* Scrollable content */}
         <div style={{ flex:1, overflowY:'auto', padding:'24px 28px' }}>
-          
-          {/* --- DYNAMIC RENDERING BLOCK --- */}
-          {/* --- DYNAMIC RENDERING BLOCK --- */}
-{isUsersPage ? (
-  renderUsersTable()
-) : isNewsPage ? (
-  renderNewsTable()
-) : isFeedbackPage ? (
-  renderFeedbackManagement()
-) : isPromisesPage ? (
-  <PromisesManagement />
-) : (
-  <>
-    {/* Overview Dashboard */}
+          {isUsersPage ? (
+            renderUsersTable()
+          ) : isNewsPage ? (
+            renderNewsTable()
+          ) : (
+          <>
 
-    <div
-      ref={ref}
-      style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(4,1fr)',
-        gap: 16,
-        marginBottom: 24,
-      }}
-    >
-      {STATS.map((s, i) => (
-        <StatCard key={i} stat={s} inView={inView} />
-      ))}
-    </div>
-
-    {/* keep the rest of dashboard JSX BELOW as-is */}
-  </>
-)}
-          {/* Overview Dashboard */}
+          {/* Stat cards */}
           <div ref={ref} style={{ display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:16, marginBottom:24 }}>
             {STATS.map((s,i) => <StatCard key={i} stat={s} inView={inView} />)}
           </div>

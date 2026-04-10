@@ -72,7 +72,7 @@ const validateField = (name, value) => {
   return '';
 };
 
-const Notifications = () => {
+const Notifications = ({ embedded = false }) => {
   const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
   const getCachedNotifications = () => {
@@ -515,8 +515,8 @@ const Notifications = () => {
 
   return (
     <div
-      className="min-h-screen py-8 px-4 sm:px-6 lg:px-8"
-      style={{ background: `linear-gradient(145deg, ${C.gray[50]} 0%, #FFFFFF 55%, ${C.parliament[50]} 100%)` }}
+      className={embedded ? 'space-y-6' : 'min-h-screen py-8 px-4 sm:px-6 lg:px-8'}
+      style={embedded ? undefined : { background: `linear-gradient(145deg, ${C.gray[50]} 0%, #FFFFFF 55%, ${C.parliament[50]} 100%)` }}
     >
       <div className="max-w-6xl mx-auto space-y-6">
         <div className="rounded-2xl p-6 sm:p-8 border shadow-sm" style={{ borderColor: C.gray[200], background: '#fff' }}>
