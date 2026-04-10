@@ -120,7 +120,7 @@ const StatusPill = ({ status, small }) => {
 };
 
 /* ─── Hero ──────────────────────────────────────────────────── */
-const Hero = () => {
+const Hero = ({ isAdmin }) => {
   const [cur, setCur] = useState(0);
   const [search, setSearch] = useState('');
 
@@ -191,6 +191,19 @@ const Hero = () => {
         {/* CTAs */}
         <motion.div initial={{ opacity:0, y:12 }} animate={{ opacity:1, y:0 }} transition={{ delay:0.8 }}
           style={{ display:'flex', gap:12, flexWrap:'wrap' }}>
+          {isAdmin && (
+            <Link to="/admin-dashboard" style={{
+              display:'inline-flex', alignItems:'center', gap:8, padding:'12px 24px',
+              background:'rgba(255,255,255,0.12)', color:'#fff', borderRadius:10, fontWeight:700, fontSize:14,
+              textDecoration:'none', border:'1px solid rgba(255,255,255,0.3)', fontFamily:"'DM Sans', sans-serif",
+              backdropFilter:'blur(8px)',
+            }}
+              onMouseEnter={e=>e.currentTarget.style.background='rgba(255,255,255,0.2)'}
+              onMouseLeave={e=>e.currentTarget.style.background='rgba(255,255,255,0.12)'}>
+              <ShieldCheckIcon style={{ width:16, height:16 }} /> Admin Dashboard
+            </Link>
+          )}
+
           <Link to="/politicians" style={{
             display:'inline-flex', alignItems:'center', gap:8, padding:'12px 24px',
             background: C.parliament[600], color:'#fff', borderRadius:10, fontWeight:700, fontSize:14,
@@ -579,6 +592,14 @@ const FloatingBtn = () => (
 const Home = () => {
   const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
   const [latestNews, setLatestNews] = useState([]);
+  const [userInfo, setUserInfo] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem('userInfo'));
+    } catch {
+      return null;
+    }
+  });
+  const isAdmin = userInfo?.role === 'admin';
 
   const mapTrendArticle = (article) => ({
     title: article.title,
@@ -616,20 +637,38 @@ const Home = () => {
     fetchLatestNews();
   }, [API_URL]);
 
-  return (
-  <div style={{ fontFamily:"'DM Sans', sans-serif", overflowX:'hidden' }}>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  useEffect(() => {
+    const syncUser = () => {
+      try {
+        setUserInfo(JSON.parse(localStorage.getItem('userInfo')));
+      } catch {
+        setUserInfo(null);
+      }
+    };
 
-    <Hero />
-    <StatsBand />
-    <PromiseFeed />
-    <Politicians />
-    <NewsSection newsItems={latestNews} />
-    <CTABanner />
-    <FloatingBtn />
-  </div>
+    window.addEventListener('authChange', syncUser);
+    window.addEventListener('storage', syncUser);
+
+    return () => {
+      window.removeEventListener('authChange', syncUser);
+      window.removeEventListener('storage', syncUser);
+    };
+  }, []);
+
+  return (
+    <div style={{ fontFamily:"'DM Sans', sans-serif", overflowX:'hidden' }}>
+      <link rel="preconnect" href="https://fonts.googleapis.com" />
+      <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+      <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+
+      <Hero isAdmin={isAdmin} />
+      <StatsBand />
+      <PromiseFeed />
+      <Politicians />
+      <NewsSection newsItems={latestNews} />
+      <CTABanner />
+      <FloatingBtn />
+    </div>
   );
 };
 

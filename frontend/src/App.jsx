@@ -14,6 +14,15 @@ import Profile from './pages/Profile';
 import './App.css';
 import AdminDashboard from './pages/admindashboard';
 
+function NotificationsRoute() {
+  try {
+    const storedUser = JSON.parse(localStorage.getItem('userInfo') || 'null');
+    return storedUser?.role === 'admin' ? <AdminDashboard /> : <Notifications />;
+  } catch {
+    return <Notifications />;
+  }
+}
+
 
 function App() {
   return (
@@ -26,7 +35,7 @@ function App() {
           <Route path="/promises" element={<Promises />} />
           <Route path="/feedback" element={<Feedback />} />
           <Route path="/news" element={<News />} />
-          <Route path="/notifications" element={<Notifications />} />
+          <Route path="/notifications" element={<NotificationsRoute />} />
           <Route path="/login" element={<Login />} />
           <Route path="/admin-dashboard" element={<AdminDashboard />} />
           <Route path="/admin-news" element={<AdminDashboard />} />

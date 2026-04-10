@@ -10,6 +10,7 @@ import {
   CheckCircle, MapPin, BarChart2, ThumbsUp, ThumbsDown,
   ExternalLink, Home, Plus, Pencil, Trash2,
 } from 'lucide-react';
+import Notifications from '../components/Notifications';
 
 /* ── Janaya360 Color Tokens ───────────────────────────────────── */
 const C = {
@@ -228,6 +229,7 @@ const AdminDashboard = () => {
   const [deletingNewsId, setDeletingNewsId] = useState('');
   const isUsersPage = location.pathname === '/users';
   const isNewsPage = location.pathname === '/admin-news';
+  const isNotificationsPage = location.pathname === '/notifications';
   const searchTerm = (activeUserSearch || userSearchInput).trim().toLowerCase();
   const displayedUsers = searchTerm
     ? users.filter((user) => (
@@ -997,10 +999,10 @@ const AdminDashboard = () => {
             </button>
           <div>
               <div style={{ fontSize:16, fontWeight:700, color: C.gray[900] }}>
-                {isUsersPage ? 'User Management' : isNewsPage ? 'News Management' : 'Overview Dashboard'}
+                {isUsersPage ? 'User Management' : isNewsPage ? 'News Management' : isNotificationsPage ? 'Notification Management' : 'Overview Dashboard'}
               </div>
               <div style={{ fontSize:11, color: C.gray[400] }}>
-                {isUsersPage ? 'All registered users from the database' : isNewsPage ? 'All news records from the database' : 'Welcome back, Admin'}
+                {isUsersPage ? 'All registered users from the database' : isNewsPage ? 'All news records from the database' : isNotificationsPage ? 'Create, edit, and delete notifications from the admin panel' : 'Welcome back, Admin'}
               </div>
             </div>
           </div>
@@ -1061,6 +1063,8 @@ const AdminDashboard = () => {
             renderUsersTable()
           ) : isNewsPage ? (
             renderNewsTable()
+          ) : isNotificationsPage ? (
+            <Notifications embedded />
           ) : (
           <>
 

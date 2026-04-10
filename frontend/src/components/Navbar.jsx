@@ -433,6 +433,7 @@ const Navbar = () => {
   const [userInfo,    setUserInfo]    = useState(() => {
     try { return JSON.parse(localStorage.getItem('userInfo')); } catch { return null; }
   });
+  const isAdmin = userInfo?.role === 'admin';
 
   /* ─── Notification state ─── */
   const [notifications, setNotifications] = useState([]);
@@ -672,6 +673,26 @@ const Navbar = () => {
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }} className="hidden-mobile">
               {userInfo ? (
                 <>
+                  {isAdmin && (
+                    <button
+                      onClick={() => navigate('/admin-dashboard')}
+                      style={{
+                        ...ff,
+                        padding: '8px 16px',
+                        borderRadius: 10,
+                        border: `1px solid ${isActive('/admin-dashboard') ? C.orange : C.gray200}`,
+                        background: isActive('/admin-dashboard') ? C.orange : C.orangeBg,
+                        color: isActive('/admin-dashboard') ? C.white : C.orange,
+                        fontSize: 13,
+                        fontWeight: 700,
+                        cursor: 'pointer',
+                        transition: 'all 0.2s',
+                      }}
+                    >
+                      Admin Dashboard
+                    </button>
+                  )}
+
                   {/* User avatar + name */}
                   <button
                     onClick={openProfile}
@@ -839,6 +860,29 @@ const Navbar = () => {
               <div style={{ borderTop: `1px solid ${C.gray100}`, marginTop: 10, paddingTop: 12, display: 'flex', flexDirection: 'column', gap: 8 }}>
                 {userInfo ? (
                   <>
+                    {isAdmin && (
+                      <button
+                        onClick={() => {
+                          setMenuOpen(false);
+                          navigate('/admin-dashboard');
+                        }}
+                        style={{
+                          ...ff,
+                          width: '100%',
+                          padding: '11px 12px',
+                          borderRadius: 10,
+                          border: `1px solid ${isActive('/admin-dashboard') ? C.orange : C.gray200}`,
+                          background: isActive('/admin-dashboard') ? C.orange : C.orangeBg,
+                          color: isActive('/admin-dashboard') ? C.white : C.orange,
+                          fontSize: 14,
+                          fontWeight: 700,
+                          cursor: 'pointer',
+                        }}
+                      >
+                        Admin Dashboard
+                      </button>
+                    )}
+
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 2 }}>
                       <button
                         onClick={openProfile}
