@@ -7,16 +7,14 @@ JusticeLink is a full-stack civic transparency platform for tracking political p
 - [Overview](#overview)
 - [Core Features](#core-features)
 - [Architecture](#architecture)
-- [Tech Stack](#tech-stack)
-- [Project Structure](#project-structure)
-- [Setup Instructions](#setup-instructions)
-- [Deployment](#deployment)
-- [API Endpoint Documentation](#api-endpoint-documentation)
-- [Testing Instructions Report](#testing-instructions-report)
-- [Evidence Folders](#evidence-folders)
-- [Third-Party API Integration](#third-party-api-integration)
-- [Evaluation Criteria Checklist](#evaluation-criteria-checklist)
-- [Submission Guidelines Checklist](#submission-guidelines-checklist)
+- [🚀 I. Setup Instructions](#-i-setup-instructions)
+- [📡 II. API Endpoint Documentation](#-ii-api-endpoint-documentation)
+- [🧪 III. Testing](#-iii-testing)
+- [🌐 IV. Deployment](#-iv-deployment)
+- [🛠️ V. Tech Stack](#️-v-tech-stack)
+- [📁 VI. Project Structure](#-vi-project-structure)
+- [✅ VII. Evaluation Checklist](#-vii-evaluation-checklist)
+- [📌 VIII. Submission Notes](#-viii-submission-notes)
 - [Evaluation Dates](#evaluation-dates)
 
 ## Quick Links
@@ -47,35 +45,7 @@ The platform is designed to:
 - Frontend: React + Vite SPA.
 - Auth: JWT bearer tokens.
 
-## Tech Stack
-- Backend: `express`, `mongoose`, `jsonwebtoken`, `dotenv`, `nodemailer`, `swagger-jsdoc`, `swagger-ui-express`
-- Frontend: `react`, `react-router-dom`, `axios`, `vite`, `tailwindcss`
-
-## Project Structure
-```text
-Backend/
-  Controller/
-  Middleware/
-  Model/
-  Routes/
-  Utils/
-  Logs/
-  index.js
-  package.json
-
-frontend/
-  public/
-  src/
-     components/
-     pages/
-     App.jsx
-     index.jsx
-  package.json
-
-README.md
-```
-
-## Setup Instructions
+## 🚀 I. Setup Instructions
 
 ### Prerequisites
 - Node.js 18+
@@ -111,82 +81,7 @@ README.md
     ```
 5. Frontend default local URL: `http://localhost:5173`
 
-## Deployment
-
-### Live URLs
-- Deployed backend API: https://janaya360-web-development-project.onrender.com
-- Deployed frontend application: https://janaya360-web-development-project.vercel.app/
-
-### Backend Deployment Platform and Setup Steps (Render)
-1. Push backend code to GitHub.
-2. In Render, create a new Web Service from the repository.
-3. Set root directory to `Backend`.
-4. Build command:
-    ```bash
-    npm install
-    ```
-5. Start command:
-    ```bash
-    npm start
-    ```
-6. Add environment variables from [Environment Variables](#environment-variables) in Render dashboard.
-7. Deploy and verify health by opening:
-    - `https://janaya360-web-development-project.onrender.com`
-
-### Frontend Deployment Platform and Setup Steps (Vercel)
-1. Push frontend code to GitHub.
-2. In Vercel, import the same repository.
-3. Set project root directory to `frontend`.
-4. Build command:
-    ```bash
-    npm run build
-    ```
-5. Output directory: `dist`
-6. Add frontend environment variable:
-    - `VITE_API_URL=https://janaya360-web-development-project.onrender.com`
-7. Deploy and verify by opening:
-    - `https://janaya360-web-development-project.vercel.app/`
-
-### Environment Variables
-Secrets are not exposed in this repository. Use secure platform dashboards (Render/Vercel) to configure them.
-
-#### Backend (`Backend/.env`)
-- `PORT` - server port (example: `5000`)
-- `MONGO_URI` - MongoDB connection string
-- `JWT_SECRET` - JWT signing secret
-- `FRONTEND_URL` - frontend URL for CORS/email links
-- `NEWS_API_KEY` - news provider API key
-- `SMTP_HOST` - SMTP host
-- `SMTP_PORT` - SMTP port
-- `SMTP_USER` - SMTP username/email
-- `SMTP_PASSWORD` - SMTP password/app password
-- `EMAIL_USER` - sender email (if used by utility module)
-- `EMAIL_PASS` - sender password/app password (if used by utility module)
-
-#### Frontend (`frontend/.env`)
-- `VITE_API_URL` - base URL of backend API
-
-### Deployment Evidence (Screenshots)
-Add screenshots to clearly prove successful deployment.
-
-Minimum recommended evidence:
-1. Render dashboard showing successful backend deployment status.
-2. Browser tab showing live backend URL responding.
-3. Vercel dashboard showing successful frontend deployment status.
-4. Browser tab showing live frontend application running.
-
-Suggested path for storing evidence:
-- [docs/deployment/](docs/deployment/)
-
-Backend evidence locations:
-1. [docs/deployment/backend-render-overview.png](docs/deployment/backend-render-overview.png)
-2. [docs/deployment/backend-live-url-response.png](docs/deployment/backend-live-url-response.png)
-
-Frontend evidence locations:
-1. [docs/deployment/frontend-vercel-overview.png](docs/deployment/frontend-vercel-overview.png)
-2. [docs/deployment/frontend-live-url-view.png](docs/deployment/frontend-live-url-view.png)
-
-## API Endpoint Documentation
+## 📡 II. API Endpoint Documentation
 
 ### Base URL
 - Production: `https://janaya360-web-development-project.onrender.com`
@@ -195,9 +90,9 @@ Frontend evidence locations:
 ### Authentication
 - Scheme: `Bearer <JWT_TOKEN>`
 - Header:
-  ```http
-  Authorization: Bearer <token>
-  ```
+    ```http
+    Authorization: Bearer <token>
+    ```
 
 ### Request/Response Format
 - Request body: JSON (`Content-Type: application/json`)
@@ -278,25 +173,25 @@ POST /api/users/login
 Content-Type: application/json
 
 {
-  "email": "user@example.com",
-  "password": "your_password"
+    "email": "user@example.com",
+    "password": "your_password"
 }
 ```
 
 ```json
 {
-  "success": true,
-  "token": "<jwt-token>",
-  "user": {
-     "_id": "...",
-     "name": "Sample User",
-     "email": "user@example.com",
-     "role": "citizen"
-  }
+    "success": true,
+    "token": "<jwt-token>",
+    "user": {
+         "_id": "...",
+         "name": "Sample User",
+         "email": "user@example.com",
+         "role": "citizen"
+    }
 }
 ```
 
-## Testing Instructions Report
+## 🧪 III. Testing
 
 ### 1. Unit Testing
 Current status:
@@ -355,16 +250,110 @@ Report requirements:
 - Performance Tooling: Artillery
 - Frontend: React + Vite
 
-## Evidence Folders
-- Deployment evidence: [docs/deployment/](docs/deployment/)
-- Testing evidence: [docs/testing/](docs/testing/)
+## 🌐 IV. Deployment
 
-## Third-Party API Integration
-- News API integration for social/political trend data.
-- SMTP/email integration for OTP and notifications.
-- External integrations in chatbot/notification workflows.
+### Live URLs
+- Deployed backend API: https://janaya360-web-development-project.onrender.com
+- Deployed frontend application: https://janaya360-web-development-project.vercel.app/
 
-## Evaluation Criteria Checklist
+### Backend Deployment Platform and Setup Steps (Render)
+1. Push backend code to GitHub.
+2. In Render, create a new Web Service from the repository.
+3. Set root directory to `Backend`.
+4. Build command:
+    ```bash
+    npm install
+    ```
+5. Start command:
+    ```bash
+    npm start
+    ```
+6. Add environment variables from [Environment Variables](#environment-variables) in Render dashboard.
+7. Deploy and verify health by opening:
+    - `https://janaya360-web-development-project.onrender.com`
+
+### Frontend Deployment Platform and Setup Steps (Vercel)
+1. Push frontend code to GitHub.
+2. In Vercel, import the same repository.
+3. Set project root directory to `frontend`.
+4. Build command:
+    ```bash
+    npm run build
+    ```
+5. Output directory: `dist`
+6. Add frontend environment variable:
+    - `VITE_API_URL=https://janaya360-web-development-project.onrender.com`
+7. Deploy and verify by opening:
+    - `https://janaya360-web-development-project.vercel.app/`
+
+### Environment Variables
+Secrets are not exposed in this repository. Use secure platform dashboards (Render/Vercel) to configure them.
+
+#### Backend (`Backend/.env`)
+- `PORT` - server port (example: `5000`)
+- `MONGO_URI` - MongoDB connection string
+- `JWT_SECRET` - JWT signing secret
+- `FRONTEND_URL` - frontend URL for CORS/email links
+- `NEWS_API_KEY` - news provider API key
+- `SMTP_HOST` - SMTP host
+- `SMTP_PORT` - SMTP port
+- `SMTP_USER` - SMTP username/email
+- `SMTP_PASSWORD` - SMTP password/app password
+- `EMAIL_USER` - sender email (if used by utility module)
+- `EMAIL_PASS` - sender password/app password (if used by utility module)
+
+#### Frontend (`frontend/.env`)
+- `VITE_API_URL` - base URL of backend API
+
+### Deployment Evidence (Screenshots)
+Add screenshots to clearly prove successful deployment.
+
+Minimum recommended evidence:
+1. Render dashboard showing successful backend deployment status.
+2. Browser tab showing live backend URL responding.
+3. Vercel dashboard showing successful frontend deployment status.
+4. Browser tab showing live frontend application running.
+
+Suggested path for storing evidence:
+- [docs/deployment/](docs/deployment/)
+
+Backend evidence locations:
+1. [docs/deployment/backend-render-overview.png](docs/deployment/backend-render-overview.png)
+2. [docs/deployment/backend-live-url-response.png](docs/deployment/backend-live-url-response.png)
+
+Frontend evidence locations:
+1. [docs/deployment/frontend-vercel-overview.png](docs/deployment/frontend-vercel-overview.png)
+2. [docs/deployment/frontend-live-url-view.png](docs/deployment/frontend-live-url-view.png)
+
+## 🛠️ V. Tech Stack
+- Backend: `express`, `mongoose`, `jsonwebtoken`, `dotenv`, `nodemailer`, `swagger-jsdoc`, `swagger-ui-express`
+- Frontend: `react`, `react-router-dom`, `axios`, `vite`, `tailwindcss`
+
+## 📁 VI. Project Structure
+```text
+Backend/
+    Controller/
+    Middleware/
+    Model/
+    Routes/
+    Utils/
+    Logs/
+    index.js
+    package.json
+
+frontend/
+    public/
+    src/
+         components/
+         pages/
+         App.jsx
+         index.jsx
+    package.json
+
+README.md
+```
+
+## ✅ VII. Evaluation Checklist
 - Correctness and overall functionality.
 - Creativity and UI/UX implementation quality.
 - Code readability and best practices.
@@ -373,24 +362,35 @@ Report requirements:
 - Testing depth and quality.
 - Viva performance.
 
-## Submission Guidelines Checklist
+## 📌 VIII. Submission Notes
 
-### 1. Source Code Submission
+### Quick Document Links
+- [Deployment-Report.md](Deployment-Report.md)
+- [Testing-Instructions-Report.md](Testing-Instructions-Report.md)
+- [docs/deployment/](docs/deployment/)
+- [docs/testing/](docs/testing/)
+
+### Third-Party API Integration
+- News API integration for social/political trend data.
+- SMTP/email integration for OTP and notifications.
+- External integrations in chatbot/notification workflows.
+
+### Source Code Submission
 - Submit complete source via GitHub.
 - Keep clean and meaningful commit history.
 - Avoid late changes after the deadline window.
 
-### 2. Documentation Submission
+### Documentation Submission
 Include:
 1. This README with setup and API endpoint details.
 2. [Deployment-Report.md](Deployment-Report.md).
 3. [Testing-Instructions-Report.md](Testing-Instructions-Report.md) with:
-    - How to run unit tests
-    - Integration testing setup and execution
-    - Performance testing setup and execution
-    - Testing environment configuration
+     - How to run unit tests
+     - Integration testing setup and execution
+     - Performance testing setup and execution
+     - Testing environment configuration
 
-### 3. Deployment Report
+### Deployment Report Note
 The deployment section above includes required platform details, setup steps, environment variable handling, live URLs, and evidence checklist.
 The standalone report is available in [Deployment-Report.md](Deployment-Report.md).
 
