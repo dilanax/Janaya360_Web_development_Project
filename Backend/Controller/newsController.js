@@ -9,6 +9,16 @@ const decodeHtml = (value = "") =>
     .replace(/&lt;/g, "<")
     .replace(/&gt;/g, ">");
 
+const isLikelyEnglish = (text = "") => {
+  const sample = String(text || "").trim();
+  if (!sample) return false;
+  const letters = sample.match(/[A-Za-z]/g)?.length || 0;
+  return letters >= Math.max(8, sample.length * 0.25);
+};
+
+const isSriLankaRelevant = (text = "") =>
+  /sri lanka|sri lankan|colombo|kandy|jaffna|parliament/i.test(String(text || ""));
+
 const parseTag = (block, tag) => {
   const match = block.match(new RegExp(`<${tag}>([\\s\\S]*?)<\\/${tag}>`, "i"));
   return match ? decodeHtml(match[1].trim()) : "";
@@ -21,32 +31,38 @@ const parseSource = (block) => {
 
 const mapGoogleRssToArticles = (xml) => {
   const items = xml.match(/<item>[\s\S]*?<\/item>/gi) || [];
-  return items.slice(0, 12).map((item, index) => ({
-    title: parseTag(item, "title") || `Latest political update ${index + 1}`,
-    description: parseTag(item, "description") || "Live political update from RSS feed.",
-    content: parseTag(item, "description") || "",
-    url: parseTag(item, "link"),
-    image: "",
-    publishedAt: parseTag(item, "pubDate"),
-    source: {
-      name: parseSource(item),
-    },
-  }));
+  return items
+    .map((item, index) => ({
+      title: parseTag(item, "title") || `Latest political update ${index + 1}`,
+      description: parseTag(item, "description") || "Live political update from RSS feed.",
+      content: parseTag(item, "description") || "",
+      url: parseTag(item, "link"),
+      image: "",
+      publishedAt: parseTag(item, "pubDate"),
+      source: {
+        name: parseSource(item),
+      },
+    }))
+    .filter((article) => isLikelyEnglish(`${article.title} ${article.description}`))
+    .slice(0, 12);
 };
 
 const mapGdeltArticles = (data) => {
   const list = Array.isArray(data?.articles) ? data.articles : [];
-  return list.slice(0, 12).map((item, index) => ({
-    title: item.title || `Political update ${index + 1}`,
-    description: item.seendate ? `Reported on ${item.seendate}` : "Live political update.",
-    content: "",
-    url: item.url || "",
-    image: "",
-    publishedAt: item.seendate || "",
-    source: {
-      name: item.sourcecountry || "GDELT",
-    },
-  }));
+  return list
+    .map((item, index) => ({
+      title: item.title || `Political update ${index + 1}`,
+      description: item.seendate ? `Reported on ${item.seendate}` : "Live political update.",
+      content: "",
+      url: item.url || "",
+      image: "",
+      publishedAt: item.seendate || "",
+      source: {
+        name: item.sourcecountry || "GDELT",
+      },
+    }))
+    .filter((article) => isLikelyEnglish(`${article.title} ${article.description}`))
+    .slice(0, 12);
 };
 
 // ===============================
@@ -145,18 +161,33 @@ export const getPoliticalTrends = async (req, res) => {
   try {
     if (process.env.NEWS_API_KEY) {
       try {
-        const response = await axios.get(
+      const response = await axios.get(
           "https://gnews.io/api/v4/search",
           {
             params: {
-              q: "Sri Lanka politics",
+            q: '"Sri Lanka" politics',
+            lang: "en",
               apikey: process.env.NEWS_API_KEY,
             },
           }
         );
 
-        if (Array.isArray(response.data?.articles) && response.data.articles.length > 0) {
-          return res.json(response.data);
+        const englishArticles = (Array.isArray(response.data?.articles) ? response.data.articles : [])
+          .filter((article) => {
+            const title = article?.title || "";
+            const description = article?.description || "";
+            return (
+              isLikelyEnglish(`${title} ${description}`) &&
+              isSriLankaRelevant(`${title} ${description}`)
+            );
+          });
+
+        if (englishArticles.length > 0) {
+          return res.json({
+            ...response.data,
+            totalArticles: englishArticles.length,
+            articles: englishArticles,
+          });
         }
       } catch (gnewsError) {
         console.log("GNEWS TRENDS ERROR:", gnewsError.response?.data || gnewsError.message);
@@ -187,7 +218,7 @@ export const getPoliticalTrends = async (req, res) => {
         "https://api.gdeltproject.org/api/v2/doc/doc",
         {
           params: {
-            query: "Sri Lanka politics",
+            query: '"Sri Lanka" politics sourcelang:english',
             mode: "ArtList",
             maxrecords: 20,
             format: "json",
