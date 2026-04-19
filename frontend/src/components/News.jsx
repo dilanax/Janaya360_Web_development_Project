@@ -29,6 +29,7 @@ const mapLiveArticle = (article, index) => ({
   image: article.image || `https://picsum.photos/seed/live-news-${index}/640/360`,
   url: article.url || '',
   publishedAt: article.publishedAt || '',
+  createdAt: article.publishedAt || '',
   politician: article.source?.name || 'Sri Lanka Politics',
   isLive: true,
 });
@@ -41,6 +42,7 @@ const mapDatabaseArticle = (article) => ({
   image: article.image || `https://picsum.photos/seed/db-news-${article._id}/640/360`,
   url: article.url || '',
   publishedAt: article.publishedAt || '',
+  createdAt: article.createdAt || article.publishedAt || '',
   politician: article.politician || 'General',
   isLive: false,
 });
@@ -169,10 +171,14 @@ const News = () => {
     fetchNews();
   }, [API_URL]);
 
-  const primaryNews = liveNews.length > 0 ? liveNews : adminNews;
+  const mergedNews = [...liveNews, ...adminNews].sort((a, b) => {
+    const dateA = new Date(a.publishedAt || a.createdAt || 0).getTime();
+    const dateB = new Date(b.publishedAt || b.createdAt || 0).getTime();
+    return dateB - dateA;
+  });
 
   return (
-    <div style={{ background: C.gray[50], minHeight: '100vh', padding: '48px 24px 72px' }}>
+    <div style={{ background: C.gray[50], minHeight: '100vh', padding: '48px 16px 72px' }}>
       <div style={{ maxWidth: 1180, margin: '0 auto' }}>
         <div style={{ marginBottom: 28 }}>
           <div
@@ -196,8 +202,13 @@ const News = () => {
             Latest Political News
           </h1>
           <p style={{ color: C.gray[500], margin: 0, maxWidth: 700, lineHeight: 1.7 }}>
-            This page now prefers real live news from the third-party API. If live news is unavailable, it falls back to the news created in the admin dashboard.
+            This page combines third-party live news and admin-created news in one timeline, sorted by latest first.
           </p>
+          {!isLoading && (
+            <p style={{ color: C.gray[500], marginTop: 8, fontSize: 13 }}>
+              Live: {liveNews.length} | Admin: {adminNews.length} | Total: {mergedNews.length}
+            </p>
+          )}
         </div>
 
         {isLoading && <p style={{ color: C.gray[500] }}>Loading news...</p>}
@@ -215,7 +226,7 @@ const News = () => {
               fontWeight: 600,
             }}
           >
-            Live news is unavailable right now, so showing admin-published news instead.
+            Live news is unavailable right now. Showing available admin-published news.
           </div>
         )}
 
@@ -236,13 +247,13 @@ const News = () => {
           </div>
         )}
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 22 }}>
-          {primaryNews.map((item) => (
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: 22 }}>
+          {mergedNews.map((item) => (
             <NewsCard key={item.id} item={item} />
           ))}
         </div>
 
-        {!isLoading && primaryNews.length === 0 && (
+        {!isLoading && mergedNews.length === 0 && (
           <p style={{ color: C.gray[500], marginTop: 20 }}>No news available yet.</p>
         )}
       </div>

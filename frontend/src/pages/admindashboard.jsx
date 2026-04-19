@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import CountUp from 'react-countup';
@@ -55,54 +55,38 @@ const C = {
   sidebar: '#18181B',   // zinc-900 — admin panel sidebar per spec
 };
 
-/* ── DATA ─────────────────────────────────────────────────────── */
-const STATS = [
-  { label:'Politicians Tracked', value:89,   suffix:'',  change:'+4 this month',  up:true,  bg: C.status.keptBg,  icon:Users,        iconColor: C.status.keptColor  },
-  { label:'Total Promises',      value:247,  suffix:'',  change:'+18 new',        up:true,  bg: C.civic[100],     icon:FileText,     iconColor: C.civic[600]        },
-  { label:'Citizen Reports',     value:3452, suffix:'',  change:'+12% vs last wk',  up:true,  bg: C.status.brokBg,  icon:MessageSquare,iconColor: C.status.brokColor  },
-  { label:'Fulfilment Rate',     value:34,   suffix:'%', change:'-2% vs last mo',   up:false, bg: C.status.progBg,  icon:BarChart2,    iconColor: C.status.progColor  },
-];
-
-const PROMISE_STATUS = [
-  { label:'Kept',        pct:34, color: C.status.keptColor,  bg: C.status.keptBg,  text: C.status.keptText  },
-  { label:'In Progress', pct:28, color: C.status.progColor,  bg: C.status.progBg,  text: C.status.progText  },
-  { label:'Pending',     pct:22, color: C.gray[500],          bg: C.status.pendBg,  text: C.status.pendText  },
-  { label:'Broken',      pct:16, color: C.status.brokColor,  bg: C.status.brokBg,  text: C.status.brokText  },
-];
-
-const RECENT_PROMISES = [
-  { initials:'AK', bg: C.status.brokBg,  fg: C.status.brokText,  name:'Anura K. Dissanayake', party:'NPP', text:'Abolish executive presidency',       status:'Pending'       },
-  { initials:'SP', bg: C.status.keptBg,  fg: C.status.keptText,  name:'Sajith Premadasa',      party:'SJB', text:'Build 100,000 low-income homes',    status:'Broken'        },
-  { initials:'RW', bg: C.status.progBg,  fg: C.status.progText,  name:'Ranil Wickremesinghe',  party:'UNP', text:'Stabilise fuel supply in 3 months', status:'Kept'          },
-  { initials:'AK', bg: C.status.brokBg,  fg: C.status.brokText,  name:'Anura K. Dissanayake', party:'NPP', text:'Recover stolen assets in year one',  status:'In Progress'  },
-];
-
-const FEEDBACK = [
-  { name:'Nimal Perera',    promise:'Fuel stabilisation',   vote:true,  district:'Colombo', time:'2h ago' },
-  { name:'Kamala Silva',    promise:'Housing scheme',        vote:false, district:'Kandy',   time:'4h ago' },
-  { name:'Dr. Asanka W.',  promise:'Abolish presidency',    vote:true,  district:'Galle',   time:'6h ago' },
-  { name:'Priya M.',        promise:'Teacher salaries +50%', vote:false, district:'Jaffna',  time:'1d ago' },
-  { name:'Roshan Fernando', promise:'Recover stolen assets', vote:true,  district:'Matara',  time:'1d ago' },
-];
-
-const PARTIES = [
-  { name:'NPP',   pct:38, color: C.maroon[600]        },
-  { name:'SJB',   pct:27, color: '#1B4D3E'             },
-  { name:'UNP',   pct:19, color: C.parliament[600]     },
-  { name:'Other', pct:16, color: C.gray[400]           },
-];
-
-const TOP_POLITICIANS = [
-  { name:'Anura K. Dissanayake', party:'NPP', kept:18, total:52,  rating:34.6, color: C.maroon[600]    },
-  { name:'Sajith Premadasa',     party:'SJB', kept:67, total:95,  rating:70.5, color: '#1B4D3E'         },
-  { name:'Ranil Wickremesinghe', party:'UNP', kept:85, total:120, rating:70.8, color: C.parliament[600] },
-];
-
 const formatDate = (value) => {
   if (!value) return 'N/A';
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return 'N/A';
   return date.toLocaleDateString();
+};
+
+const getRelativeTime = (value) => {
+  if (!value) return 'N/A';
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return 'N/A';
+  const diffMs = Date.now() - date.getTime();
+  const mins = Math.floor(diffMs / 60000);
+  if (mins < 1) return 'just now';
+  if (mins < 60) return `${mins}m ago`;
+  const hours = Math.floor(mins / 60);
+  if (hours < 24) return `${hours}h ago`;
+  const days = Math.floor(hours / 24);
+  return `${days}d ago`;
+};
+
+const toUiStatus = (status) => {
+  if (!status) return 'Pending';
+  return status === 'In-Progress' ? 'In Progress' : status;
+};
+
+const partyColorMap = {
+  NPP: C.maroon[600],
+  SJB: '#1B4D3E',
+  UNP: C.parliament[600],
+  SLPP: '#7C3AED',
+  Other: C.gray[400],
 };
 
 /* ── STATUS CONFIG ────────────────────────────────────────────── */
@@ -136,7 +120,7 @@ const DISTRICTS = [
 ];
 
 /* ── DONUT CHART ──────────────────────────────────────────────── */
-const DonutChart = ({ data }) => {
+const DonutChart = ({ data, centerValue }) => {
   const size = 140, r = 52, inner = 34, cx = 70, cy = 70;
   let start = -Math.PI / 2;
   const slices = data.map(d => {
@@ -153,7 +137,7 @@ const DonutChart = ({ data }) => {
       {slices.map((s,i) => <path key={i} d={s.path} fill={s.color} />)}
       <circle cx={cx} cy={cy} r={inner} fill="white" />
       <text x={cx} y={cy-6} textAnchor="middle" fontSize="11" fill={C.gray[400]} fontFamily="sans-serif">Total</text>
-      <text x={cx} y={cy+10} textAnchor="middle" fontSize="16" fontWeight="600" fill={C.gray[900]} fontFamily="sans-serif">89</text>
+      <text x={cx} y={cy+10} textAnchor="middle" fontSize="16" fontWeight="600" fill={C.gray[900]} fontFamily="sans-serif">{centerValue}</text>
     </svg>
   );
 };
@@ -193,10 +177,15 @@ const AdminDashboard = () => {
 
   const location  = useLocation();
   const navigate  = useNavigate();
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [viewportWidth, setViewportWidth] = useState(() => window.innerWidth);
+  const isMobile = viewportWidth <= 900;
+  const isTablet = viewportWidth <= 1200;
+  const [sidebarOpen, setSidebarOpen] = useState(() => window.innerWidth > 900);
   const [ref, inView] = useInView({ triggerOnce:true, threshold:0.1 });
   const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
   const [users, setUsers] = useState([]);
+  const [promises, setPromises] = useState([]);
+  const [politicians, setPoliticians] = useState([]);
   const [newsItems, setNewsItems] = useState([]);
   const [feedbackItems, setFeedbackItems] = useState([]);
   const [feedbackSearch, setFeedbackSearch] = useState('');
@@ -275,17 +264,185 @@ const AdminDashboard = () => {
     setNewsItems(Array.isArray(response.data) ? response.data : []);
   };
 
-  const fetchFeedback = async () => {
-  try {
-    const res = await axios.get(
-      `${API_URL}/api/feedback/69a6af84dea6363b079b02ac`,
-      { headers: getAuthHeaders() }
+  const fetchPromises = async () => {
+    const response = await axios.get(`${API_URL}/api/promises`, {
+      headers: getAuthHeaders(),
+      params: { limit: 300 },
+    });
+    const items = response.data?.data || response.data || [];
+    setPromises(Array.isArray(items) ? items : []);
+    return Array.isArray(items) ? items : [];
+  };
+
+  const fetchPoliticians = async () => {
+    const response = await axios.get(`${API_URL}/api/politicians`, {
+      headers: getAuthHeaders(),
+    });
+    const items = response.data?.data || response.data || [];
+    setPoliticians(Array.isArray(items) ? items : []);
+  };
+
+  const fetchFeedback = async (promiseList = []) => {
+    const uniquePromiseIds = Array.from(
+      new Set(
+        promiseList
+          .map((item) => item?._id)
+          .filter(Boolean)
+      )
     );
-    setFeedbackItems(Array.isArray(res.data) ? res.data : []);
-  } catch (error) {
-    console.error('Failed to load feedback', error);
-  }
-};
+    if (uniquePromiseIds.length === 0) {
+      setFeedbackItems([]);
+      return;
+    }
+
+    const feedbackResponses = await Promise.all(
+      uniquePromiseIds.map(async (promiseId) => {
+        try {
+          const res = await axios.get(`${API_URL}/api/feedback/${promiseId}`, {
+            headers: getAuthHeaders(),
+          });
+          return Array.isArray(res.data)
+            ? res.data.map((entry) => ({ ...entry, promiseId }))
+            : [];
+        } catch (error) {
+          return [];
+        }
+      })
+    );
+    setFeedbackItems(feedbackResponses.flat());
+  };
+
+  const dashboardData = useMemo(() => {
+    const totalPromises = promises.length;
+    const normalizedStatusCounts = {
+      Kept: 0,
+      'In Progress': 0,
+      Pending: 0,
+      Broken: 0,
+    };
+
+    promises.forEach((promise) => {
+      const status = toUiStatus(promise.status);
+      if (normalizedStatusCounts[status] !== undefined) {
+        normalizedStatusCounts[status] += 1;
+      }
+    });
+
+    const keptCount = normalizedStatusCounts.Kept;
+    const fulfillmentRate = totalPromises > 0 ? Math.round((keptCount / totalPromises) * 100) : 0;
+    const feedbackCount = feedbackItems.length;
+    const promiseStatusRows = Object.entries(normalizedStatusCounts).map(([label, count]) => {
+      const pct = totalPromises > 0 ? Math.round((count / totalPromises) * 100) : 0;
+      if (label === 'Kept') {
+        return { label, count, pct, color: C.status.keptColor, bg: C.status.keptBg, text: C.status.keptText };
+      }
+      if (label === 'In Progress') {
+        return { label, count, pct, color: C.status.progColor, bg: C.status.progBg, text: C.status.progText };
+      }
+      if (label === 'Broken') {
+        return { label, count, pct, color: C.status.brokColor, bg: C.status.brokBg, text: C.status.brokText };
+      }
+      return { label, count, pct, color: C.gray[500], bg: C.status.pendBg, text: C.status.pendText };
+    });
+
+    const stats = [
+      { label: 'Politicians Tracked', value: politicians.length, suffix: '', change: 'From database', up: true, bg: C.status.keptBg, icon: Users, iconColor: C.status.keptColor },
+      { label: 'Total Promises', value: totalPromises, suffix: '', change: 'From database', up: true, bg: C.civic[100], icon: FileText, iconColor: C.civic[600] },
+      { label: 'Citizen Reports', value: feedbackCount, suffix: '', change: 'From database', up: true, bg: C.status.brokBg, icon: MessageSquare, iconColor: C.status.brokColor },
+      { label: 'Fulfilment Rate', value: fulfillmentRate, suffix: '%', change: `${keptCount} promises kept`, up: fulfillmentRate >= 50, bg: C.status.progBg, icon: BarChart2, iconColor: C.status.progColor },
+    ];
+
+    const recentPromises = [...promises]
+      .sort((a, b) => new Date(b.updatedAt || b.createdAt) - new Date(a.updatedAt || a.createdAt))
+      .slice(0, 4)
+      .map((item) => {
+        const politicianName = item.politicianId?.name || 'Unknown';
+        const initials = politicianName.split(' ').map((w) => w[0]).join('').slice(0, 2).toUpperCase() || 'NA';
+        const uiStatus = toUiStatus(item.status);
+        const tagColors =
+          uiStatus === 'Kept'
+            ? { bg: C.status.keptBg, fg: C.status.keptText }
+            : uiStatus === 'In Progress'
+              ? { bg: C.status.progBg, fg: C.status.progText }
+              : uiStatus === 'Broken'
+                ? { bg: C.status.brokBg, fg: C.status.brokText }
+                : { bg: C.status.pendBg, fg: C.status.pendText };
+
+        return {
+          initials,
+          bg: tagColors.bg,
+          fg: tagColors.fg,
+          name: politicianName,
+          party: item.politicianId?.party || 'Other',
+          text: item.title || 'Untitled promise',
+          status: uiStatus,
+        };
+      });
+
+    const promiseTitleMap = new Map(promises.map((item) => [item._id, item.title]));
+    const recentFeedback = [...feedbackItems]
+      .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+      .slice(0, 5)
+      .map((item) => ({
+        name: item.citizenName || 'Anonymous',
+        promise: promiseTitleMap.get(item.promiseId) || 'Unknown promise',
+        vote: (item.upvotes || 0) >= (item.downvotes || 0),
+        district: item.district || 'N/A',
+        time: getRelativeTime(item.createdAt),
+      }));
+
+    const partyCounts = {};
+    politicians.forEach((politician) => {
+      const party = politician.party || 'Other';
+      partyCounts[party] = (partyCounts[party] || 0) + 1;
+    });
+    const totalPoliticians = politicians.length;
+    const parties = Object.entries(partyCounts)
+      .map(([name, count]) => ({
+        name,
+        pct: totalPoliticians > 0 ? Math.round((count / totalPoliticians) * 100) : 0,
+        color: partyColorMap[name] || partyColorMap.Other,
+      }))
+      .sort((a, b) => b.pct - a.pct);
+
+    const politicianPerformanceMap = {};
+    promises.forEach((promise) => {
+      const politician = promise.politicianId;
+      const id = politician?._id;
+      if (!id) return;
+      if (!politicianPerformanceMap[id]) {
+        politicianPerformanceMap[id] = {
+          id,
+          name: politician.name || 'Unknown',
+          party: politician.party || 'Other',
+          kept: 0,
+          total: 0,
+        };
+      }
+      politicianPerformanceMap[id].total += 1;
+      if (toUiStatus(promise.status) === 'Kept') politicianPerformanceMap[id].kept += 1;
+    });
+
+    const topPoliticians = Object.values(politicianPerformanceMap)
+      .map((item) => ({
+        ...item,
+        rating: item.total > 0 ? Number(((item.kept / item.total) * 100).toFixed(1)) : 0,
+        color: partyColorMap[item.party] || partyColorMap.Other,
+      }))
+      .sort((a, b) => b.rating - a.rating)
+      .slice(0, 3);
+
+    return {
+      stats,
+      promiseStatusRows,
+      recentPromises,
+      recentFeedback,
+      parties,
+      topPoliticians,
+      totalPoliticians,
+      totalPromises,
+    };
+  }, [promises, politicians, feedbackItems]);
 
 
   const handleUserFormChange = (field, value) => {
@@ -385,7 +542,7 @@ const AdminDashboard = () => {
     );
 
     setEditingFeedbackId(null); // exit edit mode
-    fetchFeedback();            // reload data
+    fetchFeedback(promises);            // reload data
   } catch (error) {
     alert("Failed to update feedback");
     console.error(error);
@@ -424,7 +581,7 @@ const AdminDashboard = () => {
           Admin news is optional. The homepage latest-news section prefers the live third-party news feed, while news created here remains available for your managed news content and public news page.
         </div>
 
-        <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12 }}>
+        <div style={{ display:'grid', gridTemplateColumns:isMobile ? '1fr' : '1fr 1fr', gap:12 }}>
           <input value={newsForm.title} onChange={(e) => handleNewsFormChange('title', e.target.value)} placeholder="News title" style={{ padding:'11px 12px', borderRadius:10, border:`1px solid ${C.gray[300]}` }} />
           <input value={newsForm.source} onChange={(e) => handleNewsFormChange('source', e.target.value)} placeholder="Source" style={{ padding:'11px 12px', borderRadius:10, border:`1px solid ${C.gray[300]}` }} />
           <input value={newsForm.politician} onChange={(e) => handleNewsFormChange('politician', e.target.value)} placeholder="Politician" style={{ padding:'11px 12px', borderRadius:10, border:`1px solid ${C.gray[300]}` }} />
@@ -454,7 +611,7 @@ const AdminDashboard = () => {
 
       <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
         {newsItems.map((news) => (
-          <div key={news._id} style={{ display:'grid', gridTemplateColumns:'1.6fr 1fr 0.9fr 0.8fr', gap:12, alignItems:'center', padding:'14px 16px', borderRadius:12, background:C.gray[50], border:`1px solid ${C.gray[200]}` }}>
+          <div key={news._id} style={{ display:'grid', gridTemplateColumns:isMobile ? '1fr' : '1.6fr 1fr 0.9fr 0.8fr', gap:12, alignItems:'center', padding:'14px 16px', borderRadius:12, background:C.gray[50], border:`1px solid ${C.gray[200]}` }}>
             <div>
               <div style={{ fontSize:13, fontWeight:700, color:C.gray[900] }}>{news.title || 'Untitled news item'}</div>
               <div style={{ fontSize:11, color:C.gray[500], marginTop:4 }}>{news.description || 'No description available'}</div>
@@ -495,7 +652,7 @@ const AdminDashboard = () => {
         </Link>
       </div>
 
-      <div style={{ display:'grid', gridTemplateColumns:'1.15fr 1.85fr', gap:16, marginBottom:20 }}>
+      <div style={{ display:'grid', gridTemplateColumns:isMobile ? '1fr' : '1.15fr 1.85fr', gap:16, marginBottom:20 }}>
         <form onSubmit={handleSaveUser} style={{ background:C.gray[50], border:`1px solid ${C.gray[200]}`, borderRadius:16, padding:'16px' }}>
           <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:14 }}>
             <div style={{ fontSize:14, fontWeight:700, color:C.gray[900] }}>{editingUserId ? 'Update User Account' : 'Create User Account'}</div>
@@ -503,7 +660,7 @@ const AdminDashboard = () => {
               <button type="button" onClick={resetUserForm} style={{ border:'none', background:'transparent', color:C.parliament[600], fontSize:12, fontWeight:700, cursor:'pointer' }}>Cancel edit</button>
             )}
           </div>
-          <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12 }}>
+          <div style={{ display:'grid', gridTemplateColumns:isMobile ? '1fr' : '1fr 1fr', gap:12 }}>
             <input value={userForm.name} onChange={(e) => handleUserFormChange('name', e.target.value)} placeholder="Full name" style={{ padding:'11px 12px', borderRadius:10, border:`1px solid ${C.gray[300]}` }} />
             <input value={userForm.email} onChange={(e) => handleUserFormChange('email', e.target.value)} placeholder="Email address" style={{ padding:'11px 12px', borderRadius:10, border:`1px solid ${C.gray[300]}` }} />
             <input value={userForm.phone} onChange={(e) => handleUserFormChange('phone', e.target.value)} placeholder="Phone number" style={{ padding:'11px 12px', borderRadius:10, border:`1px solid ${C.gray[300]}` }} />
@@ -541,7 +698,7 @@ const AdminDashboard = () => {
 
       <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
         {displayedUsers.map((user) => (
-          <div key={user._id} style={{ display:'grid', gridTemplateColumns:'1.1fr 1.2fr 0.75fr 0.75fr 0.55fr 0.95fr', gap:12, alignItems:'center', padding:'14px 16px', borderRadius:12, background:C.gray[50], border:`1px solid ${C.gray[200]}` }}>
+          <div key={user._id} style={{ display:'grid', gridTemplateColumns:isMobile ? '1fr' : '1.1fr 1.2fr 0.75fr 0.75fr 0.55fr 0.95fr', gap:12, alignItems:'center', padding:'14px 16px', borderRadius:12, background:C.gray[50], border:`1px solid ${C.gray[200]}` }}>
             <div>
               <div style={{ fontSize:13, fontWeight:700, color:C.gray[900] }}>{user.name}</div>
               <div style={{ fontSize:10, color:C.gray[400] }}>{user._id}</div>
@@ -759,7 +916,7 @@ const AdminDashboard = () => {
                   await axios.delete(`${API_URL}/api/feedback/${item._id}`, {
                     headers: getAuthHeaders(),
                   });
-                  fetchFeedback();
+                  fetchFeedback(promises);
                 }
               }}
             >
@@ -775,6 +932,16 @@ const AdminDashboard = () => {
 
 
   useEffect(() => {
+    const handleResize = () => setViewportWidth(window.innerWidth);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  useEffect(() => {
+    if (isMobile) setSidebarOpen(false);
+  }, [isMobile]);
+
+  useEffect(() => {
     const storedUser = localStorage.getItem('userInfo');
     if (!storedUser) { navigate('/login'); return; }
     const parsedUser = JSON.parse(storedUser);
@@ -786,35 +953,46 @@ const AdminDashboard = () => {
       setDataError('');
 
       try {
+        const loadedPromises = await fetchPromises();
         await Promise.all([
           fetchUsers(activeUserSearch),
+          fetchPoliticians(),
           fetchNews(),
-          fetchFeedback(),   // ✅ ADD ONLY THIS LINE
+          fetchFeedback(loadedPromises),
         ]);
       } catch (error) {
         setDataError(error.response?.data?.message || 'Failed to load admin dashboard data.');
       } finally {
         setIsDataLoading(false);
       }
-      setIsDataLoading(true); setDataError('');
-      try { await Promise.all([fetchUsers(activeUserSearch), fetchNews()]); } 
-      catch (error) { setDataError(error.response?.data?.message || 'Failed to load admin dashboard data.'); } 
-      finally { setIsDataLoading(false); }
     };
     fetchDashboardData();
   }, [API_URL, navigate, activeUserSearch]);
 
   const handleLogout = () => {
+    const shouldLogout = window.confirm('Are you sure you want to log out from the admin dashboard?');
+    if (!shouldLogout) return;
     localStorage.removeItem('userInfo');
     window.dispatchEvent(new Event('authChange'));
     navigate('/login');
   };
 
   return (
-    <div style={{ display:'flex', height:'100vh', background: C.gray[50], fontFamily:"'DM Sans', sans-serif", overflow:'hidden' }}>
+    <div style={{ display:'flex', height:'100vh', background: C.gray[50], fontFamily:"'DM Sans', sans-serif", overflow:'hidden', position:'relative' }}>
 
       {/* ── SIDEBAR ─────────────────────────────────────────── */}
-      <aside style={{ width: sidebarOpen ? 240 : 70, flexShrink:0, background: C.sidebar, display:'flex', flexDirection:'column', transition:'width 0.25s ease', overflow:'hidden' }}>
+      <aside style={{
+        width: isMobile ? (sidebarOpen ? 240 : 0) : (sidebarOpen ? 240 : 70),
+        flexShrink:0,
+        background: C.sidebar,
+        display:'flex',
+        flexDirection:'column',
+        transition:'width 0.25s ease',
+        overflow:'hidden',
+        position: isMobile ? 'absolute' : 'relative',
+        zIndex: 30,
+        height: '100%',
+      }}>
         <div style={{ padding:'20px 18px 16px', borderBottom:`1px solid rgba(255,255,255,0.07)`, display:'flex', alignItems:'center', gap:10 }}>
           <div style={{ width:34, height:34, borderRadius:10, background:`linear-gradient(135deg, ${C.parliament[600]}, ${C.parliament[500]})`, display:'flex', alignItems:'center', justifyContent:'center', fontSize:14, fontWeight:800, color:'#fff', flexShrink:0, boxShadow:`0 2px 8px rgba(234,88,12,0.4)` }}>J</div>
           {sidebarOpen && (
@@ -886,7 +1064,7 @@ const AdminDashboard = () => {
       <div style={{ flex:1, display:'flex', flexDirection:'column', overflow:'hidden' }}>
 
         {/* Topbar */}
-        <header style={{ height:64, background:'#fff', borderBottom:`1px solid ${C.gray[200]}`, display:'flex', alignItems:'center', justifyContent:'space-between', padding:'0 28px', flexShrink:0, boxShadow:`0 1px 0 ${C.gray[200]}` }}>
+        <header style={{ height:64, background:'#fff', borderBottom:`1px solid ${C.gray[200]}`, display:'flex', alignItems:'center', justifyContent:'space-between', padding:isMobile ? '0 12px' : '0 28px', flexShrink:0, boxShadow:`0 1px 0 ${C.gray[200]}` }}>
           <div style={{ display:'flex', alignItems:'center', gap:16 }}>
             <button onClick={() => setSidebarOpen(o => !o)} style={{ background:'none', border:'none', cursor:'pointer', padding:4, borderRadius:6, display:'flex', alignItems:'center' }}>
               <div style={{ display:'flex', flexDirection:'column', gap:4 }}>{[0,1,2].map(i => <div key={i} style={{ width:18, height:1.5, background: C.gray[500], borderRadius:2 }} />)}</div>
@@ -927,10 +1105,10 @@ const AdminDashboard = () => {
           </div>
 
           <div style={{ display:'flex', alignItems:'center', gap:12 }}>
-            <div style={{ display:'flex', alignItems:'center', gap:8, background: C.gray[50], border:`1px solid ${C.gray[200]}`, borderRadius:10, padding:'8px 14px', minWidth:200 }}>
+            {!isMobile && <div style={{ display:'flex', alignItems:'center', gap:8, background: C.gray[50], border:`1px solid ${C.gray[200]}`, borderRadius:10, padding:'8px 14px', minWidth:200 }}>
               <Search size={13} color={C.gray[400]} />
               <span style={{ fontSize:13, color: C.gray[300] }}>Search anything...</span>
-            </div>
+            </div>}
             <Link to="/" style={{ textDecoration:'none' }}>
               <div style={{ display:'flex', alignItems:'center', gap:6, padding:'7px 12px', borderRadius:10, background: C.parliament[50], border:`1px solid ${C.parliament[200]}`, cursor:'pointer', transition:'background 0.15s' }} onMouseEnter={e => e.currentTarget.style.background = C.parliament[100]} onMouseLeave={e => e.currentTarget.style.background = C.parliament[50]}>
                 <Home size={13} color={C.parliament[600]} />
@@ -942,12 +1120,12 @@ const AdminDashboard = () => {
               <Bell size={15} color={C.gray[500]} />
               <div style={{ position:'absolute', top:7, right:8, width:7, height:7, background: C.status.brokColor, borderRadius:'50%', border:'1.5px solid #fff' }} />
             </div>
-            <div style={{ width:36, height:36, borderRadius:'50%', background: C.parliament[100], display:'flex', alignItems:'center', justifyContent:'center', fontSize:12, fontWeight:700, color: C.parliament[700], cursor:'pointer', border:`2px solid ${C.parliament[200]}` }}>AD</div>
+            {!isMobile && <div style={{ width:36, height:36, borderRadius:'50%', background: C.parliament[100], display:'flex', alignItems:'center', justifyContent:'center', fontSize:12, fontWeight:700, color: C.parliament[700], cursor:'pointer', border:`2px solid ${C.parliament[200]}` }}>AD</div>}
           </div>
         </header>
 
         {/* Scrollable content */}
-        <div style={{ flex:1, overflowY:'auto', padding:'24px 28px' }}>
+        <div style={{ flex:1, overflowY:'auto', padding:isMobile ? '14px 12px' : '24px 28px' }}>
           {isUsersPage ? (
             renderUsersTable()
           ) : isNewsPage ? (
@@ -964,11 +1142,11 @@ const AdminDashboard = () => {
           <>
 
           {/* Stat cards */}
-          <div ref={ref} style={{ display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:16, marginBottom:24 }}>
-            {STATS.map((s,i) => <StatCard key={i} stat={s} inView={inView} />)}
+          <div ref={ref} style={{ display:'grid', gridTemplateColumns:isMobile ? '1fr' : (isTablet ? 'repeat(2,1fr)' : 'repeat(4,1fr)'), gap:16, marginBottom:24 }}>
+            {dashboardData.stats.map((s,i) => <StatCard key={i} stat={s} inView={inView} />)}
           </div>
 
-          <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:16, marginBottom:20 }}>
+          <div style={{ display:'grid', gridTemplateColumns:isMobile ? '1fr' : '1fr 1fr', gap:16, marginBottom:20 }}>
             {/* Promise status breakdown */}
             <div style={{ background:'#fff', borderRadius:16, padding:'20px', border:`1px solid ${C.gray[200]}` }}>
               <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:18 }}>
@@ -978,7 +1156,7 @@ const AdminDashboard = () => {
                 </Link>
               </div>
               <div style={{ display:'flex', flexDirection:'column', gap:12 }}>
-                {PROMISE_STATUS.map((s,i) => (
+                {dashboardData.promiseStatusRows.map((s,i) => (
                   <div key={i} style={{ display:'flex', alignItems:'center', gap:12 }}>
                     <span style={{ fontSize:12, color: C.gray[500], width:72, textAlign:'right', flexShrink:0 }}>{s.label}</span>
                     <div style={{ flex:1, height:8, background: C.gray[100], borderRadius:99, overflow:'hidden' }}>
@@ -988,10 +1166,10 @@ const AdminDashboard = () => {
                   </div>
                 ))}
               </div>
-              <div style={{ display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:8, marginTop:20 }}>
-                {PROMISE_STATUS.map((s,i) => (
+              <div style={{ display:'grid', gridTemplateColumns:isMobile ? 'repeat(2,1fr)' : 'repeat(4,1fr)', gap:8, marginTop:20 }}>
+                {dashboardData.promiseStatusRows.map((s,i) => (
                   <div key={i} style={{ background:s.bg, borderRadius:10, padding:'10px 8px', textAlign:'center' }}>
-                    <div style={{ fontSize:18, fontWeight:700, color:s.text }}>{Math.round(247*s.pct/100)}</div>
+                    <div style={{ fontSize:18, fontWeight:700, color:s.text }}>{s.count}</div>
                     <div style={{ fontSize:10, color:s.text, opacity:0.75 }}>{s.label}</div>
                   </div>
                 ))}
@@ -1007,7 +1185,7 @@ const AdminDashboard = () => {
                 </Link>
               </div>
               <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
-                {RECENT_PROMISES.map((p,i) => (
+                {dashboardData.recentPromises.map((p,i) => (
                   <div key={i} style={{ display:'flex', alignItems:'center', gap:10, padding:'10px 12px', background: C.gray[50], borderRadius:12 }}>
                     <div style={{ width:32, height:32, borderRadius:'50%', background:p.bg, color:p.fg, display:'flex', alignItems:'center', justifyContent:'center', fontSize:10, fontWeight:700, flexShrink:0 }}>{p.initials}</div>
                     <div style={{ flex:1, minWidth:0 }}>
@@ -1021,7 +1199,7 @@ const AdminDashboard = () => {
             </div>
           </div>
 
-          <div style={{ display:'grid', gridTemplateColumns:'1.8fr 1fr', gap:16, marginBottom:20 }}>
+          <div style={{ display:'grid', gridTemplateColumns:isMobile ? '1fr' : '1.8fr 1fr', gap:16, marginBottom:20 }}>
             {/* Feedback table */}
             <div style={{ background:'#fff', borderRadius:16, padding:'20px', border:`1px solid ${C.gray[200]}` }}>
               <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:16 }}>
@@ -1039,8 +1217,8 @@ const AdminDashboard = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {FEEDBACK.map((f,i) => (
-                    <tr key={i} style={{ borderBottom: i < FEEDBACK.length-1 ? `1px solid ${C.gray[50]}` : 'none' }}>
+                  {dashboardData.recentFeedback.map((f,i) => (
+                    <tr key={i} style={{ borderBottom: i < dashboardData.recentFeedback.length-1 ? `1px solid ${C.gray[50]}` : 'none' }}>
                       <td style={{ padding:'10px 10px', fontWeight:600, color: C.gray[900] }}>{f.name}</td>
                       <td style={{ padding:'10px 10px', color: C.gray[500], maxWidth:140, whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>{f.promise}</td>
                       <td style={{ padding:'10px 10px' }}>
@@ -1057,6 +1235,11 @@ const AdminDashboard = () => {
                       <td style={{ padding:'10px 10px', fontSize:11, color: C.gray[400] }}>{f.time}</td>
                     </tr>
                   ))}
+                  {!isDataLoading && dashboardData.recentFeedback.length === 0 && (
+                    <tr>
+                      <td colSpan={5} style={{ padding:'12px 10px', color:C.gray[500] }}>No feedback records available.</td>
+                    </tr>
+                  )}
                 </tbody>
               </table>
             </div>
@@ -1065,9 +1248,9 @@ const AdminDashboard = () => {
             <div style={{ background:'#fff', borderRadius:16, padding:'20px', border:`1px solid ${C.gray[200]}` }}>
               <div style={{ fontSize:14, fontWeight:700, color: C.gray[900], marginBottom:16 }}>Party Distribution</div>
               <div style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:16 }}>
-                <DonutChart data={PARTIES} />
+                <DonutChart data={dashboardData.parties} centerValue={dashboardData.totalPoliticians} />
                 <div style={{ width:'100%', display:'flex', flexDirection:'column', gap:8 }}>
-                  {PARTIES.map((p,i) => (
+                  {dashboardData.parties.map((p,i) => (
                     <div key={i} style={{ display:'flex', alignItems:'center', gap:8 }}>
                       <div style={{ width:10, height:10, borderRadius:'50%', background:p.color, flexShrink:0 }} />
                       <span style={{ fontSize:12, color: C.gray[500], flex:1 }}>{p.name}</span>
@@ -1090,8 +1273,8 @@ const AdminDashboard = () => {
                 View all <ChevronRight size={12}/>
               </Link>
             </div>
-            <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:16 }}>
-              {TOP_POLITICIANS.map((p,i) => (
+            <div style={{ display:'grid', gridTemplateColumns:isMobile ? '1fr' : (isTablet ? 'repeat(2,1fr)' : 'repeat(3,1fr)'), gap:16 }}>
+              {dashboardData.topPoliticians.map((p,i) => (
                 <div key={i} style={{ padding:'16px', background: C.gray[50], borderRadius:14, border:`1px solid ${C.gray[200]}` }}>
                   <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:12 }}>
                     <div style={{ width:36, height:36, borderRadius:'50%', background:p.color, display:'flex', alignItems:'center', justifyContent:'center', fontSize:11, fontWeight:700, color:'#fff', flexShrink:0 }}>

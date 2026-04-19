@@ -7,7 +7,7 @@ import {
   Share2, MessageSquareWarning, MapPin, Globe, X,
   ChevronLeft, ChevronRight
 } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 // --- PREMIUM PUBLIC COLOR TOKENS ---
 const C = {
@@ -51,6 +51,7 @@ const TRANSLATIONS = {
 const Promises = () => {
   // ✅ FIXED: Hook is now safely inside the component
   const navigate = useNavigate();
+  const location = useLocation();
   const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
   // --- STATES ---
@@ -59,6 +60,7 @@ const Promises = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeCategory, setActiveCategory] = useState('All');
   const [activeDistrict, setActiveDistrict] = useState('All Districts');
+  const [activePolitician, setActivePolitician] = useState('All Politicians');
   const [lang, setLang] = useState('en');
   
   // --- PAGINATION STATES ---
@@ -110,14 +112,41 @@ const Promises = () => {
       const matchesSearch = !searchQuery || p.title.toLowerCase().includes(searchQuery.toLowerCase()) || (p.politicianId?.name && p.politicianId.name.toLowerCase().includes(searchQuery.toLowerCase()));
       const matchesCategory = activeCategory === 'All' || p.category === activeCategory;
       const matchesDistrict = activeDistrict === 'All Districts' || p.district === activeDistrict;
-      return matchesSearch && matchesCategory && matchesDistrict;
+      const matchesPolitician = activePolitician === 'All Politicians' || p.politicianId?._id === activePolitician;
+      return matchesSearch && matchesCategory && matchesDistrict && matchesPolitician;
     });
-  }, [promises, searchQuery, activeCategory, activeDistrict]);
+  }, [promises, searchQuery, activeCategory, activeDistrict, activePolitician]);
+
+  const politicianOptions = useMemo(() => {
+    const map = new Map();
+    promises.forEach((p) => {
+      const id = p.politicianId?._id;
+      const name = p.politicianId?.name;
+      if (id && name && !map.has(id)) map.set(id, name);
+    });
+    return Array.from(map.entries()).map(([id, name]) => ({ id, name }));
+  }, [promises]);
 
   // Reset to page 1 whenever a filter changes
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchQuery, activeCategory, activeDistrict]);
+  }, [searchQuery, activeCategory, activeDistrict, activePolitician]);
+
+  useEffect(() => {
+    const query = new URLSearchParams(location.search);
+    const politicianId = query.get('politicianId');
+    const politicianName = query.get('politicianName');
+
+    if (politicianName) {
+      setSearchQuery(politicianName);
+    }
+
+    if (politicianId) {
+      setActivePolitician(politicianId);
+    } else {
+      setActivePolitician('All Politicians');
+    }
+  }, [location.search]);
 
   // --- PAGINATION LOGIC ---
   const totalPages = Math.ceil(displayedPromises.length / itemsPerPage);
@@ -241,6 +270,12 @@ const Promises = () => {
             <select value={activeDistrict} onChange={(e) => setActiveDistrict(e.target.value)} style={{ padding: '10px 16px', borderRadius: '99px', fontSize: '13px', fontWeight: '700', border: `1px solid ${C.border}`, background: '#fff', color: C.text, outline: 'none', cursor: 'pointer' }}>
               {DISTRICTS.map(d => <option key={d} value={d}>{d === 'All Districts' ? t.allDistricts : d}</option>)}
             </select>
+            <select value={activePolitician} onChange={(e) => setActivePolitician(e.target.value)} style={{ padding: '10px 16px', borderRadius: '99px', fontSize: '13px', fontWeight: '700', border: `1px solid ${C.border}`, background: '#fff', color: C.text, outline: 'none', cursor: 'pointer' }}>
+              <option value="All Politicians">All Politicians</option>
+              {politicianOptions.map((pol) => (
+                <option key={pol.id} value={pol.id}>{pol.name}</option>
+              ))}
+            </select>
             {CATEGORIES.map(category => (
               <button key={category} onClick={() => setActiveCategory(category)} style={{ whiteSpace: 'nowrap', padding: '10px 20px', borderRadius: '99px', fontSize: '13px', fontWeight: '700', cursor: 'pointer', transition: 'all 0.2s', background: activeCategory === category ? C.text : '#fff', color: activeCategory === category ? '#fff' : C.textMuted, border: activeCategory === category ? `1px solid ${C.text}` : `1px solid ${C.border}` }}>
                 {category}
@@ -251,8 +286,8 @@ const Promises = () => {
       </div>
 
       {/* --- PROMISE FEED --- */}
-      <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 24px 80px' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: '24px', marginBottom: '40px' }}>
+      <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 16px 80px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '24px', marginBottom: '40px' }}>
           {isLoading ? ( <>{[1,2,3,4,5,6].map(i => <SkeletonCard key={i} />)}</> ) : paginatedPromises.length === 0 ? (
              <div style={{ gridColumn: '1 / -1', padding: '80px 20px', textAlign: 'center', background: C.card, borderRadius: '24px', border: `1px solid ${C.border}` }}>
                <Search size={48} color={C.border} style={{ margin: '0 auto 16px' }} />
