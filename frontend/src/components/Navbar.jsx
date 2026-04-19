@@ -243,7 +243,7 @@ const NotificationDropdown = ({ notifications, onMarkRead, onMarkAllRead, onView
   return (
     <div ref={dropdownRef} style={{
       position: 'absolute', top: 'calc(100% + 10px)', right: -8, zIndex: 200,
-      width: 400, maxHeight: 510,
+      width: 'min(400px, 92vw)', maxHeight: 510,
       background: C.campusPanel, borderRadius: 16,
       border: `1px solid ${C.campusBorder}`,
       boxShadow: '0 16px 36px rgba(26,37,51,0.18), 0 4px 12px rgba(26,37,51,0.10)',

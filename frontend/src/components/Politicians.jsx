@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import axios from 'axios';
+import { Link } from 'react-router-dom';
 
 const C = {
 	navy: '#2F4B72',
@@ -78,6 +79,7 @@ const Politicians = () => {
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState('');
 	const [search, setSearch] = useState('');
+	const [promises, setPromises] = useState([]);
 	const [imageFallbackLevel, setImageFallbackLevel] = useState({});
 	const [activeCardId, setActiveCardId] = useState(null);
 
@@ -98,6 +100,9 @@ const Politicians = () => {
 				);
 
 				setPoliticians(withInternetImages);
+				const promisesRes = await axios.get(`${API_URL}/api/promises`);
+				const promiseList = promisesRes.data?.data || promisesRes.data || [];
+				setPromises(Array.isArray(promiseList) ? promiseList : []);
 			} catch (e) {
 				setError(e.response?.data?.message || 'Failed to load politicians');
 			} finally {
@@ -129,6 +134,19 @@ const Politicians = () => {
 				.some((v) => String(v).toLowerCase().includes(q));
 		});
 	}, [politicians, search]);
+
+	const trustByPolitician = useMemo(() => {
+		const stats = {};
+		promises.forEach((item) => {
+			const pol = item.politicianId;
+			const id = typeof pol === 'object' ? pol?._id : pol;
+			if (!id) return;
+			if (!stats[id]) stats[id] = { total: 0, kept: 0 };
+			stats[id].total += 1;
+			if (item.status === 'Kept') stats[id].kept += 1;
+		});
+		return stats;
+	}, [promises]);
 
 	const getInitials = (name) => {
 		if (!name) return 'NA';
@@ -289,6 +307,24 @@ const Politicians = () => {
 										<div className="mt-4 space-y-2 text-sm">
 											<p><span style={{ color: C.gray500 }}>District:</span> <span style={{ color: C.gray900, fontWeight: 600 }}>{p.district}</span></p>
 											{p.bio && <p style={{ color: C.gray700, lineHeight: 1.6 }}>{p.bio}</p>}
+											{(() => {
+												const trust = trustByPolitician[p._id] || { total: 0, kept: 0 };
+												const pct = trust.total > 0 ? Math.round((trust.kept / trust.total) * 100) : 0;
+												return (
+													<div style={{ marginTop: 10 }}>
+														<div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+															<span style={{ color: C.gray500, fontSize: 12, fontWeight: 600 }}>Promise trust rate</span>
+															<span style={{ color: C.navy, fontSize: 12, fontWeight: 800 }}>{pct}%</span>
+														</div>
+														<div style={{ height: 8, borderRadius: 999, background: C.gray100, overflow: 'hidden' }}>
+															<div style={{ width: `${pct}%`, height: '100%', background: C.gold, borderRadius: 999, transition: 'width 0.4s ease' }} />
+														</div>
+														<div style={{ marginTop: 4, color: C.gray500, fontSize: 11 }}>
+															{trust.kept} kept / {trust.total} total promises
+														</div>
+													</div>
+												);
+											})()}
 										</div>
 
 										<div className="mt-4 flex items-center justify-between">
@@ -312,6 +348,26 @@ const Politicians = () => {
 											>
 												{isActive ? 'Selected' : 'Tap card'}
 											</span>
+										</div>
+										<div className="mt-3">
+											<Link
+												to={`/promises?politicianId=${encodeURIComponent(p._id)}&politicianName=${encodeURIComponent(p.name || '')}`}
+												onClick={(e) => e.stopPropagation()}
+												style={{
+													display: 'inline-flex',
+													alignItems: 'center',
+													gap: 6,
+													padding: '8px 12px',
+													borderRadius: 10,
+													background: C.navySoft,
+													color: C.navy,
+													fontSize: 12,
+													fontWeight: 700,
+													textDecoration: 'none',
+												}}
+											>
+												View promise trust details
+											</Link>
 										</div>
 									</div>
 								);

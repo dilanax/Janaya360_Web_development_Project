@@ -1,6 +1,39 @@
 import axios from "axios";
 import News from "../Model/News.js";
 
+const decodeHtml = (value = "") =>
+  value
+    .replace(/&amp;/g, "&")
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">");
+
+const parseTag = (block, tag) => {
+  const match = block.match(new RegExp(`<${tag}>([\\s\\S]*?)<\\/${tag}>`, "i"));
+  return match ? decodeHtml(match[1].trim()) : "";
+};
+
+const parseSource = (block) => {
+  const match = block.match(/<source[^>]*>([\s\S]*?)<\/source>/i);
+  return match ? decodeHtml(match[1].trim()) : "Google News RSS";
+};
+
+const mapGoogleRssToArticles = (xml) => {
+  const items = xml.match(/<item>[\s\S]*?<\/item>/gi) || [];
+  return items.slice(0, 12).map((item, index) => ({
+    title: parseTag(item, "title") || `Latest political update ${index + 1}`,
+    description: parseTag(item, "description") || "Live political update from RSS feed.",
+    content: parseTag(item, "description") || "",
+    url: parseTag(item, "link"),
+    image: "",
+    publishedAt: parseTag(item, "pubDate"),
+    source: {
+      name: parseSource(item),
+    },
+  }));
+};
+
 // ===============================
 // GET ALL NEWS (ADMIN)
 // ===============================
@@ -95,25 +128,40 @@ export const getNewsByPolitician = async (req, res) => {
 // ===============================
 export const getPoliticalTrends = async (req, res) => {
   try {
-    if (!process.env.NEWS_API_KEY) {
-      return res.status(400).json({ message: "NEWS_API_KEY is missing" });
+    if (process.env.NEWS_API_KEY) {
+      try {
+        const response = await axios.get(
+          "https://gnews.io/api/v4/search",
+          {
+            params: {
+              q: "Sri Lanka politics",
+              apikey: process.env.NEWS_API_KEY,
+            },
+          }
+        );
+
+        if (Array.isArray(response.data?.articles) && response.data.articles.length > 0) {
+          return res.json(response.data);
+        }
+      } catch (gnewsError) {
+        console.log("GNEWS TRENDS ERROR:", gnewsError.response?.data || gnewsError.message);
+      }
     }
 
-    const response = await axios.get(
-      "https://gnews.io/api/v4/search",
-      {
-        params: {
-          q: "Sri Lanka politics",
-          apikey: process.env.NEWS_API_KEY,
-        },
-      }
+    // Fallback live feed (no API key required)
+    const rssResponse = await axios.get(
+      "https://news.google.com/rss/search?q=Sri+Lanka+politics&hl=en-US&gl=US&ceid=US:en",
+      { timeout: 8000 }
     );
 
-    return res.json(response.data);
-
+    const fallbackArticles = mapGoogleRssToArticles(rssResponse.data);
+    return res.json({
+      source: "google-rss-fallback",
+      totalArticles: fallbackArticles.length,
+      articles: fallbackArticles,
+    });
   } catch (error) {
-    console.log("GNEWS TRENDS ERROR:", error.response?.data || error.message);
-
+    console.log("LIVE NEWS FALLBACK ERROR:", error.response?.data || error.message);
     return res.status(500).json({
       message: "Failed to fetch trends",
       error: error.response?.data || error.message,

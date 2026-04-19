@@ -97,6 +97,14 @@ const STATUS_STYLE = {
   'Pending':     { bg: C.status.pendBg,  text: C.status.pendText,  dot: C.status.pendColor  },
 };
 
+const partyColorMap = {
+  NPP: C.maroon[600],
+  SJB: '#1B4D3E',
+  UNP: C.parliament[600],
+  SLPP: '#7C3AED',
+  Other: C.gray[500],
+};
+
 /* ─── Img with fallback ─────────────────────────────────────── */
 const Img = ({ src, fb, alt='', style={}, className='' }) => {
   const [err, setErr] = useState(false);
@@ -370,7 +378,7 @@ const PromiseFeed = () => {
 };
 
 /* ─── Politicians ───────────────────────────────────────────── */
-const Politicians = () => (
+const Politicians = ({ items }) => (
   <section style={{ background:'#fff', padding:'72px 24px' }}>
     <div style={{ maxWidth:1200, margin:'0 auto' }}>
       <div style={{ display:'flex', alignItems:'flex-end', justifyContent:'space-between', flexWrap:'wrap', gap:16, marginBottom:40 }}>
@@ -389,7 +397,7 @@ const Politicians = () => (
       </div>
 
       <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill, minmax(340px, 1fr))', gap:24 }}>
-        {POLITICIANS.map((p,i) => (
+        {items.map((p,i) => (
           <motion.div key={i} initial={{ opacity:0, y:24 }} whileInView={{ opacity:1, y:0 }} transition={{ delay:i*0.1 }}
             style={{ background:'#fff', borderRadius:16, border:`1px solid ${C.gray[200]}`, overflow:'hidden', boxShadow:'0 2px 8px rgba(0,0,0,0.06)', transition:'all 0.2s' }}
             onMouseEnter={e=>{ e.currentTarget.style.boxShadow=`0 8px 32px rgba(234,88,12,0.12)`; e.currentTarget.style.transform='translateY(-4px)'; }}
@@ -398,7 +406,13 @@ const Politicians = () => (
             {/* Top: photo + basic info */}
             <div style={{ display:'flex', alignItems:'stretch', padding:20, gap:16 }}>
               <div style={{ width:72, height:72, borderRadius:12, overflow:'hidden', flexShrink:0, border:`2px solid ${C.gray[100]}` }}>
-                <Img src={p.photo} fb={p.photoFb} alt={p.name} style={{ width:'100%', height:'100%', objectFit:'cover', objectPosition:'top' }} />
+                {p.photo ? (
+                  <Img src={p.photo} fb={p.photoFb} alt={p.name} style={{ width:'100%', height:'100%', objectFit:'cover', objectPosition:'top' }} />
+                ) : (
+                  <div style={{ width:'100%', height:'100%', display:'flex', alignItems:'center', justifyContent:'center', background:C.gray[100], color:C.gray[700], fontWeight:800 }}>
+                    {p.shortName || 'NA'}
+                  </div>
+                )}
               </div>
               <div style={{ flex:1, minWidth:0 }}>
                 <div style={{ display:'flex', alignItems:'center', gap:6, marginBottom:3 }}>
@@ -441,11 +455,11 @@ const Politicians = () => (
 
             {/* CTA */}
             <div style={{ padding:'12px 20px', borderTop:`1px solid ${C.gray[100]}` }}>
-              <Link to={`/politicians/${p.name.toLowerCase().replace(/\s+/g,'-')}`}
+              <Link to={`/promises?politicianId=${encodeURIComponent(p.id || '')}&politicianName=${encodeURIComponent(p.name || '')}`}
                 style={{ display:'flex', alignItems:'center', justifyContent:'center', gap:6, padding:'10px', borderRadius:8, background: C.parliament[50], color: C.parliament[700], fontWeight:600, fontSize:12, textDecoration:'none', border:`1px solid ${C.parliament[200]}`, transition:'all 0.15s' }}
                 onMouseEnter={e=>{ e.currentTarget.style.background=C.parliament[600]; e.currentTarget.style.color='#fff'; e.currentTarget.style.borderColor=C.parliament[600]; }}
                 onMouseLeave={e=>{ e.currentTarget.style.background=C.parliament[50]; e.currentTarget.style.color=C.parliament[700]; e.currentTarget.style.borderColor=C.parliament[200]; }}>
-                View Full Scorecard <ArrowRightIcon style={{ width:13, height:13 }} />
+                View Promise Trust <ArrowRightIcon style={{ width:13, height:13 }} />
               </Link>
             </div>
           </motion.div>
@@ -480,7 +494,7 @@ const NewsSection = ({ newsItems }) => {
       </div>
 
       {/* Featured + sidebar layout */}
-      <div style={{ display:'grid', gridTemplateColumns:'1.6fr 1fr', gap:20 }}>
+      <div className="home-news-layout" style={{ display:'grid', gridTemplateColumns:'1.6fr 1fr', gap:20 }}>
         {/* Featured */}
         {featuredNews.map((n,i) => (
           <motion.div key={i} initial={{ opacity:0, x:-20 }} whileInView={{ opacity:1, x:0 }} transition={{ delay:0.1 }}
@@ -592,6 +606,7 @@ const FloatingBtn = () => (
 const Home = () => {
   const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
   const [latestNews, setLatestNews] = useState([]);
+  const [homePoliticians, setHomePoliticians] = useState([]);
   const [userInfo, setUserInfo] = useState(() => {
     try {
       return JSON.parse(localStorage.getItem('userInfo'));
@@ -611,6 +626,73 @@ const Home = () => {
     url: article.url,
     category: 'Live',
   });
+
+  useEffect(() => {
+    const fetchPoliticianScorecards = async () => {
+      try {
+        const [politiciansRes, promisesRes] = await Promise.all([
+          axios.get(`${API_URL}/api/politicians`),
+          axios.get(`${API_URL}/api/promises`),
+        ]);
+
+        const politicians = Array.isArray(politiciansRes.data?.data)
+          ? politiciansRes.data.data
+          : Array.isArray(politiciansRes.data) ? politiciansRes.data : [];
+        const promises = Array.isArray(promisesRes.data?.data)
+          ? promisesRes.data.data
+          : Array.isArray(promisesRes.data) ? promisesRes.data : [];
+
+        const perfMap = {};
+        promises.forEach((item) => {
+          const pol = item.politicianId;
+          const id = typeof pol === 'object' ? pol?._id : pol;
+          if (!id) return;
+          if (!perfMap[id]) perfMap[id] = { total: 0, kept: 0, recent: [] };
+          perfMap[id].total += 1;
+          if (item.status === 'Kept') perfMap[id].kept += 1;
+          if (perfMap[id].recent.length < 3) {
+            perfMap[id].recent.push({
+              text: item.title,
+              status: item.status === 'In-Progress' ? 'In Progress' : (item.status || 'Pending'),
+            });
+          }
+        });
+
+        const mapped = politicians
+          .map((p) => {
+            const stat = perfMap[p._id] || { total: 0, kept: 0, recent: [] };
+            const rating = stat.total > 0 ? Number(((stat.kept / stat.total) * 100).toFixed(1)) : 0;
+            return {
+              id: p._id,
+              name: p.name,
+              shortName: String(p.name || '').split(' ').map((w) => w[0]).join('').slice(0, 2).toUpperCase(),
+              title: p.position || 'Member of Parliament',
+              since: p.district || 'Sri Lanka',
+              party: p.party || 'Other',
+              partyColor: partyColorMap[p.party] || partyColorMap.Other,
+              partyBg: C.parliament[50],
+              partyText: partyColorMap[p.party] || partyColorMap.Other,
+              kept: stat.kept,
+              total: stat.total,
+              rating,
+              trend: `${rating}%`,
+              trendUp: rating >= 50,
+              photo: p.profileImageUrl || '',
+              photoFb: '',
+              promises: stat.recent.length > 0 ? stat.recent : [{ text: 'No promises tracked yet', status: 'Pending' }],
+            };
+          })
+          .sort((a, b) => b.rating - a.rating)
+          .slice(0, 6);
+
+        setHomePoliticians(mapped.length > 0 ? mapped : POLITICIANS);
+      } catch {
+        setHomePoliticians(POLITICIANS);
+      }
+    };
+
+    fetchPoliticianScorecards();
+  }, [API_URL]);
 
   useEffect(() => {
     const fetchLatestNews = async () => {
@@ -664,10 +746,16 @@ const Home = () => {
       <Hero isAdmin={isAdmin} />
       <StatsBand />
       <PromiseFeed />
-      <Politicians />
+      <Politicians items={homePoliticians.length > 0 ? homePoliticians : POLITICIANS} />
       <NewsSection newsItems={latestNews} />
       <CTABanner />
       <FloatingBtn />
+      <style>{`
+        @media (max-width: 900px) {
+          .home-news-layout { grid-template-columns: 1fr !important; }
+          .home-news-layout > div:first-child { grid-row: auto !important; }
+        }
+      `}</style>
     </div>
   );
 };
