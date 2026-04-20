@@ -29,7 +29,8 @@ const defaultForm = {
 
 const AdminFeedbackManagement = () => {
   const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-  const [promiseId, setPromiseId] = useState('69a6af84dea6363b079b02ac');
+  const [promises, setPromises] = useState([]);
+  const [promiseId, setPromiseId] = useState('');
   const [feedbackItems, setFeedbackItems] = useState([]);
   const [search, setSearch] = useState('');
   const [form, setForm] = useState(defaultForm);
@@ -38,6 +39,19 @@ const AdminFeedbackManagement = () => {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
+
+  useEffect(() => {
+  const loadPromises = async () => {
+    try {
+      const res = await axios.get(`${API_URL}/api/promises`);
+      setPromises(res.data.data || res.data);
+    } catch (error) {
+      console.log("Failed to load promises", error);
+    }
+  };
+
+  loadPromises();
+}, []);
 
   const loadFeedback = async () => {
     if (!promiseId.trim()) {
@@ -159,15 +173,23 @@ const AdminFeedbackManagement = () => {
       </div>
 
       <div style={{ marginBottom: 10, display: 'grid', gridTemplateColumns: '1fr auto', gap: 10 }}>
-        <input
-          value={promiseId}
-          onChange={(e) => setPromiseId(e.target.value)}
-          placeholder="Promise ID"
-          style={{ padding: '10px 12px', borderRadius: 10, border: `1px solid ${C.gray[300]}` }}
-        />
-        <button type="button" onClick={loadFeedback} style={{ border: 'none', borderRadius: 10, background: C.gray[900], color: '#fff', padding: '0 14px', fontWeight: 700, cursor: 'pointer' }}>
-          Load
-        </button>
+        <select
+            value={promiseId}
+            onChange={(e) => setPromiseId(e.target.value)}
+            style={{
+            padding: '10px 12px',
+            borderRadius: 10,
+            border: `1px solid ${C.gray[300]}`
+           }}
+          >
+         <option value="">Select Promise</option>
+        {promises.map((promise) => (
+        <option key={promise._id} value={promise._id}>
+      {promise.title}
+       </option>
+         ))}
+          </select>
+
       </div>
 
       <form onSubmit={handleSave} style={{ background: C.gray[50], border: `1px solid ${C.gray[200]}`, borderRadius: 14, padding: 14, marginBottom: 12 }}>

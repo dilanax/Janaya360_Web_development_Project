@@ -50,6 +50,7 @@ const AppContent = () => {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/promise/:id" element={<PromiseDetail />} />
+          <Route path="/promise/:id/feedback" element={<Feedback />} />
           <Route path="/profile" element={<Profile />} />
 
           <Route path="/admin-dashboard" element={<AdminDashboard />} />
